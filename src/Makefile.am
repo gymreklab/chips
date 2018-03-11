@@ -5,8 +5,10 @@ noinst_LIBRARIES = libasimon.a
 libasimon_a_CPPFLAGS = $(AM_CPPFLAGS)
 libasimon_a_SOURCES = simulate_reads_main.cpp \
 	fragment.h fragment.cpp \
+	library_constructor.h library_constructor.cpp \
 	options.h options.cpp \
 	pulldown.h pulldown.cpp \
+	sequencer.h sequencer.cpp \
 	shearer.h shearer.cpp
 
 asimon_SOURCES = main.cpp

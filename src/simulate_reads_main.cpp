@@ -4,8 +4,10 @@
 #include <vector>
 
 #include "src/fragment.h"
+#include "src/library_constructor.h"
 #include "src/options.h"
 #include "src/pulldown.h"
+#include "src/sequencer.h"
 #include "src/shearer.h"
 
 using namespace std;
@@ -88,10 +90,12 @@ int simulate_reads_main(int argc, char* argv[]) {
     pulldown.Perform(sheared_fragments, &pulldown_fragments);
     
     /*** Step 3: Library construction ***/
-    // TODO fragment set -> fragment set
+    LibraryConstructor lc(options);
+    lc.Perform(pulldown_fragments, &lib_fragments);
 
     /*** Step 4: Sequencing ***/
-    // TODO fragment set -> output
+    Sequencer seq(options);
+    seq.Sequence(lib_fragments);
 
     /******************************************************/
   } else {
