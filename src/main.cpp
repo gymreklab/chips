@@ -29,6 +29,7 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
+// TODO add commands: learn(learn params from input chip data)
 int asimon_help(void) {
   cout << PROGRAM_NAME << ": Simulator for ChIP-seq and other -seq experiments.\n";
   cout << "usage:   asimon <subcommand> [options]" << endl << endl;

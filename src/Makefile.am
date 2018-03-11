@@ -3,8 +3,9 @@ bin_PROGRAMS = asimon
 noinst_LIBRARIES = libasimon.a
 
 libasimon_a_CPPFLAGS = $(AM_CPPFLAGS)
-libasimon_a_SOURCES = simulate_reads_main.cpp
-
+libasimon_a_SOURCES = simulate_reads_main.cpp \
+	options.h options.cpp \
+	fragment.h fragment.cpp
 
 asimon_SOURCES = main.cpp
 
