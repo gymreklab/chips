@@ -1,8 +1,12 @@
 #include <cstring>
 #include <iostream>
 #include <stdlib.h>
+#include <vector>
 
+#include "src/fragment.h"
 #include "src/options.h"
+#include "src/pulldown.h"
+#include "src/shearer.h"
 
 using namespace std;
 
@@ -31,7 +35,6 @@ int simulate_reads_main(int argc, char* argv[]) {
   }
   if (showHelp) {simulate_reads_help();}
 
-  // TODO parse other params
   // do some parsing (all of these parameters require 2 strings)
   for(int i = 1; i < argc; i++) {
     int parameterLength = (int)strlen(argv[i]);
@@ -72,17 +75,25 @@ int simulate_reads_main(int argc, char* argv[]) {
   }
 
   if (!showHelp) {
+    /***************** Main implementation ***************/
+    // Set up
+    vector<Fragment> sheared_fragments, pulldown_fragments, lib_fragments;
+
     /*** Step 1: Shearing ***/
-    // TODO refgenome->fragment set
+    Shearer shearer(options);
+    shearer.Shear(&sheared_fragments);
 
     /*** Step 2: Pulldown ***/
-    // TODO fragment set -> fragment set
+    Pulldown pulldown(options);
+    pulldown.Perform(sheared_fragments, &pulldown_fragments);
     
     /*** Step 3: Library construction ***/
     // TODO fragment set -> fragment set
 
     /*** Step 4: Sequencing ***/
     // TODO fragment set -> output
+
+    /******************************************************/
   } else {
     simulate_reads_help();
     return 0;
