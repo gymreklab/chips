@@ -41,9 +41,9 @@ int simulate_reads_main(int argc, char* argv[]) {
   for (int i = 1; i < argc; i++) {
     int parameterLength = (int)strlen(argv[i]);
 
-    if (PARAMETER_CHECK("-r", 2, parameterLength)) {
+    if (PARAMETER_CHECK("-p", 2, parameterLength)) {
       if ((i+1) < argc) {
-	options.regionsbed = argv[i+1];
+	options.peaksbed = argv[i+1];
 	i++;
       }
     } else if (PARAMETER_CHECK("-f", 2, parameterLength)) {
@@ -63,8 +63,8 @@ int simulate_reads_main(int argc, char* argv[]) {
   }
 
   // Check inputs
-  if (options.regionsbed.empty()) {
-    cerr << "****** ERROR: Must specify regions with -r ******" << endl;
+  if (options.peaksbed.empty()) {
+    cerr << "****** ERROR: Must specify peaks with -p ******" << endl;
     showHelp = true;
   }
   if (options.reffa.empty()) {
@@ -79,15 +79,11 @@ int simulate_reads_main(int argc, char* argv[]) {
   if (!showHelp) {
     /***************** Main implementation ***************/
     // Set up
-    vector<Fragment> sheared_fragments, pulldown_fragments, lib_fragments;
+    vector<Fragment> pulldown_fragments, lib_fragments;
 
-    /*** Step 1: Shearing ***/
-    Shearer shearer(options);
-    shearer.Shear(&sheared_fragments);
-
-    /*** Step 2: Pulldown ***/
+    /*** Step 1/2: Shearing + Pulldown ***/
     Pulldown pulldown(options);
-    pulldown.Perform(sheared_fragments, &pulldown_fragments);
+    pulldown.Perform(&pulldown_fragments);
     
     /*** Step 3: Library construction ***/
     LibraryConstructor lc(options);
@@ -109,9 +105,9 @@ void simulate_reads_help(void) {
   cerr << "\nTool:    asimon simreads" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
   cerr << "Summary: Simulate ChIP-seq reads for a set of peaks." << endl << endl;
-  cerr << "Usage:   " << PROGRAM_NAME << " -r regions.bed -f ref.fa -o outprefix [OPTIONS] " << endl << endl;
+  cerr << "Usage:   " << PROGRAM_NAME << " -p peaks.bed -f ref.fa -o outprefix [OPTIONS] " << endl << endl;
   cerr << "[Required arguments]: " << "\n";
-  cerr << "     -r <regions.bed>: BED file with peak regions" << "\n";
+  cerr << "     -p <peaks.bed>: BED file with peak regions" << "\n";
   cerr << "     -f <ref.fa>: FASTA file with reference genome" << "\n";
   cerr << "     -o <outprefix>: Prefix for output files" << "\n";
   cerr << "\n";

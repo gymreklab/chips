@@ -40,6 +40,11 @@ int learn_main(int argc, char* argv[]) {
 	options.chipbam = argv[i+1];
 	i++;
       }
+    } else if (PARAMETER_CHECK("-p", 2, parameterLength)) {
+      if ((i+1) < argc) {
+	options.peaksbed = argv[i+1];
+	i++;
+      }
     } else if (PARAMETER_CHECK("-o", 2, parameterLength)) {
       if ((i+1) < argc) {
 	options.outprefix = argv[i+1];
@@ -56,13 +61,24 @@ int learn_main(int argc, char* argv[]) {
     cerr << "****** ERROR: Must specify BAM file with -b ******" << endl;
     showHelp = true;
   }
+  if (options.peaksbed.empty()) {
+    cerr << "****** ERROR: Must specify peaks file with -p ******" << endl;
+    showHelp = true;
+  }
   if (options.outprefix.empty()) {
     cerr << "****** ERROR: Must specify outprefix with -o ******" << endl;
     showHelp = true;
   }
 
   if (!showHelp) {
-    // TODO do everything here
+    /***************** Main implementation ***************/
+
+    /*** Learn fragment size disbribution parameters ***/
+    // TODO
+
+    /*** Learn pulldown ratio parameters ***/
+    // TODO
+
     return 0;
   } else {
     learn_help();
@@ -74,9 +90,10 @@ void learn_help(void) {
   cerr << "\nTool:    asimon learn" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
   cerr << "Summary: Learn parameters from a ChIP dataset." << endl << endl;
-  cerr << "Usage:   " << PROGRAM_NAME << " -b reads.bam -o outprefix [OPTIONS] " << endl << endl;
+  cerr << "Usage:   " << PROGRAM_NAME << " -b reads.bam -p peak.bed -o outprefix [OPTIONS] " << endl << endl;
   cerr << "[Required arguments]: " << "\n";
   cerr << "         -b <reads.bam>: BAM file with ChIP reads (.bai index required)" << "\n";
+  cerr << "         -p <peaks.bed>: BED file with peak regions (Homer format)" << "\n";
   cerr << "         -o <outprefix>: Prefix for output files" << "\n";
   cerr << "\n";
   exit(1);

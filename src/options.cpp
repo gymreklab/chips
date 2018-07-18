@@ -8,7 +8,7 @@ using namespace std;
 Options::Options() {
   // Required simulation inputs
   reffa = "";
-  regionsbed = "";
+  peaksbed = "";
   outprefix = "";
 
   // Required learn inputs

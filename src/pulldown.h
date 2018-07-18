@@ -13,8 +13,7 @@ class Pulldown {
   Pulldown(const Options& options);
   virtual ~Pulldown();
 
-  void Perform(const vector<Fragment>& input_fragments,
-	       vector<Fragment>* output_fragments);
+  void Perform(vector<Fragment>* output_fragments);
 };
 
 #endif  // SRC_PULLDOWN_H__

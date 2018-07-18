@@ -12,7 +12,7 @@ class Options {
 
   // Required simulation inputs
   std::string reffa;
-  std::string regionsbed;
+  std::string peaksbed;
   std::string outprefix;
 
   // Required learn inputs

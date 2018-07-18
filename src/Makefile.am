@@ -8,8 +8,7 @@ libasimon_a_SOURCES = simulate_reads_main.cpp learn_main.cpp \
 	library_constructor.h library_constructor.cpp \
 	options.h options.cpp \
 	pulldown.h pulldown.cpp \
-	sequencer.h sequencer.cpp \
-	shearer.h shearer.cpp
+	sequencer.h sequencer.cpp
 
 asimon_SOURCES = main.cpp
 
