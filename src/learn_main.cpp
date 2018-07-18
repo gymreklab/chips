@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <vector>
 
+#include "src/bam_io.h"
+#include "src/common.h"
 #include "src/options.h"
 
 using namespace std;
@@ -15,6 +17,21 @@ using namespace std;
 
 // Function declarations
 void learn_help(void);
+bool learn_frag(const std::string& bamfile, float* param);
+
+bool learn_frag(const std::string& bamfile, float* param) {
+  // TODO which params do we need to learn? probably more than one  
+  /*
+    Learn fragment length distribution from an input BAM file
+    Fragment lengths follow a gamma distribution.
+
+    Inputs:
+    - bamfile (std::string): path to the BAM file
+    Outputs:
+    - param (float): parameter of gamma distribution (TODO update with correct name and number of params to be learned)
+   */
+  return false; // TODO return true if successful
+}
 
 int learn_main(int argc, char* argv[]) {
   bool showHelp = false;
@@ -74,7 +91,10 @@ int learn_main(int argc, char* argv[]) {
     /***************** Main implementation ***************/
 
     /*** Learn fragment size disbribution parameters ***/
-    // TODO
+    float frag_param;
+    if (!learn_frag(options.chipbam, &frag_param)) {
+      PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
+    }
 
     /*** Learn pulldown ratio parameters ***/
     // TODO

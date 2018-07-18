@@ -1,3 +1,5 @@
+AM_LDFLAGS = $(HTSLIB_LIBS)
+
 bin_PROGRAMS = asimon
 
 noinst_LIBRARIES = libasimon.a
@@ -8,7 +10,10 @@ libasimon_a_SOURCES = simulate_reads_main.cpp learn_main.cpp \
 	library_constructor.h library_constructor.cpp \
 	options.h options.cpp \
 	pulldown.h pulldown.cpp \
-	sequencer.h sequencer.cpp
+	sequencer.h sequencer.cpp \
+	common.h common.cpp \
+	bam_io.h bam_io.cpp \
+	stringops.h stringops.cpp
 
 asimon_SOURCES = main.cpp
 

@@ -8,7 +8,6 @@
 #include "src/options.h"
 #include "src/pulldown.h"
 #include "src/sequencer.h"
-#include "src/shearer.h"
 
 using namespace std;
 
