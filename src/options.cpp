@@ -10,6 +10,9 @@ Options::Options() {
   reffa = "";
   regionsbed = "";
   outprefix = "";
+
+  // Required learn inputs
+  chipbam = "";
 }
 
 Options::~Options() {}

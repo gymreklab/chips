@@ -15,6 +15,9 @@ class Options {
   std::string regionsbed;
   std::string outprefix;
 
+  // Required learn inputs
+  std::string chipbam;
+
   virtual ~Options();
 };
 

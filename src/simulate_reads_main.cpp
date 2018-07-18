@@ -27,10 +27,10 @@ int simulate_reads_main(int argc, char* argv[]) {
 
   // check to see if we should print out some help
   if(argc <= 1) showHelp = true;
-  for(int i = 1; i < argc; i++) {
+  for (int i = 1; i < argc; i++) {
     int parameterLength = (int)strlen(argv[i]);
 
-    if((PARAMETER_CHECK("-h", 2, parameterLength)) ||
+    if ((PARAMETER_CHECK("-h", 2, parameterLength)) ||
        (PARAMETER_CHECK("--help", 5, parameterLength))) {
       showHelp = true;
     }
@@ -38,10 +38,10 @@ int simulate_reads_main(int argc, char* argv[]) {
   if (showHelp) {simulate_reads_help();}
 
   // do some parsing (all of these parameters require 2 strings)
-  for(int i = 1; i < argc; i++) {
+  for (int i = 1; i < argc; i++) {
     int parameterLength = (int)strlen(argv[i]);
 
-    if(PARAMETER_CHECK("-r", 2, parameterLength)) {
+    if (PARAMETER_CHECK("-r", 2, parameterLength)) {
       if ((i+1) < argc) {
 	options.regionsbed = argv[i+1];
 	i++;
@@ -97,10 +97,11 @@ int simulate_reads_main(int argc, char* argv[]) {
     Sequencer seq(options);
     seq.Sequence(lib_fragments);
 
+    return 0;
     /******************************************************/
   } else {
     simulate_reads_help();
-    return 0;
+    return 1;
   }
 }
 
