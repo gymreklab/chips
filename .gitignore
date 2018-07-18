@@ -17,3 +17,8 @@ src/asimon
 *.a
 stamp-h1
 *~
+ltmain.sh
+libtool
+config/compile
+config/config.*
+m4/*.m4
