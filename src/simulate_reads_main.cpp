@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <vector>
 
+#include "src/common.h"
 #include "src/fragment.h"
 #include "src/library_constructor.h"
 #include "src/options.h"
@@ -10,9 +11,6 @@
 #include "src/sequencer.h"
 
 using namespace std;
-
-// define our program name
-#define PROGRAM_NAME "asimon simreads"
 
 // define our parameter checking macro
 #define PARAMETER_CHECK(param, paramLen, actualLen) (strncmp(argv[i], param, min(actualLen, paramLen))== 0) && (actualLen == paramLen)
@@ -104,7 +102,7 @@ void simulate_reads_help(void) {
   cerr << "\nTool:    asimon simreads" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
   cerr << "Summary: Simulate ChIP-seq reads for a set of peaks." << endl << endl;
-  cerr << "Usage:   " << PROGRAM_NAME << " -p peaks.bed -f ref.fa -o outprefix [OPTIONS] " << endl << endl;
+  cerr << "Usage:   " << PROGRAM_NAME << " simreads -p peaks.bed -f ref.fa -o outprefix [OPTIONS] " << endl << endl;
   cerr << "[Required arguments]: " << "\n";
   cerr << "     -p <peaks.bed>: BED file with peak regions" << "\n";
   cerr << "     -f <ref.fa>: FASTA file with reference genome" << "\n";

@@ -423,11 +423,6 @@ class BamHeader {
   }
 };
 
-
-
-
-
-
 class BamCramReader {
  private:
   samFile   *in_;

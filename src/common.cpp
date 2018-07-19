@@ -27,7 +27,7 @@ void PrintMessageDieOnError(const string& msg, MSGTYPE msgtype) {
     errx(1, "Invalid message type. This should never happen");
   }
   stringstream ss;
-  ss  << "[GangSTR"
+  ss  << "[" << PROGRAM_NAME
       << "-" << _GIT_VERSION << "] " << typestring << msg << endl;
   cerr << ss.str();
 

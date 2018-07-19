@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 
+// define our program name
+#define PROGRAM_NAME "asimon"
+
 // Print msg, exit if error
 enum MSGTYPE {
   M_ERROR = 0,

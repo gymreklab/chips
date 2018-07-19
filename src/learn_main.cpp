@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <vector>
+#include <sstream>
 
 #include "src/bam_io.h"
 #include "src/common.h"
@@ -9,11 +10,9 @@
 
 using namespace std;
 
-// define our program name
-#define PROGRAM_NAME "asimon learn"
-
 // define our parameter checking macro
 #define PARAMETER_CHECK(param, paramLen, actualLen) (strncmp(argv[i], param, min(actualLen, paramLen))== 0) && (actualLen == paramLen)
+const bool DEBUG = true;
 
 // Function declarations
 void learn_help(void);
@@ -30,7 +29,41 @@ bool learn_frag(const std::string& bamfile, float* param) {
     Outputs:
     - param (float): parameter of gamma distribution (TODO update with correct name and number of params to be learned)
    */
-  return false; // TODO return true if successful
+
+  /* First, get a vector of the fragment lengths */
+  int maxreads = 10000; int numreads = 0; // don't look at more than this many reads
+  BamCramReader bamreader(bamfile);
+  const BamHeader* bamheader = bamreader.bam_header();
+  // Get first chrom to look at fragment lengths
+  std::vector<std::string> seq_names = bamheader->seq_names();
+  std::vector<uint32_t> seq_lengths = bamheader->seq_lengths();
+  if (seq_names.size() > 0 && seq_lengths.size() > 0) {
+    bamreader.SetRegion(seq_names[0], 0, seq_lengths[0]);
+  } else {
+    return false;
+  }
+  std::vector<int32_t> fraglengths;
+  int32_t tlen;
+  BamAlignment aln;
+  while(bamreader.GetNextAlignment(aln) && numreads<maxreads) {
+    tlen = aln.TemplateLength();
+    if (tlen > 0) {
+      fraglengths.push_back(abs(tlen));
+      numreads++;
+    }
+    //    cerr << abs(tlen) << endl; // if you want to print out for debugging
+  }
+
+  /* Now, fit fraglengths to a gamma distribution */
+  // TODO (MICHAEL/AN) FILL THIS PART IN, RETURN TRUE IF SUCCESSFUL
+  // MAY NEED TO CHANGE fraglenths DATA STRUCTURE depending on what optimizer takes
+  *param = 0; // example for how to set result
+  if (DEBUG) {
+    std::stringstream ss;
+    ss << "Learned fragment length param " << *param;
+    PrintMessageDieOnError(ss.str(), M_DEBUG);
+  }
+  return true;
 }
 
 int learn_main(int argc, char* argv[]) {
@@ -99,6 +132,9 @@ int learn_main(int argc, char* argv[]) {
     /*** Learn pulldown ratio parameters ***/
     // TODO
 
+    /*** Write params to file ***/
+    // TODO
+
     return 0;
   } else {
     learn_help();
@@ -110,7 +146,7 @@ void learn_help(void) {
   cerr << "\nTool:    asimon learn" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
   cerr << "Summary: Learn parameters from a ChIP dataset." << endl << endl;
-  cerr << "Usage:   " << PROGRAM_NAME << " -b reads.bam -p peak.bed -o outprefix [OPTIONS] " << endl << endl;
+  cerr << "Usage:   " << PROGRAM_NAME << " learn -b reads.bam -p peak.bed -o outprefix [OPTIONS] " << endl << endl;
   cerr << "[Required arguments]: " << "\n";
   cerr << "         -b <reads.bam>: BAM file with ChIP reads (.bai index required)" << "\n";
   cerr << "         -p <peaks.bed>: BED file with peak regions (Homer format)" << "\n";

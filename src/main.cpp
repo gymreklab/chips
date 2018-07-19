@@ -1,9 +1,8 @@
 #include <iostream>
 
-using namespace std;
+#include "src/common.h"
 
-// define our program name
-#define PROGRAM_NAME "asimon"
+using namespace std;
 
 // Function declarations
 int asimon_help(void);
