@@ -18,6 +18,16 @@ class Options {
   // Required learn inputs
   std::string chipbam;
 
+  // Simulation experiment parameters
+  int numcopies;
+  int numreads;
+  int readlen;
+  bool paired;
+
+  // Simulation model parameters
+  float gamma_alpha;
+  float gamma_beta;
+
   virtual ~Options();
 };
 
