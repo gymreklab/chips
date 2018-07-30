@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <sstream>
+#include <math.h>
 
 #include "src/bam_io.h"
 #include "src/common.h"
@@ -56,7 +57,78 @@ bool learn_frag(const std::string& bamfile, float* param) {
 
   /* Now, fit fraglengths to a gamma distribution */
   // TODO (MICHAEL/AN) FILL THIS PART IN, RETURN TRUE IF SUCCESSFUL
-  // MAY NEED TO CHANGE fraglenths DATA STRUCTURE depending on what optimizer takes
+  // MAY NEED TO CHANGE fraglenths DATA STRUCTURE depending on what optimizer takes 
+
+  /* Use Maximum Likelihood Estimation to estimate the
+     Gamma Distribution parameters: shape(k) and scale(theta) Try two methods */
+
+  const float EPSILON = 1e-8; // Value to check for convergence
+
+  // METHOD 1 MAXIMIZE LOWER BOUND
+  // a = alpha = k, b = theta
+  
+  float total_frag_len = 0;     // get the sum of all the frag lengths
+  float total_log = 0;          // sum of log of each frag length
+
+  for (int frag = 0; frag < fraglengths.size(); frag++)
+  {
+    total_frag_len += fraglengths[frag];
+    total_log += log10(fraglengths[frag]);
+  }
+
+  // mean of frag lengths and log mean of fraglengths
+  float mean_frag_length = total_frag_len/fraglengths.size();
+  float total_log_mean = total_log/fraglengths.size();
+
+  // Starting point for the value of a
+  float a = 0.5/(log10(mean_frag_length) - total_log_mean);
+
+  int iterations = 0;
+
+  while (true)
+  {
+    iterations++;
+
+    // a converges
+    if ( abs(new_a - a) < EPSILON)
+      break;
+
+    a = // write the update function 
+  }
+
+  // find b (theta) using the now found "a" which was determined through ab = mean of distribution
+  float b = mean_frag_length/a;
+
+  /*TODO write out print statements to evaluate method of approximating values */
+  printf("TOTAL ITERATIONS: %d\n", iterations);
+
+
+  // METHOD 2 APPROXIMATE UsING A GENERALIZED NEWTON
+  // a = alpha = k, b = theta
+  
+  // Starting point for the value of a
+  a = 0.5/(log10(mean_frag_length) - total_log_mean);
+  iterations = 0;
+  
+  while (true)
+  {
+    iterations++;
+    // a converges
+    if (abs(new_a - a) < EPSILON)
+      break;
+
+    a = // write the update function
+
+    // find the converging value of a
+  }
+
+  b = mean_frag_length/a;
+
+  /*TODO: write out print statements to evaluate both methods of approximating values */
+  printf("TOTAL ITERATIONS: %d", iterations);
+  
+/*################################ END OF DETERMING GAMMA DISTRIBUTION PARAMETERS ##################################### */
+
   *param = 0; // example for how to set result
   if (DEBUG) {
     std::stringstream ss;
