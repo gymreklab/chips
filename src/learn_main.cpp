@@ -65,8 +65,7 @@ bool learn_frag(const std::string& bamfile, float* param) {
 
   /* Use Maximum Likelihood Estimation to estimate the
      Gamma Distribution parameters: 
-        shape(k) and scale(theta) 
-        Use math library boost for digamma and trigamma function */
+        shape(a=k) and scale(b=theta) */ 
 
   const float EPSILON = 1e-7; // Value to check for convergence
   
