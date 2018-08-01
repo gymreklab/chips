@@ -4,6 +4,10 @@
 #include <vector>
 #include <sstream>
 #include <math.h>
+#include <boost/math/special_functions/digamma.hpp>
+#include <boost/math/special_functions/polygamma.hpp>
+// NOTE: In order to use these two files, I had to set my CPLUS_INCLUDE_PATH to where
+// boost_1_67_0 was located.
 
 #include "src/bam_io.h"
 #include "src/common.h"
@@ -60,72 +64,53 @@ bool learn_frag(const std::string& bamfile, float* param) {
   // MAY NEED TO CHANGE fraglenths DATA STRUCTURE depending on what optimizer takes 
 
   /* Use Maximum Likelihood Estimation to estimate the
-     Gamma Distribution parameters: shape(k) and scale(theta) Try two methods */
+     Gamma Distribution parameters: 
+        shape(k) and scale(theta) 
+        Use math library boost for digamma and trigamma function */
 
-  const float EPSILON = 1e-8; // Value to check for convergence
-
-  // METHOD 1 MAXIMIZE LOWER BOUND
-  // a = alpha = k, b = theta
+  const float EPSILON = 1e-7; // Value to check for convergence
   
-  float total_frag_len = 0;     // get the sum of all the frag lengths
+  float total_frag_len = 0;     // sum of all the frag lengths
   float total_log = 0;          // sum of log of each frag length
 
+  // get sum of all frag lengths and log sum of each frag length
   for (int frag = 0; frag < fraglengths.size(); frag++)
   {
     total_frag_len += fraglengths[frag];
-    total_log += log10(fraglengths[frag]);
+    total_log += log(fraglengths[frag]);
   }
 
   // mean of frag lengths and log mean of fraglengths
   float mean_frag_length = total_frag_len/fraglengths.size();
   float total_log_mean = total_log/fraglengths.size();
 
-  // Starting point for the value of a
-  float a = 0.5/(log10(mean_frag_length) - total_log_mean);
-
-  int iterations = 0;
-
-  while (true)
-  {
-    iterations++;
-
-    // a converges
-    if ( abs(new_a - a) < EPSILON)
-      break;
-
-    a = // write the update function 
-  }
-
-  // find b (theta) using the now found "a" which was determined through ab = mean of distribution
-  float b = mean_frag_length/a;
-
-  /*TODO write out print statements to evaluate method of approximating values */
-  printf("TOTAL ITERATIONS: %d\n", iterations);
-
-
-  // METHOD 2 APPROXIMATE UsING A GENERALIZED NEWTON
-  // a = alpha = k, b = theta
   
   // Starting point for the value of a
-  a = 0.5/(log10(mean_frag_length) - total_log_mean);
-  iterations = 0;
+  float a = 0.5/(log(mean_frag_length) - total_log_mean);
+  float b = 0;
+  float new_a = 0;
   
+  // estimate the value for a using maximum likelihood estimate
   while (true)
   {
-    iterations++;
+    // evaluate updated a
+    float update = (1/a) + ((total_log_mean - log(mean_frag_length) + log(a)
+                 - boost::math::digamma(a))/(a - a*a*boost::math::polygamma(1, a)));
+    new_a = 1 / update;
+
     // a converges
     if (abs(new_a - a) < EPSILON)
+    {
+      a = new_a;
       break;
+    }
 
-    a = // write the update function
-
-    // find the converging value of a
+    a = new_a;
   }
 
   b = mean_frag_length/a;
 
-  /*TODO: write out print statements to evaluate both methods of approximating values */
-  printf("TOTAL ITERATIONS: %d", iterations);
+  printf("Gamma distribution k value: %.4f \t theta value: %.4f\n", a, b);
   
 /*################################ END OF DETERMING GAMMA DISTRIBUTION PARAMETERS ##################################### */
 
