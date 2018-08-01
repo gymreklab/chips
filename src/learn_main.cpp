@@ -83,7 +83,6 @@ bool learn_frag(const std::string& bamfile, float* param) {
   // mean of frag lengths and log mean of fraglengths
   float mean_frag_length = total_frag_len/fraglengths.size();
   float total_log_mean = total_log/fraglengths.size();
-
   
   // Starting point for the value of a
   float a = 0.5/(log(mean_frag_length) - total_log_mean);
@@ -110,7 +109,8 @@ bool learn_frag(const std::string& bamfile, float* param) {
 
   b = mean_frag_length/a;
 
-  printf("Gamma distribution k value: %.4f \t theta value: %.4f\n", a, b);
+  if (DEBUG)
+    printf("Gamma distribution k value: %.4f \t theta value: %.4f\n", a, b);
   
 /*################################ END OF DETERMING GAMMA DISTRIBUTION PARAMETERS ##################################### */
 
