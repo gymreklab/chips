@@ -6,8 +6,6 @@
 #include <math.h>
 #include <boost/math/special_functions/digamma.hpp>
 #include <boost/math/special_functions/polygamma.hpp>
-// NOTE: In order to use these two files, I had to set my CPLUS_INCLUDE_PATH to where
-// boost_1_67_0 was located.
 
 #include "src/bam_io.h"
 #include "src/common.h"
@@ -21,10 +19,9 @@ const bool DEBUG = true;
 
 // Function declarations
 void learn_help(void);
-bool learn_frag(const std::string& bamfile, float* param);
+bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
 
-bool learn_frag(const std::string& bamfile, float* param) {
-  // TODO which params do we need to learn? probably more than one  
+bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
   /*
     Learn fragment length distribution from an input BAM file
     Fragment lengths follow a gamma distribution.
@@ -32,7 +29,8 @@ bool learn_frag(const std::string& bamfile, float* param) {
     Inputs:
     - bamfile (std::string): path to the BAM file
     Outputs:
-    - param (float): parameter of gamma distribution (TODO update with correct name and number of params to be learned)
+    - alpha (float): parameter of gamma distribution
+    - beta  (float): parameter of gamma distribution
    */
 
   /* First, get a vector of the fragment lengths */
@@ -59,13 +57,9 @@ bool learn_frag(const std::string& bamfile, float* param) {
     //    cerr << abs(tlen) << endl; // if you want to print out for debugging
   }
 
-  /* Now, fit fraglengths to a gamma distribution */
-  // TODO (MICHAEL/AN) FILL THIS PART IN, RETURN TRUE IF SUCCESSFUL
-  // MAY NEED TO CHANGE fraglenths DATA STRUCTURE depending on what optimizer takes 
-
-  /* Use Maximum Likelihood Estimation to estimate the
-     Gamma Distribution parameters: 
-        shape(a=k) and scale(b=theta) */ 
+  /* Now, fit fraglengths to a gamma distribution.
+     Use Maximum Likelihood Estimation to estimate the
+     Gamma Distribution parameters */ 
 
   const float EPSILON = 1e-7; // Value to check for convergence
   
@@ -85,7 +79,6 @@ bool learn_frag(const std::string& bamfile, float* param) {
   
   // Starting point for the value of a
   float a = 0.5/(log(mean_frag_length) - total_log_mean);
-  float b = 0;
   float new_a = 0;
   
   // estimate the value for a using maximum likelihood estimate
@@ -98,25 +91,17 @@ bool learn_frag(const std::string& bamfile, float* param) {
 
     // a converges
     if (abs(new_a - a) < EPSILON)
-    {
-      a = new_a;
       break;
-    }
 
     a = new_a;
   }
 
-  b = mean_frag_length/a;
-
-  if (DEBUG)
-    printf("Gamma distribution k value: %.4f \t theta value: %.4f\n", a, b);
+  *beta = a/mean_frag_length;
+  *alpha = a;
   
-/*################################ END OF DETERMING GAMMA DISTRIBUTION PARAMETERS ##################################### */
-
-  *param = 0; // example for how to set result
   if (DEBUG) {
     std::stringstream ss;
-    ss << "Learned fragment length param " << *param;
+    ss << "Learned fragment length params alpha: " << *alpha << " and beta: " << *beta;
     PrintMessageDieOnError(ss.str(), M_DEBUG);
   }
   return true;
@@ -180,8 +165,9 @@ int learn_main(int argc, char* argv[]) {
     /***************** Main implementation ***************/
 
     /*** Learn fragment size disbribution parameters ***/
-    float frag_param;
-    if (!learn_frag(options.chipbam, &frag_param)) {
+    float frag_param_a;
+    float frag_param_b;
+    if (!learn_frag(options.chipbam, &frag_param_a, &frag_param_b)) {
       PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
     }
 
