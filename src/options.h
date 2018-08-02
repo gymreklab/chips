@@ -27,6 +27,12 @@ class Options {
   // Simulation model parameters
   float gamma_alpha;
   float gamma_beta;
+  float ratio_s;
+  float ratio_f;
+
+  // Additional simulation parameters
+  std::string region;
+  int binsize;
 
   virtual ~Options();
 };

@@ -5,3 +5,5 @@ Fragment::Fragment(const std::string& _chrom, const int32_t& _start, const size_
   start = _start;
   length = _length;
 }
+
+Fragment::~Fragment() {}

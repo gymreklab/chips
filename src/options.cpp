@@ -21,8 +21,14 @@ Options::Options() {
   paired = false;
 
   // Simulation model parameters
-  gamma_alpha = 100; // TODO set to more reasonable defaults
+  gamma_alpha = 100;
   gamma_beta = 0.5;
+  ratio_s = 0.001;
+  ratio_f = 0.00001;
+
+  // Additional simulation parameters
+  region = "";
+  binsize = 100000;
 }
 
 Options::~Options() {}
