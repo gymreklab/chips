@@ -77,6 +77,26 @@ int simulate_reads_main(int argc, char* argv[]) {
 	options.gamma_beta = atof(params[1].c_str());
 	i++;
       }
+    } else if (PARAMETER_CHECK("--spot", 6, parameterLength)) {
+      if ((i+1) < argc) {
+	options.ratio_s = atof(argv[i+1]);
+	i++;
+      }
+    } else if (PARAMETER_CHECK("--frac", 6, parameterLength)) {
+      if ((i+1) < argc) {
+	options.ratio_f = atof(argv[i+1]);
+	i++;
+      }
+    } else if (PARAMETER_CHECK("--region", 8, parameterLength)) {
+      if ((i+1) < argc) {
+	options.region = argv[i+1];
+	i++;
+      }
+    } else if (PARAMETER_CHECK("--binsize", 9, parameterLength)) {
+      if ((i+1) < argc) {
+	options.region = atoi(argv[i+1]);
+	i++;
+      }
     } else if (PARAMETER_CHECK("--paired", 8, parameterLength)) {
       options.paired = true;
     } else {
@@ -144,9 +164,18 @@ void simulate_reads_help(void) {
   cerr << "     --paired         : Simulate paired-end reads.\n"
        << "                        Default: false \n";
   cerr << "\n[Model parameters]: " << "\n";
-  cerr << "     --gamma-frag <float>,<float>: Parameters for fragment length distribution.\n"
+  cerr << "     --gamma-frag <float>,<float>: Parameters for fragment length distribution (alpha, beta).\n"
        << "                                   Default: " << options.gamma_alpha << ","
        << options.gamma_beta << "\n";
+  cerr << "     --spot <float>              : SPOT score (fraction of reads in peaks) \n"
+       << "                                   Default: " << options.ratio_s << "\n";
+  cerr << "     --frac <float>              : Fraction of the genome that is bound \n"
+       << "                                   Default: " << options.ratio_f << "\n";
+  cerr << "\n[Other options]: " << "\n";
+  cerr << "     --region <str>              : Only simulate reads from this region chrom:start-end\n"
+       << "                                   Default: genome-wide \n";
+  cerr << "     --binsize <int>             : Consider bins of this size when simulating\n"
+       << "                                 : Default: " << options.binsize << "\n";
   cerr << "\n";
   exit(1);
 }
