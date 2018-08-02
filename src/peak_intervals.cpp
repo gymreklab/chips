@@ -19,7 +19,7 @@ PeakIntervals::~PeakIntervals() {}
   This function puts the peaks into a searachable data structure
  */
 bool PeakIntervals::LoadPeaks(const std::string& peakfile) {
-  // TODO
+  // TODO An/Michael
   return false;
 }
 
@@ -34,5 +34,6 @@ bool PeakIntervals::LoadPeaks(const std::string& peakfile) {
   If it overlaps one ore more peak, return the max score across all peaks
  */
 float PeakIntervals::GetOverlap(const Fragment& frag) {
-  return 0; // TODO
+  // TODO An/Michael
+  return 0;
 }

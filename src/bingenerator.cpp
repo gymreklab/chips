@@ -4,10 +4,10 @@
   Constructor for BinGenerator
   
   Set up binning over a region, or over the entire genome
-  Initialize currentBin
+  Initialize currentBin to the first bin
  */
 BinGenerator::BinGenerator(const Options& options) {
-  // TODO
+  // TODO An/Michael
   currentBin = new GenomeBin("test", 0, 0); // TODO this is a dummy
 }
 
@@ -20,7 +20,8 @@ BinGenerator::BinGenerator(const Options& options) {
   Set currentBin to be the next bin
  */
 bool BinGenerator::GotoNextBin() {
-  return true; // TODO
+  // TODO An/Michael
+  return true;
 }
 
 /*
