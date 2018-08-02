@@ -27,6 +27,7 @@ class BinGenerator {
     Generate bins of size options.binsize
 
     Before implementing, take a look at bedtools makewindows
+    Also, see ref_genome.h for reference genome class you will probably have to use here
    */
  public:
   BinGenerator(const Options& options);
@@ -34,7 +35,12 @@ class BinGenerator {
 
   /* Set the next bin */
   bool GotoNextBin();
+
+  /* Return the current bin */
   const GenomeBin GetCurrentBin();
+
+ private:
+  GenomeBin* currentBin;
 };
 
-#endif  // SRC_PULLDOWN_H__
+#endif  // SRC_BINGENERATOR_H__

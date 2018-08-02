@@ -11,6 +11,7 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin) {
   gamma_alpha = options.gamma_alpha;
   gamma_beta = options.gamma_beta;
   ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
+  pintervals = new PeakIntervals(options.peaksbed);
 }
 
 void Pulldown::Perform(vector<Fragment>* output_fragments) {
@@ -21,6 +22,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments) {
   int32_t fstart, fend;
   float fsize;
   bool bound;
+  float peak_score;
 
   // Perform separate shearing for each copy of the genome
   for (int i = 0; i < numcopies; i++) {
@@ -31,7 +33,8 @@ void Pulldown::Perform(vector<Fragment>* output_fragments) {
       fstart = current_pos; fend = current_pos+fsize;
       if (fend > end) {break;}
       Fragment frag(chrom, current_pos, fsize);
-      bound = false; // TODO check for overlap peak and use score
+      peak_score = pintervals->GetOverlap(frag);
+      bound = (rand()/double(RAND_MAX) < peak_score);
       if (bound) {
 	output_fragments->push_back(frag); // alpha=1
       } else {
@@ -45,4 +48,6 @@ void Pulldown::Perform(vector<Fragment>* output_fragments) {
 }
 
 
-Pulldown::~Pulldown() {}
+Pulldown::~Pulldown() {
+  delete pintervals;
+}

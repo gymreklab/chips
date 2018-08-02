@@ -4,6 +4,7 @@
 #include "src/bingenerator.h"
 #include "src/fragment.h"
 #include "src/options.h"
+#include "src/peak_intervals.h"
 
 #include <vector>
 
@@ -23,6 +24,7 @@ class Pulldown {
   int numcopies;
   float gamma_alpha, gamma_beta;
   float ratio_beta;
+  PeakIntervals* pintervals;
 };
 
 #endif  // SRC_PULLDOWN_H__
