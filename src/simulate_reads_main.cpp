@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <vector>
 
+#include "src/bingenerator.h"
 #include "src/common.h"
 #include "src/fragment.h"
 #include "src/library_constructor.h"
@@ -124,17 +125,24 @@ int simulate_reads_main(int argc, char* argv[]) {
     // Set up
     vector<Fragment> pulldown_fragments, lib_fragments;
 
-    /*** Step 1/2: Shearing + Pulldown ***/
-    Pulldown pulldown(options);
-    pulldown.Perform(&pulldown_fragments);
-    
-    /*** Step 3: Library construction ***/
-    LibraryConstructor lc(options);
-    lc.Perform(pulldown_fragments, &lib_fragments);
+    // Perform in bins so we don't keep everything in memory at once
+    BinGenerator bingenerator(options);
 
-    /*** Step 4: Sequencing ***/
-    Sequencer seq(options);
-    seq.Sequence(lib_fragments);
+    while(bingenerator.GotoNextBin()) {
+      /*** Step 1/2: Shearing + Pulldown ***/
+      Pulldown pulldown(options, bingenerator.GetCurrentBin());
+      pulldown.Perform(&pulldown_fragments);
+    
+      /*** Step 3: Library construction ***/
+      LibraryConstructor lc(options);
+      lc.Perform(pulldown_fragments, &lib_fragments);
+
+      /*** Step 4: Sequencing ***/
+      Sequencer seq(options);
+      seq.Sequence(lib_fragments);
+
+      break; // TODO remove!
+    }
 
     return 0;
     /******************************************************/
