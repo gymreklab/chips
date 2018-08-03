@@ -207,8 +207,8 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile, \
   // calculate f and s, and then ab_ratio
   float f = (float)plen / (float)total_genome_length;
   float s = (float)n_reads_in_peak / (float)(reads.size());
-  std::cout <<"peak-length: "<<plen<<"\ttotal: "<<total_genome_length<<"\tf: "<<f<<std::endl;
-  std::cout <<"#reads in peaks: "<<n_reads_in_peak<<"\t#reads: "<<reads.size()<<"\ts: "<<s<<std::endl;
+  std::cout <<"peak-length: "<<plen<<"\ttotal: "<<total_genome_length<<std::endl;
+  std::cout <<"#reads in peaks: "<<n_reads_in_peak<<"\t#reads: "<<reads.size()<<std::endl;
 
   float ab_ratio = (s/(1-s)) * ((1-f)/f);
   *ab_ratio_ptr = ab_ratio;
