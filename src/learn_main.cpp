@@ -10,7 +10,7 @@
 #include "src/bam_io.h"
 #include "src/common.h"
 #include "src/options.h"
-
+#include "src/homer_peak_io.h"
 using namespace std;
 
 // define our parameter checking macro
@@ -19,6 +19,8 @@ const bool DEBUG = true;
 
 // Function declarations
 void learn_help(void);
+bool learn_ratio(const std::string& bamfile, const std::string& peakfile, float* ab_ratio_ptr, float *s_ptr, float* f_ptr);
+bool compare_location(seq_loc a, seq_loc b);
 bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
 
 bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
@@ -107,6 +109,126 @@ bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
   return true;
 }
 
+
+bool learn_ratio(const std::string& bamfile, const std::string& peakfile, \
+        float* ab_ratio_ptr, float *s_ptr, float* f_ptr){
+  /*
+    Learn the ratio of alpha to beta from an input BAM file,
+    and its correspounding peak file.
+
+    Here,
+    alpha = Prob(P|B); beta = Prob(P| NOT B)
+    f:  fraction of the genome bound,
+        approximated as the length of all peaks divided by length of the genome
+    s:  SPOT score, or fraction of all reads falling peaks
+    
+    ab_ratio = (s/(1-s)) * ((1-f)/f)
+
+    Inputs:
+    - bamfile (std::string): path to the BAM file
+    - peakfile (std::string): path to the ChIP-Seq peak file
+    Outputs:
+    - ab_ratio (float): the ratio of alpha to beta
+   */
+
+  // Read peak locations from the ChIP-seq file,
+  // and calculate the total length of peaks across the genomes
+  std::vector<seq_loc> peaks;
+  HomerPeakReader peakreader(peakfile, peaks);
+
+  int plen = 0;
+  for(int peak_index = 0; peak_index < peaks.size(); peak_index++){
+    plen += (peaks[peak_index].end - peaks[peak_index].start);
+  }
+
+
+  // Read read locations
+  BamCramReader bamreader(bamfile);
+  const BamHeader* bamheader = bamreader.bam_header();
+  std::vector<std::string> seq_names = bamheader->seq_names();
+  std::vector<uint32_t> seq_lengths = bamheader->seq_lengths();
+
+  uint32_t total_genome_length = 0;
+  vector<seq_loc> reads;
+  for (int seq_index=0; seq_index<seq_names.size(); seq_index++){
+    // only chr1-chr22, chrX, chrY are kept. The others are abandoned.
+    if ((seq_names[seq_index].find("_") == std::string::npos) && (seq_names[seq_index] != "chrM")){
+      bamreader.SetRegion(seq_names[seq_index], 0, seq_lengths[seq_index]);
+      BamAlignment aln;
+      while (bamreader.GetNextAlignment(aln)){
+        seq_loc read_location = {seq_names[seq_index], aln.Position(), aln.GetEndPosition()};
+        reads.push_back(read_location);
+      }
+
+      total_genome_length += seq_lengths[seq_index];
+    }
+  }
+
+  // Count number of reads that fall in peak regions
+  uint32_t n_reads_in_peak = 0;
+  // Naive version: (commented out)
+  /*
+  for (int read_index=0; read_index<reads.size(); read_index++){
+    for(int peak_index = 0; peak_index < peaks.size(); peak_index++){
+      if (peaks[peak_index].chromID == reads[read_index].chromID){
+        if ((peaks[peak_index].start < reads[read_index].end) &&\
+                (peaks[peak_index].end > reads[read_index].start)){
+          n_reads_in_peak += 1;
+        }
+      }
+    }
+  } 
+  */
+  // Faster version: (results are the same as the naive version)
+  sort(peaks.begin(), peaks.end(), compare_location);
+  sort(reads.begin(), reads.end(), compare_location);
+
+  int peak_index_start = 0;
+  for (int read_index=0; read_index<reads.size(); read_index++){
+    for(int peak_index=peak_index_start; peak_index<peaks.size(); peak_index++){
+      if (peaks[peak_index].chromID == reads[read_index].chromID){
+        if ((peaks[peak_index].start < reads[read_index].end) &&\
+                (peaks[peak_index].end > reads[read_index].start)){
+          n_reads_in_peak += 1;
+          break;
+        }else if(peaks[peak_index].start >= reads[read_index].end){
+          break;
+        }else if(peaks[peak_index].end <= reads[read_index].start){
+          peak_index_start = peak_index + 1;
+        }
+      }else if(peaks[peak_index].chromID < reads[read_index].chromID){
+        peak_index_start = peak_index + 1;
+      }else if(peaks[peak_index].chromID > reads[read_index].chromID){
+        break;
+      }
+    }
+  }
+  
+  // calculate f and s, and then ab_ratio
+  float f = (float)plen / (float)total_genome_length;
+  float s = (float)n_reads_in_peak / (float)(reads.size());
+  std::cout <<"peak-length: "<<plen<<"\ttotal: "<<total_genome_length<<std::endl;
+  std::cout <<"#reads in peaks: "<<n_reads_in_peak<<"\t#reads: "<<reads.size()<<std::endl;
+
+  float ab_ratio = (s/(1-s)) * ((1-f)/f);
+  *ab_ratio_ptr = ab_ratio;
+  *f_ptr = f;
+  *s_ptr = s;
+  return true;
+}
+
+bool compare_location(seq_loc a, seq_loc b){
+  if (a.chromID != b.chromID){
+    return (a.chromID < b.chromID);
+  }else if (a.start != b.start){
+    return (a.start < b.start);
+  }else if (a.end != b.end){
+    return (a.end < b.end);
+  }else{
+    return true;
+  }
+}
+
 int learn_main(int argc, char* argv[]) {
   bool showHelp = false;
   Options options;
@@ -172,7 +294,15 @@ int learn_main(int argc, char* argv[]) {
     }
 
     /*** Learn pulldown ratio parameters ***/
-    // TODO
+    float ab_ratio;
+    float s;
+    float f;
+    if (!learn_ratio(options.chipbam, options.peaksbed, &ab_ratio, &s, &f)){
+      PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
+    }
+    cout << "ab_ratio: " << ab_ratio << endl;
+    cout << "f: " << f << endl;
+    cout << "s: " << s << endl;
 
     /*** Write params to file ***/
     // TODO
