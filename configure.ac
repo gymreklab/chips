@@ -53,7 +53,7 @@ AC_SUBST(MACHTYPE)
 #COMPILER_WARNINGS="-Wextra -Wswitch-default -Wno-strict-aliasing"
 
 # Custom Flags to add to CFLAGS/CXXFLAGS
-ASIMON_CFLAGS="-D_GIT_VERSION=\"\\\"${GIT_VERSION}\\\"\" -D_MACHTYPE=\"\\\"${MACHTYPE}\\\"\""
+ASIMON_CFLAGS="-D_GIT_VERSION=\"\\\"${GIT_VERSION}\\\"\" -D_MACHTYPE=\"\\\"${MACHTYPE}\\\"\" -std=gnu++11"
 
 # Set the final value for CFLAGS/CXXFLAGS
 CFLAGS="$CFLAGS $COMPILER_WARNINGS $ASIMON_CFLAGS"

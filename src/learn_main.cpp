@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <vector>
 #include <sstream>
+#include <math.h>
+#include <boost/math/special_functions/digamma.hpp>
+#include <boost/math/special_functions/polygamma.hpp>
 
 #include "src/bam_io.h"
 #include "src/common.h"
@@ -16,12 +19,11 @@ const bool DEBUG = true;
 
 // Function declarations
 void learn_help(void);
-bool learn_frag(const std::string& bamfile, float* param);
-bool learn_ratio(const std::string& bamfile, const std::string& peakfile, float* ab_ratio_ptr);
+bool learn_ratio(const std::string& bamfile, const std::string& peakfile, float* ab_ratio_ptr, float *s_ptr, float* f_ptr);
 bool compare_location(seq_loc a, seq_loc b);
+bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
 
-bool learn_frag(const std::string& bamfile, float* param) {
-  // TODO which params do we need to learn? probably more than one  
+bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
   /*
     Learn fragment length distribution from an input BAM file
     Fragment lengths follow a gamma distribution.
@@ -29,7 +31,8 @@ bool learn_frag(const std::string& bamfile, float* param) {
     Inputs:
     - bamfile (std::string): path to the BAM file
     Outputs:
-    - param (float): parameter of gamma distribution (TODO update with correct name and number of params to be learned)
+    - alpha (float): parameter of gamma distribution
+    - beta  (float): parameter of gamma distribution
    */
 
   /* First, get a vector of the fragment lengths */
@@ -56,20 +59,59 @@ bool learn_frag(const std::string& bamfile, float* param) {
     //    cerr << abs(tlen) << endl; // if you want to print out for debugging
   }
 
-  /* Now, fit fraglengths to a gamma distribution */
-  // TODO (MICHAEL/AN) FILL THIS PART IN, RETURN TRUE IF SUCCESSFUL
-  // MAY NEED TO CHANGE fraglenths DATA STRUCTURE depending on what optimizer takes
-  *param = 0; // example for how to set result
+  /* Now, fit fraglengths to a gamma distribution.
+     Use Maximum Likelihood Estimation to estimate the
+     Gamma Distribution parameters */ 
+
+  const float EPSILON = 1e-7; // Value to check for convergence
+  
+  float total_frag_len = 0;     // sum of all the frag lengths
+  float total_log = 0;          // sum of log of each frag length
+
+  // get sum of all frag lengths and log sum of each frag length
+  for (int frag = 0; frag < fraglengths.size(); frag++)
+  {
+    total_frag_len += fraglengths[frag];
+    total_log += log(fraglengths[frag]);
+  }
+
+  // mean of frag lengths and log mean of fraglengths
+  float mean_frag_length = total_frag_len/fraglengths.size();
+  float total_log_mean = total_log/fraglengths.size();
+  
+  // Starting point for the value of a
+  float a = 0.5/(log(mean_frag_length) - total_log_mean);
+  float new_a = 0;
+  
+  // estimate the value for a using maximum likelihood estimate
+  while (true)
+  {
+    // evaluate updated a
+    float update = (1/a) + ((total_log_mean - log(mean_frag_length) + log(a)
+                 - boost::math::digamma(a))/(a - a*a*boost::math::polygamma(1, a)));
+    new_a = 1 / update;
+
+    // a converges
+    if (abs(new_a - a) < EPSILON)
+      break;
+
+    a = new_a;
+  }
+
+  *beta = a/mean_frag_length;
+  *alpha = a;
+  
   if (DEBUG) {
     std::stringstream ss;
-    ss << "Learned fragment length param " << *param;
+    ss << "Learned fragment length params alpha: " << *alpha << " and beta: " << *beta;
     PrintMessageDieOnError(ss.str(), M_DEBUG);
   }
   return true;
 }
 
 
-bool learn_ratio(const std::string& bamfile, const std::string& peakfile, float* ab_ratio_ptr){
+bool learn_ratio(const std::string& bamfile, const std::string& peakfile, \
+        float* ab_ratio_ptr, float *s_ptr, float* f_ptr){
   /*
     Learn the ratio of alpha to beta from an input BAM file,
     and its correspounding peak file.
@@ -170,6 +212,8 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile, float*
 
   float ab_ratio = (s/(1-s)) * ((1-f)/f);
   *ab_ratio_ptr = ab_ratio;
+  *f_ptr = f;
+  *s_ptr = s;
   return true;
 }
 
@@ -243,17 +287,22 @@ int learn_main(int argc, char* argv[]) {
     /***************** Main implementation ***************/
 
     /*** Learn fragment size disbribution parameters ***/
-    float frag_param;
-    if (!learn_frag(options.chipbam, &frag_param)) {
+    float frag_param_a;
+    float frag_param_b;
+    if (!learn_frag(options.chipbam, &frag_param_a, &frag_param_b)) {
       PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
     }
 
     /*** Learn pulldown ratio parameters ***/
     float ab_ratio;
-    if (!learn_ratio(options.chipbam, options.peaksbed, &ab_ratio)){
+    float s;
+    float f;
+    if (!learn_ratio(options.chipbam, options.peaksbed, &ab_ratio, &s, &f)){
       PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
     }
     cout << "ab_ratio: " << ab_ratio << endl;
+    cout << "f: " << f << endl;
+    cout << "s: " << s << endl;
 
     /*** Write params to file ***/
     // TODO
