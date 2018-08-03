@@ -33,6 +33,8 @@ bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
     - beta  (float): parameter of gamma distribution
    */
 
+  // TODO Homer autocorrelation for single end and directly get frag length for double end
+
   /* First, get a vector of the fragment lengths */
   int maxreads = 10000; int numreads = 0; // don't look at more than this many reads
   BamCramReader bamreader(bamfile);
