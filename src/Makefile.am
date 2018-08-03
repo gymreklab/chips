@@ -13,6 +13,7 @@ libasimon_a_SOURCES = simulate_reads_main.cpp learn_main.cpp \
 	sequencer.h sequencer.cpp \
 	common.h common.cpp \
 	bam_io.h bam_io.cpp \
+	homer_peak_io.h homer_peak_io.cpp\
 	stringops.h stringops.cpp \
 	bingenerator.h bingenerator.cpp \
 	peak_intervals.h peak_intervals.cpp \
