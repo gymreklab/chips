@@ -35,5 +35,7 @@ bool PeakIntervals::LoadPeaks(const std::string& peakfile) {
  */
 float PeakIntervals::GetOverlap(const Fragment& frag) {
   // TODO An/Michael
+  //
+  // could use interval tree that is organized based on score of interval of peak
   return 0;
 }

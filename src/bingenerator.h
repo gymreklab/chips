@@ -41,6 +41,8 @@ class BinGenerator {
 
  private:
   GenomeBin* currentBin;
+  int32_t reg_end;
+  int binsize;
 };
 
 #endif  // SRC_BINGENERATOR_H__
