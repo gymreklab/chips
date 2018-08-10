@@ -95,7 +95,7 @@ int simulate_reads_main(int argc, char* argv[]) {
       }
     } else if (PARAMETER_CHECK("--binsize", 9, parameterLength)) {
       if ((i+1) < argc) {
-	options.region = atoi(argv[i+1]);
+	options.binsize = atoi(argv[i+1]);
 	i++;
       }
     } else if (PARAMETER_CHECK("--paired", 8, parameterLength)) {
@@ -140,8 +140,6 @@ int simulate_reads_main(int argc, char* argv[]) {
       /*** Step 4: Sequencing ***/
       Sequencer seq(options);
       seq.Sequence(lib_fragments);
-
-      break; // TODO remove!
     }
 
     return 0;

@@ -11,39 +11,38 @@
   Initialize currentBin to the first bin
  */
 BinGenerator::BinGenerator(const Options& options) {
-  // Find the appropriate step size good way to check if in region or not
-  // TODO Region format chrom:start-end will be divided into bins of size options.binsize
   binsize = options.binsize;
-  std::string chrom;
-  int32_t start;
-  int32_t end;
+  string chrom;
+  int start;
+  int end;
   
-  if (!optons.region || option.region == "genome-wide")
+  if (options.region.empty() || options.region == "genome-wide")
   {
     // default is genome wide TODO figure out if its null or "genome-wide" as default
     // TODO How to handle traversing through whole genome?
-    //      - check if last chromosome and 
+    //      - How to check if we've reached the end of the first second third etc chr. 
   }
   else
   {
-    std::vector<std::string> parts;        // vector to store split strings
-    std::istringstream ss(options.region); // read in region
-    std::string split;                     // used to store split strings
+    vector<string> parts;        // vector to store split strings
+    stringstream ss(options.region); // read in region
+    string split;                     // used to store split strings
 
     // get chrom and locations from string
-    while(std::getline(ss, split, ':'))
+    while(getline(ss, split, ':'))
       parts.push_back(split);
 
     // get chromosome and remaining string
-    std::chrom = parts[0];
-    std::start_end = parts[1];
+    chrom = parts[0];
+    string start_end = parts[1];
     
     // reset and store region locations
     parts.clear();
     ss.str(start_end);
+    ss.clear();
    
     // read in rest of string that shows region location 
-    while(std::getline(ss, split, '-'))
+    while(getline(ss, split, '-'))
       parts.push_back(split);
 
     // set first position to read from and set ending position
@@ -51,14 +50,15 @@ BinGenerator::BinGenerator(const Options& options) {
     reg_end = stoi(parts[1]);
 
     // end of first bin size
-    end = stoi(start) + binsize; // - 1? TODO is it inclusive or exclusive?
+    end = start + binsize; // - 1? TODO is it inclusive or exclusive?
 
     // check for size of region and ensure bin is inside
     if (end > reg_end)
       end = reg_end;
   }
-
+    
   // first bin
+  firstBin = true;
   currentBin = new GenomeBin(chrom, start, end);
 }
 
@@ -72,24 +72,39 @@ BinGenerator::BinGenerator(const Options& options) {
   Set currentBin to be the next bin
  */
 bool BinGenerator::GotoNextBin() {
+  if (firstBin)
+  {
+    firstBin = false;
+    return true;
+  }
+
   // TODO Is the "end" parameter of GenomeBin inclusive?
   if (currentBin->end != reg_end)
   {
     // update the start and end for the next bin
-    int32_t start = currentBin->start + binsize;
-    int32_t end = currentBin->end + binsize;
-    std::string chrom = currentBin->chrom;
+    int start = currentBin->start + binsize;
+    int end = currentBin->end + binsize;
+    string chrom = currentBin->chrom;
     delete currentBin;
 
+    cout << "Updated Start: " << start << " Updated end: " << end << endl;
+    cout << "Region end: " << reg_end << endl;
+
     // TODO Implement the default case. What is the true end?
-    // How do we know if we've reached the end of the last chromosome?
+    // Start at first chromosome and go where?
+    // How do we know if we've reached the end of the any chromosome?
 
     // Check if the new bin is outside the end region
     if (end <= reg_end)
+    {
+      cout << "End is less or equal to reg_end" << endl;
       currentBin = new GenomeBin(chrom, start, end);
+    }
     else
+    {
+      cout << "End was larger than End of region using end of region" << endl;
       currentBin = new GenomeBin(chrom, start, reg_end);
-
+    }
     return true;
   }
   else
