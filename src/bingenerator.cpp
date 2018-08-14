@@ -1,4 +1,5 @@
 #include "src/bingenerator.h"
+#include "src/ref_genome.h"
 #include "src/common.h"
 
 #include <sstream>
@@ -15,27 +16,57 @@ BinGenerator::BinGenerator(const Options& options) {
   string chrom;
   int start;
   int end;
-  
-  if (options.region.empty() || options.region == "genome-wide")
+ 
+  // default case
+  if (options.region.empty())
   {
-    // default is genome wide TODO figure out if its null or "genome-wide" as default
-    // TODO How to handle traversing through whole genome?
-    //      - How to check if we've reached the end of the first second third etc chr. 
+    // get the chroms and lengths from fasta file
+    RefGenome ref (options.reffa);
+
+    if (!ref.GetChroms(&chroms))
+      PrintMessageDieOnError("Could not gather chromosomes from "
+                                 + options.reffa, M_ERROR);
+    if (!ref.GetLengths(&chromLengths))
+      PrintMessageDieOnError("Could not gather chromosome lengths from "
+                                 + options.reffa, M_ERROR);
+
+    // index for next chromosome
+    nextChrom = 1;
+      
+    // get last chromosome and the end of the first region
+    endChrom = chroms[chroms.size() - 1];
+    regEnd = chromLengths[chroms[0]];
+
+    // set up parameters for GenomeBin
+    chrom = chroms[0];
+    start = 1;
+    end = binsize;
+
+    if (binsize > regEnd)
+      end = regEnd;
   }
+
+  // specified region
   else
   {
-    vector<string> parts;        // vector to store split strings
+    vector<string> parts;            // vector to store split strings
     stringstream ss(options.region); // read in region
-    string split;                     // used to store split strings
+    string split;                    // used to store split strings
 
     // get chrom and locations from string
     while(getline(ss, split, ':'))
       parts.push_back(split);
 
+    if (parts.size() != 2)
+      PrintMessageDieOnError("Improper region input format should be chrom:start-end", M_ERROR);
+
     // get chromosome and remaining string
     chrom = parts[0];
     string start_end = parts[1];
     
+    // set last chromosome to stop binning
+    endChrom = chrom;
+ 
     // reset and store region locations
     parts.clear();
     ss.str(start_end);
@@ -45,16 +76,19 @@ BinGenerator::BinGenerator(const Options& options) {
     while(getline(ss, split, '-'))
       parts.push_back(split);
 
+    if (parts.size() != 2)
+      PrintMessageDieOnError("Improper region input format should be chrom:start-end", M_ERROR);
+
     // set first position to read from and set ending position
     start = stoi(parts[0]);
-    reg_end = stoi(parts[1]);
+    regEnd = stoi(parts[1]);
 
     // end of first bin size
-    end = start + binsize; // - 1? TODO is it inclusive or exclusive?
+    end = start + binsize - 1; // NOTE: It is inclusive meaning the end position is included.
 
     // check for size of region and ensure bin is inside
-    if (end > reg_end)
-      end = reg_end;
+    if (end > regEnd)
+      end = regEnd;
   }
     
   // first bin
@@ -78,33 +112,32 @@ bool BinGenerator::GotoNextBin() {
     return true;
   }
 
-  // TODO Is the "end" parameter of GenomeBin inclusive?
-  if (currentBin->end != reg_end)
+  // Go to the next bin
+  if (currentBin->end != regEnd || currentBin->chrom != endChrom)
   {
-    // update the start and end for the next bin
+    // update the start and end
+    string chrom = currentBin->chrom;
     int start = currentBin->start + binsize;
     int end = currentBin->end + binsize;
-    string chrom = currentBin->chrom;
+    
+    // update chromosome
+    if (currentBin->end == regEnd && currentBin->chrom != endChrom)
+    {
+      chrom = chroms[nextChrom];
+      start = 1;
+      end = binsize;
+      regEnd = chromLengths[chrom];
+      nextChrom++;
+    }
+
     delete currentBin;
 
-    cout << "Updated Start: " << start << " Updated end: " << end << endl;
-    cout << "Region end: " << reg_end << endl;
-
-    // TODO Implement the default case. What is the true end?
-    // Start at first chromosome and go where?
-    // How do we know if we've reached the end of the any chromosome?
-
     // Check if the new bin is outside the end region
-    if (end <= reg_end)
-    {
-      cout << "End is less or equal to reg_end" << endl;
+    if (end <= regEnd)
       currentBin = new GenomeBin(chrom, start, end);
-    }
     else
-    {
-      cout << "End was larger than End of region using end of region" << endl;
-      currentBin = new GenomeBin(chrom, start, reg_end);
-    }
+      currentBin = new GenomeBin(chrom, start, regEnd);
+
     return true;
   }
   else
