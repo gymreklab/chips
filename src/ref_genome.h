@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#include <map>
+#include <vector>
 #include <string>
 
 class RefGenome {
@@ -17,6 +19,11 @@ class RefGenome {
 		   const int32_t& _start,
 		   const int32_t& _end,
 		   std::string* seq);
+
+  bool GetChroms(std::vector<std::string>* chroms);
+
+  bool GetLengths(std::map<std::string, int>* chromLengths);
+
  private:
   bool file_exists(std::string path) const {
     return (access(path.c_str(), F_OK) != -1);
