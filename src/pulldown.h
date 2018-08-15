@@ -24,6 +24,7 @@ class Pulldown {
   float gamma_alpha, gamma_beta;
   float ratio_beta;
   PeakIntervals* pintervals;
+  bool debug_pulldown;
 };
 
 #endif  // SRC_PULLDOWN_H__

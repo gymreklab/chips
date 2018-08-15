@@ -41,6 +41,9 @@ class BinGenerator {
   /* Return the current bin */
   const GenomeBin GetCurrentBin();
 
+  /* Return string version of current bin */
+  const string GetCurrentBinStr();
+
  private:
   GenomeBin* currentBin;
   vector<string> chroms;

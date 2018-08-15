@@ -154,6 +154,12 @@ const GenomeBin BinGenerator::GetCurrentBin() {
   return *currentBin;
 }
 
+const string BinGenerator::GetCurrentBinStr() {
+  stringstream ss;
+  ss << currentBin->chrom << ":" << currentBin->start << "-" << currentBin->end;
+  return ss.str();
+}
+
 BinGenerator::~BinGenerator() {
   delete currentBin;
 }
