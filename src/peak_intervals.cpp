@@ -80,5 +80,7 @@ float PeakIntervals::SearchList(const Fragment& frag){
   If it overlaps one ore more peak, return the max score across all peaks
  */
 float PeakIntervals::GetOverlap(const Fragment& frag) {
+
   return SearchList(frag);
+
 }

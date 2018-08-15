@@ -2,6 +2,8 @@
 #define SRC_BINGENERATOR_H__
 
 #include "src/options.h"
+#include <vector>
+#include <map>
 
 using namespace std;
 
@@ -41,6 +43,11 @@ class BinGenerator {
 
  private:
   GenomeBin* currentBin;
+  vector<string> chroms;
+  map<string, int> chromLengths;
+  string endChrom;
+  int regEnd, binsize, nextChrom;
+  bool firstBin;
 };
 
 #endif  // SRC_BINGENERATOR_H__
