@@ -11,10 +11,10 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin) {
   gamma_alpha = options.gamma_alpha;
   gamma_beta = options.gamma_beta;
   ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
-  pintervals = new PeakIntervals(options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
+  //pintervals = new PeakIntervals(options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
 }
 
-void Pulldown::Perform(vector<Fragment>* output_fragments) {
+void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals) {
   // Set up 
   std::default_random_engine generator;
   std::gamma_distribution<float> fragdist(gamma_alpha, gamma_beta);
@@ -47,7 +47,3 @@ void Pulldown::Perform(vector<Fragment>* output_fragments) {
   }
 }
 
-
-Pulldown::~Pulldown() {
-  delete pintervals;
-}

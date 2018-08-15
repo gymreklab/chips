@@ -11,6 +11,7 @@
 #include "src/pulldown.h"
 #include "src/sequencer.h"
 #include "src/stringops.h"
+#include "src/peak_intervals.h"
 
 
 // define our parameter checking macro
@@ -145,11 +146,13 @@ int simulate_reads_main(int argc, char* argv[]) {
 
     // Perform in bins so we don't keep everything in memory at once
     BinGenerator bingenerator(options);
+    PeakIntervals* pintervals = \
+               new PeakIntervals(options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
 
     while(bingenerator.GotoNextBin()) {
       /*** Step 1/2: Shearing + Pulldown ***/
       Pulldown pulldown(options, bingenerator.GetCurrentBin());
-      pulldown.Perform(&pulldown_fragments);
+      pulldown.Perform(&pulldown_fragments, pintervals);
     
       /*** Step 3: Library construction ***/
       LibraryConstructor lc(options);

@@ -12,9 +12,7 @@
 class Pulldown {
  public:
   Pulldown(const Options& options, const GenomeBin& gbin);
-  virtual ~Pulldown();
-
-  void Perform(vector<Fragment>* output_fragments);
+  void Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals);
 
  private:
   std::string chrom;
@@ -23,7 +21,6 @@ class Pulldown {
   int numcopies;
   float gamma_alpha, gamma_beta;
   float ratio_beta;
-  PeakIntervals* pintervals;
 };
 
 #endif  // SRC_PULLDOWN_H__
