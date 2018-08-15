@@ -7,7 +7,6 @@ TYPE=homer
 
 ./src/asimon simreads \
     -p ${PEAKS} \
-    -b ${BAM} \
     -t ${TYPE} \
     -f ${REFFA} \
     -o test \

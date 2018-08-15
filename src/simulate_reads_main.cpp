@@ -13,6 +13,7 @@
 #include "src/stringops.h"
 #include "src/peak_intervals.h"
 
+const bool DEBUG_SIM=true;
 
 // define our parameter checking macro
 #define PARAMETER_CHECK(param, paramLen, actualLen) (strncmp(argv[i], param, min(actualLen, paramLen))== 0) && (actualLen == paramLen)
@@ -151,6 +152,9 @@ int simulate_reads_main(int argc, char* argv[]) {
 
     while(bingenerator.GotoNextBin()) {
       /*** Step 1/2: Shearing + Pulldown ***/
+      if (DEBUG_SIM) {
+	PrintMessageDieOnError("Simulating bin " + bingenerator.GetCurrentBinStr(), M_DEBUG);
+      }
       Pulldown pulldown(options, bingenerator.GetCurrentBin());
       pulldown.Perform(&pulldown_fragments, pintervals);
     
