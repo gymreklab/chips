@@ -11,7 +11,7 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin) {
   gamma_alpha = options.gamma_alpha;
   gamma_beta = options.gamma_beta;
   ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
-  pintervals = new PeakIntervals(options.peaksbed);
+  pintervals = new PeakIntervals(options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
 }
 
 void Pulldown::Perform(vector<Fragment>* output_fragments) {

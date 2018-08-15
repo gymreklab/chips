@@ -8,7 +8,6 @@
 
 #include <vector>
 
-using namespace std;
 
 class Pulldown {
  public:

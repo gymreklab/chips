@@ -12,7 +12,6 @@
 #include "src/sequencer.h"
 #include "src/stringops.h"
 
-using namespace std;
 
 // define our parameter checking macro
 #define PARAMETER_CHECK(param, paramLen, actualLen) (strncmp(argv[i], param, min(actualLen, paramLen))== 0) && (actualLen == paramLen)
@@ -100,6 +99,21 @@ int simulate_reads_main(int argc, char* argv[]) {
       }
     } else if (PARAMETER_CHECK("--paired", 8, parameterLength)) {
       options.paired = true;
+    } else if (PARAMETER_CHECK("-b", 2, parameterLength)) {
+      if ((i+1) < argc) {
+	options.chipbam = argv[i+1];
+	i++;
+      }
+    } else if (PARAMETER_CHECK("-t", 2, parameterLength)){
+      if ((i+1) < argc) {
+    options.peakfiletype = argv[i+1];
+    i++;
+      }
+    } else if (PARAMETER_CHECK("-c", 2, parameterLength)){
+      if ((i+1) < argc) {
+    options.countindex = std::atoi(argv[i+1]);
+    i++;
+      }
     } else {
       cerr << endl << "*****ERROR: Unrecognized parameter: " << argv[i] << " *****" << endl << endl;
       showHelp = true;
@@ -117,6 +131,10 @@ int simulate_reads_main(int argc, char* argv[]) {
   }
   if (options.outprefix.empty()) {
     cerr << "****** ERROR: Must specify outprefix with -o ******" << endl;
+    showHelp = true;
+  }
+  if (options.peakfiletype.empty()) {
+    cerr << "****** ERROR: Must specify peakfiletype with -t ******" << endl;
     showHelp = true;
   }
 

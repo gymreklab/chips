@@ -14,6 +14,8 @@ class Options {
   std::string reffa;
   std::string peaksbed;
   std::string outprefix;
+  std::string peakfiletype;
+  std::int32_t countindex;
 
   // Required learn inputs
   std::string chipbam;

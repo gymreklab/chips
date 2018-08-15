@@ -10,6 +10,8 @@ Options::Options() {
   reffa = "";
   peaksbed = "";
   outprefix = "";
+  peakfiletype = "";
+  countindex = -1;
 
   // Required learn inputs
   chipbam = "";

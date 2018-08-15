@@ -6,14 +6,12 @@
 
 #include <vector>
 
-using namespace std;
-
 class Sequencer {
  public:
   Sequencer(const Options& options);
   virtual ~Sequencer();
 
-  void Sequence(const vector<Fragment>& input_fragments);
+  void Sequence(const std::vector<Fragment>& input_fragments);
 };
 
 #endif  // SRC_SEQUENCER_H__
