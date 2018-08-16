@@ -66,6 +66,7 @@ bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks, const std::int32_t
           end = std::stoul(element);
         }else if((count_colidx != -1) && (elem_idx == count_colidx)){
           count = std::stof(element);
+          //std::cout<< count<<std::endl;
         }
         elem_idx++;
       }

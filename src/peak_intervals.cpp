@@ -26,7 +26,7 @@ bool PeakIntervals::LoadPeaks(const std::string peakfile, const std::string peak
   bool dataLoaded = peakloader.Load(peaks);
 
   if (dataLoaded){
-    max_coverage = -1;
+    max_coverage = 0;
     for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
       if (peaks[peakIndex].score > max_coverage){
         max_coverage = peaks[peakIndex].score;
@@ -47,16 +47,37 @@ bool PeakIntervals::LoadPeaks(const std::string peakfile, const std::string peak
  * */
 float PeakIntervals::SearchList(const Fragment& frag){
   std::vector<float> probBoundList;
+  uint32_t frag_start, frag_end, peak_start, peak_end;
+  float overlap;
   for(int peakIndex=0; peakIndex < peaks.size(); peakIndex++){
-    if ((frag.chrom == peaks[peakIndex].chrom) &&\
-            (frag.start >= peaks[peakIndex].start) &&\
-            ( (frag.start+frag.length) <= (peaks[peakIndex].start+peaks[peakIndex].length))){
-      probBoundList.push_back(peaks[peakIndex].score/max_coverage);
+    if (frag.chrom == peaks[peakIndex].chrom){
+      frag_start = frag.start;
+      frag_end = frag.start+frag.length;
+      peak_start = peaks[peakIndex].start;
+      peak_end = peaks[peakIndex].start+peaks[peakIndex].length;
+      if (peak_start < frag_start){
+        if (peak_end > frag_start){
+            if (peak_end > frag_end){
+              probBoundList.push_back(peaks[peakIndex].score/max_coverage);
+            }else{
+              overlap = (float)(peak_end-frag_start) / (float)(peak_end-peak_start);
+              probBoundList.push_back(overlap*peaks[peakIndex].score/max_coverage);
+            }
+        }else{
+            overlap = 0;
+        }
+      }else if (peak_start < frag_end){
+        overlap = (float)( std::min(peak_end,frag_end) - peak_start)/(float)(peak_end-peak_start);
+        probBoundList.push_back(overlap*peaks[peakIndex].score/max_coverage);
+      }else{
+        overlap = 0;
+      }
     }
   }
   // suppose probBoundList = [a, b, c]
   // result = 1- (1-a)*(1-b)*(1-c)
   if (probBoundList.size() > 0){
+    //std::cout<<"found"<<std::endl;
     float probBound = 1;
     for (int peakIndex=0; peakIndex < probBoundList.size(); peakIndex++){
        probBound *= (1-probBoundList[peakIndex]);
@@ -79,5 +100,9 @@ float PeakIntervals::SearchList(const Fragment& frag){
   If it overlaps one ore more peak, return the max score across all peaks
  */
 float PeakIntervals::GetOverlap(const Fragment& frag) {
-  return SearchList(frag);
+  //std::cout<<frag.start<< " "<<frag.length<<std::endl;
+  float score = SearchList(frag);
+  //std::cout<<score<<std::endl;
+  return score;
+  
 }

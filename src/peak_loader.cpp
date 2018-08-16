@@ -31,20 +31,17 @@ bool PeakLoader::Load(std::vector<Fragment>& peaks){
   switch (peakfileTypeList.at(peakfileType)){
     case 0:
       peakreader.HomerPeakReader(peaks, count_colidx);
-      if (bamfile != ""){
-        peakreader.UpdateTagCount(peaks, bamfile, &total_genome_length, &total_tagcount, &tagcount_in_peaks);
-      }
       break;
     case 1:
       peakreader.TestPeakReader(peaks, count_colidx);
-      if (bamfile != ""){
-        peakreader.UpdateTagCount(peaks, bamfile, &total_genome_length, &total_tagcount, &tagcount_in_peaks);
-      }
       break;
     default:
       std::cerr << "An unexpected error happened in PeakLoader->Load()" << std::endl;
       return false;
       break;
+  }
+  if (bamfile != ""){
+    peakreader.UpdateTagCount(peaks, bamfile, &total_genome_length, &total_tagcount, &tagcount_in_peaks);
   }
   return true;
 }
