@@ -43,6 +43,40 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks, const std::int32_
   return 0;
 }
 
+bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks, const std::int32_t count_colidx){
+  std::ifstream infile(peakfile.c_str());
+  std::string line;
+  while (std::getline(infile, line)){
+      std::string chr;
+      std::uint32_t start;
+      std::uint32_t end;
+      std::uint32_t length;
+      float count = -1;
+      
+      std::stringstream linestream(line);
+      std::string element;
+      uint32_t elem_idx=0;
+      while(!linestream.eof()){
+        linestream >> element;
+        if (elem_idx == 0){
+          chr = element;
+        }else if(elem_idx == 1){
+          start = std::stoul(element);
+        }else if(elem_idx == 2){
+          end = std::stoul(element);
+        }else if((count_colidx != -1) && (elem_idx == count_colidx)){
+          count = std::stof(element);
+        }
+        elem_idx++;
+      }
+      
+      length = end-start;
+      Fragment peak_location(chr, start, length, count);
+      peaks.push_back(peak_location);
+  }
+  return 0;
+}
+
 bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string bamfile,
             uint32_t* ptr_total_genome_length, uint32_t* ptr_total_tagcount, uint32_t* ptr_tagcount_in_peaks){
   BamCramReader bamreader(bamfile);

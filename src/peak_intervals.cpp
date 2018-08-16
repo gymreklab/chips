@@ -54,7 +54,6 @@ float PeakIntervals::SearchList(const Fragment& frag){
       probBoundList.push_back(peaks[peakIndex].score/max_coverage);
     }
   }
-
   // suppose probBoundList = [a, b, c]
   // result = 1- (1-a)*(1-b)*(1-c)
   if (probBoundList.size() > 0){
@@ -80,7 +79,5 @@ float PeakIntervals::SearchList(const Fragment& frag){
   If it overlaps one ore more peak, return the max score across all peaks
  */
 float PeakIntervals::GetOverlap(const Fragment& frag) {
-
   return SearchList(frag);
-
 }
