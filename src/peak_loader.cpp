@@ -8,7 +8,7 @@
  */
 #include "src/peak_loader.h"
 
-const std::map<std::string, int> PeakLoader::peakfileTypeList = {{"homer", 0},};
+const std::map<std::string, int> PeakLoader::peakfileTypeList = {{"homer", 0}, {"test", 1}};
 
 PeakLoader::PeakLoader(const std::string _peakfile, const std::string _peakfileType,
                         const std::string _bamfile, const std::int32_t _count_colidx){
@@ -31,14 +31,17 @@ bool PeakLoader::Load(std::vector<Fragment>& peaks){
   switch (peakfileTypeList.at(peakfileType)){
     case 0:
       peakreader.HomerPeakReader(peaks, count_colidx);
-      if (bamfile != ""){
-        peakreader.UpdateTagCount(peaks, bamfile, &total_genome_length, &total_tagcount, &tagcount_in_peaks);
-      }
+      break;
+    case 1:
+      peakreader.TestPeakReader(peaks, count_colidx);
       break;
     default:
       std::cerr << "An unexpected error happened in PeakLoader->Load()" << std::endl;
       return false;
       break;
+  }
+  if (bamfile != ""){
+    peakreader.UpdateTagCount(peaks, bamfile, &total_genome_length, &total_tagcount, &tagcount_in_peaks);
   }
   return true;
 }
