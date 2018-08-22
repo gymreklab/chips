@@ -1,8 +1,8 @@
 #include "src/sequencer.h"
 
 const std::map<char, char> Sequencer::NucleotideMap = {
-                    {'A', 'T'}, {'C', 'G'}, {'T', 'A'}, {'G', 'C'},
-                    {'a', 't'}, {'c', 'g'}, {'t', 'a'}, {'g', 'c'}};
+                    {'A', 'T'}, {'C', 'G'}, {'T', 'A'}, {'G', 'C'}, {'N', 'N'},
+                    {'a', 't'}, {'c', 'g'}, {'t', 'a'}, {'g', 'c'}, {'n', 'n'}};
 
 Sequencer::Sequencer(const Options& options) {
   ref_genome = new RefGenome(options.reffa);
