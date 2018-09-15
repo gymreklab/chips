@@ -100,7 +100,7 @@ bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
     a = new_a;
   }
 
-  *beta = a/mean_frag_length;
+  *beta = mean_frag_length/a;
   *alpha = a;
   
   if (DEBUG) {

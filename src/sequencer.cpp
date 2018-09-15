@@ -52,6 +52,7 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments) {
 bool Sequencer::Fragment2Read(const std::string frag, std::string& read){
   try{
     read = frag.substr(0, readlen);
+    if (frag.length() < readlen){ return false;}
     return true;
   } catch (const char* msg){
     std::cerr << msg << " in Sequencer::Fragment2Read!"<< std::endl;
