@@ -14,7 +14,7 @@ class Sequencer {
   Sequencer(const Options& options);
   virtual ~Sequencer();
 
-  void Sequence(const std::vector<Fragment>& input_fragments);
+  void Sequence(const std::vector<Fragment>& input_fragments, int* fastq_index);
  private:
   RefGenome* ref_genome;
   bool paired;
@@ -24,7 +24,7 @@ class Sequencer {
 
   bool Fragment2Read(const std::string frag, std::string& read);
   std::string ReverseComplement(const std::string seq);
-  bool save_into_fastq(const std::vector<std::string> reads, const std::string ofilename);
+  bool save_into_fastq(const std::vector<std::string> reads, const std::string ofilename, int* fastq_index);
 };
 
 #endif  // SRC_SEQUENCER_H__

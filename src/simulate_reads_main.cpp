@@ -142,19 +142,23 @@ int simulate_reads_main(int argc, char* argv[]) {
 
   if (!showHelp) {
     /***************** Main implementation ***************/
-    // Set up
-    vector<Fragment> pulldown_fragments, lib_fragments;
-
     // Perform in bins so we don't keep everything in memory at once
     BinGenerator bingenerator(options);
     PeakIntervals* pintervals = \
                new PeakIntervals(options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
 
+    // Keeps track of number of reads for naming
+    int total_reads = 0;
+
     while(bingenerator.GotoNextBin()) {
+      // Set up
+      vector <Fragment> pulldown_fragments, lib_fragments;
+
       /*** Step 1/2: Shearing + Pulldown ***/
       if (DEBUG_SIM) {
 	PrintMessageDieOnError("Simulating bin " + bingenerator.GetCurrentBinStr(), M_DEBUG);
       }
+
       Pulldown pulldown(options, bingenerator.GetCurrentBin());
       pulldown.Perform(&pulldown_fragments, pintervals);
     
@@ -164,8 +168,10 @@ int simulate_reads_main(int argc, char* argv[]) {
 
       /*** Step 4: Sequencing ***/
       Sequencer seq(options);
-      seq.Sequence(lib_fragments);
+      seq.Sequence(lib_fragments, &total_reads);
     }
+
+    delete pintervals;
 
     return 0;
     /******************************************************/
