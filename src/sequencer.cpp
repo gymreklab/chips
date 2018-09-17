@@ -11,7 +11,7 @@ Sequencer::Sequencer(const Options& options) {
   readlen = options.readlen;
 }
 
-void Sequencer::Sequence(const std::vector<Fragment>& input_fragments) {
+void Sequencer::Sequence(const std::vector<Fragment>& input_fragments, int* fastq_index) {
   std::string frag_seq;
   std::string read_seq;
   std::string read_seq_rc;
@@ -42,10 +42,11 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments) {
 
   // save into file
   if (paired){
-    save_into_fastq(reads_1, outprefix + "/reads_1.fastq");
-    save_into_fastq(reads_2, outprefix + "/reads_2.fastq");
+    int temp = *fastq_index;
+    save_into_fastq(reads_1, outprefix + "/reads_1.fastq", &temp);
+    save_into_fastq(reads_2, outprefix + "/reads_2.fastq", fastq_index);
   }else{
-    save_into_fastq(reads_1, outprefix + "/reads.fastq");
+    save_into_fastq(reads_1, outprefix + "/reads.fastq", fastq_index);
   }
 }
 
@@ -68,15 +69,17 @@ std::string Sequencer::ReverseComplement(const std::string seq){
   return rc_seq; 
 }
 
-bool Sequencer::save_into_fastq(const std::vector<std::string> reads, const std::string ofilename){
-  std::ofstream ofile(ofilename, std::ofstream::out);
+// TODO update this function so the read names are unique
+bool Sequencer::save_into_fastq(const std::vector<std::string> reads, const std::string ofilename, int* fastq_index){
+  std::ofstream ofile(ofilename, std::ofstream::out | std::ofstream::app);
   for (int read_index=0; read_index<reads.size(); read_index++){
-    ofile << "@SIM:" << read_index <<"\n";
+    ofile << "@SIM:" << read_index + *fastq_index <<"\n";
     ofile << reads[read_index] << "\n";
     ofile << "+\n";
     ofile << std::string(readlen, '~') << "\n";
   }
   ofile.close();
+  *fastq_index += reads.size();
   return true;
 }
 
