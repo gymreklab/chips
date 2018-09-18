@@ -3,6 +3,9 @@
 #include <iostream>
 #include <random>
 
+int Pulldown::peakIndexStart = 0;
+std::string Pulldown::prev_chrom = "";
+
 Pulldown::Pulldown(const Options& options, const GenomeBin& gbin) {
   chrom = gbin.chrom;
   start = gbin.start;
@@ -28,8 +31,15 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   bool bound;
   float peak_score;
 
+  // update the start index of peaks
+  if (chrom != prev_chrom){
+    peakIndexStart = 0;
+    prev_chrom = chrom;
+  }
+
   // Perform separate shearing for each copy of the genome
   for (int i = 0; i < numcopies; i++) {
+    pintervals->resetSearchScope(peakIndexStart); 
     if (debug_pulldown) {
       PrintMessageDieOnError("Genome copy " + to_string(i), M_DEBUG);
     }
@@ -56,5 +66,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
       current_pos += fsize;
     }
   }
+
+  peakIndexStart = pintervals->peakIndexStart;
 }
 

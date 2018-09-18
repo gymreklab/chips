@@ -16,12 +16,14 @@ class Pulldown {
 
  private:
   std::string chrom;
-  int32_t start;
-  int32_t end;
+  std::int32_t start;
+  std::int32_t end;
   int numcopies;
   float gamma_alpha, gamma_beta;
   float ratio_beta;
   bool debug_pulldown;
-};
 
+  static int peakIndexStart;
+  static std::string prev_chrom;
+};
 #endif  // SRC_PULLDOWN_H__
