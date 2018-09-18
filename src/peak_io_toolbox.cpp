@@ -40,6 +40,7 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks, const std::int32_
       peaks.push_back(peak_location);
     }
   }
+  std::sort(peaks.begin(), peaks.end(), compare_location);
   return 0;
 }
 
@@ -75,6 +76,7 @@ bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks, const std::int32_t
       Fragment peak_location(chr, start, length, count);
       peaks.push_back(peak_location);
   }
+  std::sort(peaks.begin(), peaks.end(), compare_location);
   return 0;
 }
 
