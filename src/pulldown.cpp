@@ -59,7 +59,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
       if (bound) {
 	output_fragments->push_back(frag); // alpha=1
       } else {
-	if (rand()/double(RAND_MAX) < ratio_beta) {
+	if (rand()/double(RAND_MAX) < (ratio_beta * (pintervals->prob_pd_given_b) )) {
 	  output_fragments->push_back(frag);
 	}
       }

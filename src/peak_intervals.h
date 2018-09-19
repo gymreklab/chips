@@ -19,6 +19,7 @@ class PeakIntervals {
   float GetOverlap(const Fragment& frag);
   void resetSearchScope(const int index);
   int peakIndexStart;
+  double prob_pd_given_b;
 
  private:
   // peakmap:  key: chromID,  data: fragments
