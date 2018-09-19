@@ -26,7 +26,7 @@ Options::Options() {
   gamma_alpha = 100;
   gamma_beta = 0.5;
   ratio_s = 0.001;
-  ratio_f = 0.00001;
+  ratio_f = 0.001;
 
   // Additional simulation parameters
   region = "";
