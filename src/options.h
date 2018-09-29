@@ -25,6 +25,7 @@ class Options {
   int numreads;
   int readlen;
   bool paired;
+  int n_threads;
 
   // Simulation model parameters
   float gamma_alpha;
