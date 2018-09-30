@@ -21,6 +21,7 @@ Options::Options() {
   numreads = 1000000;
   readlen = 36;
   paired = false;
+  n_threads = 1;
 
   // Simulation model parameters
   gamma_alpha = 100;
