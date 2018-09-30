@@ -62,7 +62,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
 
     // TODO debug below
     if (peak_score > 0 && debug_pulldown) {
-       cerr << chrom << " " << fstart << " " << fend << " " << " " << peak_score << " " << bound << " " << ratio_beta << endl;
+    cerr << chrom << " " << fstart << " " << fend << " " << " " << peak_score << " " << bound << " " << ratio_beta << endl;
     }
 
     if (bound) {
@@ -70,7 +70,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
     }else {
       if (rand()/double(RAND_MAX) < (ratio_beta * (pintervals->prob_pd_given_b) )) {
         output_fragments->push_back(frag);
-	  }
+      }
     }
       current_pos += fsize;
   }
