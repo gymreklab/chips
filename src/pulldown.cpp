@@ -3,10 +3,8 @@
 #include <iostream>
 #include <random>
 
-int Pulldown::peakIndexStart = 0;
-std::string Pulldown::prev_chrom = "";
-
-Pulldown::Pulldown(const Options& options, const GenomeBin& gbin) {
+Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
+        std::string& _prev_chrom, int& _peakIndexStart, int& _start_offset) {
   chrom = gbin.chrom;
   start = gbin.start;
   end = gbin.end;
@@ -14,6 +12,10 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin) {
   gamma_alpha = options.gamma_alpha;
   gamma_beta = options.gamma_beta;
   ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
+
+  prev_chrom = _prev_chrom;
+  peakIndexStart = _peakIndexStart;
+  start_offset = _start_offset;
 
   debug_pulldown = true; // TODO remove
   if (debug_pulldown) {

@@ -11,7 +11,8 @@
 
 class Pulldown {
  public:
-  Pulldown(const Options& options, const GenomeBin& gbin);
+  Pulldown(const Options& options, const GenomeBin& gbin,
+            std::string& _prev_chrom, int& _peakIndexStart, int& _start_offset);
   void Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals);
 
  private:
@@ -23,7 +24,8 @@ class Pulldown {
   float ratio_beta;
   bool debug_pulldown;
 
-  static int peakIndexStart;
-  static std::string prev_chrom;
+  int peakIndexStart;
+  std::string prev_chrom;
+  int start_offset;
 };
 #endif  // SRC_PULLDOWN_H__
