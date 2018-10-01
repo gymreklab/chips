@@ -63,9 +63,9 @@ bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
 
   /* Now, fit fraglengths to a gamma distribution.
      Use Maximum Likelihood Estimation to estimate the
-     Gamma Distribution parameters */ 
-
-  const float EPSILON = 1e-7; // Value to check for convergence
+     Gamma Distribution parameters */
+ 
+  const float EPSILON = 1e-4; // Value to check for convergence
   
   float total_frag_len = 0;     // sum of all the frag lengths
   float total_log = 0;          // sum of log of each frag length
@@ -100,7 +100,7 @@ bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
     a = new_a;
   }
 
-  *beta = a/mean_frag_length;
+  *beta = mean_frag_length/a;
   *alpha = a;
   
   if (DEBUG) {

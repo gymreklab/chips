@@ -17,10 +17,13 @@ class PeakIntervals {
 
   /* Get score of peak overlapping fragment */
   float GetOverlap(const Fragment& frag);
+  void resetSearchScope(const int index);
+  int peakIndexStart;
+  double prob_pd_given_b;
 
  private:
   // peakmap:  key: chromID,  data: fragments
-  std::vector<Fragment> peaks;
+  std::map<std::string, std::vector<Fragment> > peak_map;
   std::uint32_t max_coverage;
   /* Load peaks from file */
   bool LoadPeaks(const std::string peakfile, const std::string peakfileType, const std::string bamfile, const std::int32_t count_colidx);

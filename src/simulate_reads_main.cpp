@@ -1,5 +1,6 @@
 #include <cstring>
 #include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <vector>
 
@@ -12,7 +13,8 @@
 #include "src/sequencer.h"
 #include "src/stringops.h"
 #include "src/peak_intervals.h"
-
+#include "src/multithread.h"
+#include "src/multithread.cpp"
 const bool DEBUG_SIM=true;
 
 // define our parameter checking macro
@@ -20,6 +22,9 @@ const bool DEBUG_SIM=true;
 
 // Function declarations
 void simulate_reads_help(void);
+void merge_files(std::string ifilename, std::string ofilename);
+void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, int thread_index);
+void fill_queue(const int numcopies, TaskQueue<int> & q);
 
 int simulate_reads_main(int argc, char* argv[]) {
   bool showHelp = false;
@@ -116,6 +121,11 @@ int simulate_reads_main(int argc, char* argv[]) {
     options.countindex = std::atoi(argv[i+1]);
     i++;
       }
+    } else if (PARAMETER_CHECK("--thread", 8, parameterLength)){
+      if ((i+1) < argc) {
+    options.n_threads = std::atoi(argv[i+1]);
+    i++;
+      }
     } else {
       cerr << endl << "*****ERROR: Unrecognized parameter: " << argv[i] << " *****" << endl << endl;
       showHelp = true;
@@ -141,37 +151,115 @@ int simulate_reads_main(int argc, char* argv[]) {
   }
 
   if (!showHelp) {
-    /***************** Main implementation ***************/
-    // Set up
-    vector<Fragment> pulldown_fragments, lib_fragments;
+    TaskQueue<int> task_queue;
+    fill_queue(options.numcopies, task_queue);
 
+    /***************** Main implementation ***************/
     // Perform in bins so we don't keep everything in memory at once
-    BinGenerator bingenerator(options);
     PeakIntervals* pintervals = \
                new PeakIntervals(options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
 
-    while(bingenerator.GotoNextBin()) {
-      /*** Step 1/2: Shearing + Pulldown ***/
-      if (DEBUG_SIM) {
-	PrintMessageDieOnError("Simulating bin " + bingenerator.GetCurrentBinStr(), M_DEBUG);
-      }
-      Pulldown pulldown(options, bingenerator.GetCurrentBin());
-      pulldown.Perform(&pulldown_fragments, pintervals);
+    //BinQueue<GenomeBin> bq;
+    //fill_queue(bingenerator, bq);
+
+    // Keeps track of number of reads for naming
+    std::vector<std::thread> consumers;
+    for (int thread_index=0; thread_index<options.n_threads; thread_index++){
+      std::thread cnsmr(std::bind(consume, std::ref(task_queue), options, pintervals, thread_index));
+      consumers.push_back(std::move(cnsmr));
+    }
+
+    // wait until all threads finish
+    for (auto & cnsmr: consumers){
+      cnsmr.join();
+    }
     
+    for (int thread_index=0; thread_index<options.n_threads; thread_index++){
+      if (options.paired){
+        std::string ifilename_1 = options.outprefix+"/reads_"+std::to_string(thread_index)+"_1.fastq";
+        std::string ofilename_1 = options.outprefix+"/reads_1.fastq";
+        merge_files(ifilename_1, ofilename_1);
+
+        std::string ifilename_2 = options.outprefix+"/reads_"+std::to_string(thread_index)+"_2.fastq";
+        std::string ofilename_2 = options.outprefix+"/reads_2.fastq";
+        merge_files(ifilename_2, ofilename_2);
+      }else{
+        std::string ifilename = options.outprefix+"/reads_"+std::to_string(thread_index)+".fastq";
+        std::string ofilename = options.outprefix+"/reads.fastq";
+        merge_files(ifilename, ofilename);
+      }
+    }
+
+    delete pintervals;
+    return 0;
+    /******************************************************/
+  } else {
+    simulate_reads_help();
+    return 1;
+  }
+}
+
+/*
+ * A thread that keep generate bins
+ * */
+/*
+void fill_queue(BinGenerator bingenerator, BinQueue <GenomeBin> & q){
+  while(bingenerator.GotoNextBin()) {
+    q.push(bingenerator.GetCurrentBin());
+  }
+}
+*/
+void fill_queue(const int numcopies, TaskQueue<int> & q){
+  for (int copy_index=0; copy_index<numcopies; copy_index++){
+    q.push(copy_index);
+  }
+}
+
+
+/*
+ * A tread that operate on bins
+ * */
+void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, int thread_index){
+  while (true){
+    int copy_index = -1;
+    try{
+      copy_index = q.pop();
+    } catch (std::out_of_range e){
+      cerr << e.what() << endl;
+      break;
+    }
+
+    int total_reads = 0;
+    int peakIndexStart = 0;
+    int start_offset = 0;
+    std::string prev_chrom = "";
+    BinGenerator bingenerator(options);
+    while (bingenerator.GotoNextBin()){
+      // set up
+      vector <Fragment> pulldown_fragments, lib_fragments;
+
+      /*** Step 1/2: Shearing + Pulldown ***/
+      Pulldown pulldown(options, bingenerator.GetCurrentBin(),\
+                            prev_chrom, peakIndexStart, start_offset);
+      pulldown.Perform(&pulldown_fragments, pintervals);
+
       /*** Step 3: Library construction ***/
       LibraryConstructor lc(options);
       lc.Perform(pulldown_fragments, &lib_fragments);
 
       /*** Step 4: Sequencing ***/
       Sequencer seq(options);
-      seq.Sequence(lib_fragments);
+      seq.Sequence(lib_fragments, total_reads, thread_index, copy_index);
     }
+  }
+}
 
-    return 0;
-    /******************************************************/
-  } else {
-    simulate_reads_help();
-    return 1;
+void merge_files(std::string ifilename, std::string ofilename){
+  std::ifstream ifile(ifilename.c_str());
+  std::ofstream ofile(ofilename.c_str());
+  std::string line;
+  while (std::getline(ifile, line)){
+    ofile<<line<<"\n";
   }
 }
 
