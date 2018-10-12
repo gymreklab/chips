@@ -15,7 +15,7 @@ COLUMN=3
     -f ${REFFA} \
     -c ${COLUMN}\
     -o ${OUTPREFIX} \
-    --numcopies 5 \
+    --numcopies 10000 \
     --numreads 1000 \
     --readlen 50 \
     --gamma-frag 200,0.5 \

@@ -27,11 +27,6 @@ uname -v = #1 SMP Thu Jan 25 20:13:58 UTC 2018
 /usr/bin/oslevel       = unknown
 /bin/universe          = unknown
 
-PATH: /home/pandaman/projects/Basset/src
-PATH: /home/pandaman/tools_and_dependencies/ed/ed-1.4
-PATH: /home/pandaman/tools_and_dependencies/hdf5/hdf5-1.8.18-linux-centos7-x86_64-gcc485-shared/bin
-PATH: /home/pandaman/tools_and_dependencies/MEME-Suite/bin
-PATH: /usr/local/cuda-9.0/bin
 PATH: /usr/local/bin
 PATH: /usr/bin
 PATH: /usr/local/sbin
@@ -41,8 +36,9 @@ PATH: /opt/jdk1.8.0_111/jre/bin
 PATH: /storage/resources/source/homer49/bin
 PATH: /storage/resources/source/vcftools_0.1.13/bin/
 PATH: /storage/resources/source/sratoolkit.2.8.1-centos_linux64/bin/
-PATH: /home/pandaman/.local/bin
-PATH: /home/pandaman/bin
+PATH: /home/mlamkin/.local/bin
+PATH: /home/mlamkin/bin
+PATH: /home/mlamkin/R/bin
 
 
 ## ----------- ##
@@ -61,7 +57,7 @@ configure:2691: result: gawk
 configure:2702: checking whether make sets $(MAKE)
 configure:2724: result: yes
 configure:2753: checking whether make supports nested variables
-configure:2770: result: no
+configure:2770: result: yes
 configure:2866: checking for style of include used by make
 configure:2894: result: GNU
 configure:2965: checking for gcc
@@ -138,13 +134,468 @@ configure:3949: ar cru libconftest.a conftest.o >&5
 configure:3952: $? = 0
 configure:3975: result: ar
 configure:4025: checking build system type
-configure:4034: error: cannot guess build type; you must specify one
+configure:4039: result: x86_64-unknown-linux-gnu
+configure:4059: checking host system type
+configure:4072: result: x86_64-unknown-linux-gnu
+configure:4113: checking how to print strings
+configure:4140: result: printf
+configure:4161: checking for a sed that does not truncate output
+configure:4225: result: /usr/bin/sed
+configure:4243: checking for grep that handles long lines and -e
+configure:4301: result: /usr/bin/grep
+configure:4306: checking for egrep
+configure:4368: result: /usr/bin/grep -E
+configure:4373: checking for fgrep
+configure:4435: result: /usr/bin/grep -F
+configure:4470: checking for ld used by gcc
+configure:4537: result: /usr/bin/ld
+configure:4544: checking if the linker (/usr/bin/ld) is GNU ld
+configure:4559: result: yes
+configure:4571: checking for BSD- or MS-compatible name lister (nm)
+configure:4620: result: /usr/bin/nm -B
+configure:4750: checking the name lister (/usr/bin/nm -B) interface
+configure:4757: gcc -c -g -O2  conftest.c >&5
+configure:4760: /usr/bin/nm -B "conftest.o"
+configure:4763: output
+0000000000000000 B some_variable
+configure:4770: result: BSD nm
+configure:4773: checking whether ln -s works
+configure:4777: result: yes
+configure:4785: checking the maximum length of command line arguments
+configure:4915: result: 1572864
+configure:4932: checking whether the shell understands some XSI constructs
+configure:4942: result: yes
+configure:4946: checking whether the shell understands "+="
+configure:4952: result: yes
+configure:4987: checking how to convert x86_64-unknown-linux-gnu file names to x86_64-unknown-linux-gnu format
+configure:5027: result: func_convert_file_noop
+configure:5034: checking how to convert x86_64-unknown-linux-gnu file names to toolchain format
+configure:5054: result: func_convert_file_noop
+configure:5061: checking for /usr/bin/ld option to reload object files
+configure:5068: result: -r
+configure:5142: checking for objdump
+configure:5158: found /usr/bin/objdump
+configure:5169: result: objdump
+configure:5201: checking how to recognize dependent libraries
+configure:5403: result: pass_all
+configure:5488: checking for dlltool
+configure:5518: result: no
+configure:5548: checking how to associate runtime and link libraries
+configure:5575: result: printf %s\n
+configure:5699: checking for archiver @FILE support
+configure:5716: gcc -c -g -O2  conftest.c >&5
+configure:5716: $? = 0
+configure:5719: ar cru libconftest.a @conftest.lst >&5
+configure:5722: $? = 0
+configure:5727: ar cru libconftest.a @conftest.lst >&5
+ar: conftest.o: No such file or directory
+configure:5730: $? = 1
+configure:5742: result: @
+configure:5800: checking for strip
+configure:5816: found /usr/bin/strip
+configure:5827: result: strip
+configure:5899: checking for ranlib
+configure:5915: found /usr/bin/ranlib
+configure:5926: result: ranlib
+configure:6028: checking command to parse /usr/bin/nm -B output from gcc object
+configure:6148: gcc -c -g -O2  conftest.c >&5
+configure:6151: $? = 0
+configure:6155: /usr/bin/nm -B conftest.o \| sed -n -e 's/^.*[ ]\([ABCDGIRSTW][ABCDGIRSTW]*\)[ ][ ]*\([_A-Za-z][_A-Za-z0-9]*\)$/\1 \2 \2/p' | sed '/ __gnu_lto/d' \> conftest.nm
+configure:6158: $? = 0
+configure:6224: gcc -o conftest -g -O2   conftest.c conftstm.o >&5
+configure:6227: $? = 0
+configure:6265: result: ok
+configure:6302: checking for sysroot
+configure:6332: result: no
+configure:6409: gcc -c -g -O2  conftest.c >&5
+configure:6412: $? = 0
+configure:6588: checking for mt
+configure:6618: result: no
+configure:6638: checking if : is a manifest tool
+configure:6644: : '-?'
+configure:6652: result: no
+configure:7294: checking how to run the C preprocessor
+configure:7325: gcc -E  conftest.c
+configure:7325: $? = 0
+configure:7339: gcc -E  conftest.c
+conftest.c:11:28: fatal error: ac_nonexistent.h: No such file or directory
+ #include <ac_nonexistent.h>
+                            ^
+compilation terminated.
+configure:7339: $? = 1
+configure: failed program was:
+| /* confdefs.h */
+| #define PACKAGE_NAME "asimon"
+| #define PACKAGE_TARNAME "asimon"
+| #define PACKAGE_VERSION "UNKNOWN"
+| #define PACKAGE_STRING "asimon UNKNOWN"
+| #define PACKAGE_BUGREPORT "Melissa Gymrek mgymrek@eng.ucsd.edu"
+| #define PACKAGE_URL ""
+| #define PACKAGE "asimon"
+| #define VERSION "UNKNOWN"
+| /* end confdefs.h.  */
+| #include <ac_nonexistent.h>
+configure:7364: result: gcc -E
+configure:7384: gcc -E  conftest.c
+configure:7384: $? = 0
+configure:7398: gcc -E  conftest.c
+conftest.c:11:28: fatal error: ac_nonexistent.h: No such file or directory
+ #include <ac_nonexistent.h>
+                            ^
+compilation terminated.
+configure:7398: $? = 1
+configure: failed program was:
+| /* confdefs.h */
+| #define PACKAGE_NAME "asimon"
+| #define PACKAGE_TARNAME "asimon"
+| #define PACKAGE_VERSION "UNKNOWN"
+| #define PACKAGE_STRING "asimon UNKNOWN"
+| #define PACKAGE_BUGREPORT "Melissa Gymrek mgymrek@eng.ucsd.edu"
+| #define PACKAGE_URL ""
+| #define PACKAGE "asimon"
+| #define VERSION "UNKNOWN"
+| /* end confdefs.h.  */
+| #include <ac_nonexistent.h>
+configure:7427: checking for ANSI C header files
+configure:7447: gcc -c -g -O2  conftest.c >&5
+configure:7447: $? = 0
+configure:7520: gcc -o conftest -g -O2   conftest.c  >&5
+configure:7520: $? = 0
+configure:7520: ./conftest
+configure:7520: $? = 0
+configure:7531: result: yes
+configure:7544: checking for sys/types.h
+configure:7544: gcc -c -g -O2  conftest.c >&5
+configure:7544: $? = 0
+configure:7544: result: yes
+configure:7544: checking for sys/stat.h
+configure:7544: gcc -c -g -O2  conftest.c >&5
+configure:7544: $? = 0
+configure:7544: result: yes
+configure:7544: checking for stdlib.h
+configure:7544: gcc -c -g -O2  conftest.c >&5
+configure:7544: $? = 0
+configure:7544: result: yes
+configure:7544: checking for string.h
+configure:7544: gcc -c -g -O2  conftest.c >&5
+configure:7544: $? = 0
+configure:7544: result: yes
+configure:7544: checking for memory.h
+configure:7544: gcc -c -g -O2  conftest.c >&5
+configure:7544: $? = 0
+configure:7544: result: yes
+configure:7544: checking for strings.h
+configure:7544: gcc -c -g -O2  conftest.c >&5
+configure:7544: $? = 0
+configure:7544: result: yes
+configure:7544: checking for inttypes.h
+configure:7544: gcc -c -g -O2  conftest.c >&5
+configure:7544: $? = 0
+configure:7544: result: yes
+configure:7544: checking for stdint.h
+configure:7544: gcc -c -g -O2  conftest.c >&5
+configure:7544: $? = 0
+configure:7544: result: yes
+configure:7544: checking for unistd.h
+configure:7544: gcc -c -g -O2  conftest.c >&5
+configure:7544: $? = 0
+configure:7544: result: yes
+configure:7558: checking for dlfcn.h
+configure:7558: gcc -c -g -O2  conftest.c >&5
+configure:7558: $? = 0
+configure:7558: result: yes
+configure:7763: checking for objdir
+configure:7778: result: .libs
+configure:8049: checking if gcc supports -fno-rtti -fno-exceptions
+configure:8067: gcc -c -g -O2  -fno-rtti -fno-exceptions conftest.c >&5
+cc1: warning: command line option '-fno-rtti' is valid for C++/ObjC++ but not for C
+configure:8071: $? = 0
+configure:8084: result: no
+configure:8411: checking for gcc option to produce PIC
+configure:8418: result: -fPIC -DPIC
+configure:8426: checking if gcc PIC flag -fPIC -DPIC works
+configure:8444: gcc -c -g -O2  -fPIC -DPIC -DPIC conftest.c >&5
+configure:8448: $? = 0
+configure:8461: result: yes
+configure:8490: checking if gcc static flag -static works
+configure:8518: result: no
+configure:8533: checking if gcc supports -c -o file.o
+configure:8554: gcc -c -g -O2  -o out/conftest2.o conftest.c >&5
+configure:8558: $? = 0
+configure:8580: result: yes
+configure:8588: checking if gcc supports -c -o file.o
+configure:8635: result: yes
+configure:8668: checking whether the gcc linker (/usr/bin/ld -m elf_x86_64) supports shared libraries
+configure:9821: result: yes
+configure:9858: checking whether -lc should be explicitly linked in
+configure:9866: gcc -c -g -O2  conftest.c >&5
+configure:9869: $? = 0
+configure:9884: gcc -shared  -fPIC -DPIC conftest.o  -v -Wl,-soname -Wl,conftest -o conftest 2\>\&1 \| /usr/bin/grep  -lc  \>/dev/null 2\>\&1
+configure:9887: $? = 0
+configure:9901: result: no
+configure:10061: checking dynamic linker characteristics
+configure:10572: gcc -o conftest -g -O2   -Wl,-rpath -Wl,/foo conftest.c  >&5
+configure:10572: $? = 0
+configure:10798: result: GNU/Linux ld.so
+configure:10905: checking how to hardcode library paths into programs
+configure:10930: result: immediate
+configure:11470: checking whether stripping libraries is possible
+configure:11475: result: yes
+configure:11510: checking if libtool supports shared libraries
+configure:11512: result: yes
+configure:11515: checking whether to build shared libraries
+configure:11536: result: yes
+configure:11539: checking whether to build static libraries
+configure:11543: result: yes
+configure:11628: checking for gcc
+configure:11655: result: gcc
+configure:11884: checking for C compiler version
+configure:11893: gcc --version >&5
+gcc (GCC) 4.9.2
+Copyright (C) 2014 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+configure:11904: $? = 0
+configure:11893: gcc -v >&5
+Using built-in specs.
+COLLECT_GCC=gcc
+COLLECT_LTO_WRAPPER=/usr/local/libexec/gcc/x86_64-unknown-linux-gnu/4.9.2/lto-wrapper
+Target: x86_64-unknown-linux-gnu
+Configured with: ./configure --disable-multilib --enable-languages=c,c++
+Thread model: posix
+gcc version 4.9.2 (GCC) 
+configure:11904: $? = 0
+configure:11893: gcc -V >&5
+gcc: error: unrecognized command line option '-V'
+gcc: fatal error: no input files
+compilation terminated.
+configure:11904: $? = 1
+configure:11893: gcc -qversion >&5
+gcc: error: unrecognized command line option '-qversion'
+gcc: fatal error: no input files
+compilation terminated.
+configure:11904: $? = 1
+configure:11908: checking whether we are using the GNU C compiler
+configure:11936: result: yes
+configure:11945: checking whether gcc accepts -g
+configure:12006: result: yes
+configure:12023: checking for gcc option to accept ISO C89
+configure:12099: result: none needed
+configure:12121: checking dependency style of gcc
+configure:12232: result: gcc3
+configure:12305: checking for g++
+configure:12321: found /usr/local/bin/g++
+configure:12332: result: g++
+configure:12359: checking for C++ compiler version
+configure:12368: g++ --version >&5
+g++ (GCC) 4.9.2
+Copyright (C) 2014 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+configure:12379: $? = 0
+configure:12368: g++ -v >&5
+Using built-in specs.
+COLLECT_GCC=g++
+COLLECT_LTO_WRAPPER=/usr/local/libexec/gcc/x86_64-unknown-linux-gnu/4.9.2/lto-wrapper
+Target: x86_64-unknown-linux-gnu
+Configured with: ./configure --disable-multilib --enable-languages=c,c++
+Thread model: posix
+gcc version 4.9.2 (GCC) 
+configure:12379: $? = 0
+configure:12368: g++ -V >&5
+g++: error: unrecognized command line option '-V'
+g++: fatal error: no input files
+compilation terminated.
+configure:12379: $? = 1
+configure:12368: g++ -qversion >&5
+g++: error: unrecognized command line option '-qversion'
+g++: fatal error: no input files
+compilation terminated.
+configure:12379: $? = 1
+configure:12383: checking whether we are using the GNU C++ compiler
+configure:12402: g++ -c   conftest.cpp >&5
+configure:12402: $? = 0
+configure:12411: result: yes
+configure:12420: checking whether g++ accepts -g
+configure:12440: g++ -c -g  conftest.cpp >&5
+configure:12440: $? = 0
+configure:12481: result: yes
+configure:12506: checking dependency style of g++
+configure:12617: result: gcc3
+configure:12650: checking how to run the C++ preprocessor
+configure:12677: g++ -E  conftest.cpp
+configure:12677: $? = 0
+configure:12691: g++ -E  conftest.cpp
+conftest.cpp:23:28: fatal error: ac_nonexistent.h: No such file or directory
+ #include <ac_nonexistent.h>
+                            ^
+compilation terminated.
+configure:12691: $? = 1
+configure: failed program was:
+| /* confdefs.h */
+| #define PACKAGE_NAME "asimon"
+| #define PACKAGE_TARNAME "asimon"
+| #define PACKAGE_VERSION "UNKNOWN"
+| #define PACKAGE_STRING "asimon UNKNOWN"
+| #define PACKAGE_BUGREPORT "Melissa Gymrek mgymrek@eng.ucsd.edu"
+| #define PACKAGE_URL ""
+| #define PACKAGE "asimon"
+| #define VERSION "UNKNOWN"
+| #define STDC_HEADERS 1
+| #define HAVE_SYS_TYPES_H 1
+| #define HAVE_SYS_STAT_H 1
+| #define HAVE_STDLIB_H 1
+| #define HAVE_STRING_H 1
+| #define HAVE_MEMORY_H 1
+| #define HAVE_STRINGS_H 1
+| #define HAVE_INTTYPES_H 1
+| #define HAVE_STDINT_H 1
+| #define HAVE_UNISTD_H 1
+| #define HAVE_DLFCN_H 1
+| #define LT_OBJDIR ".libs/"
+| /* end confdefs.h.  */
+| #include <ac_nonexistent.h>
+configure:12716: result: g++ -E
+configure:12736: g++ -E  conftest.cpp
+configure:12736: $? = 0
+configure:12750: g++ -E  conftest.cpp
+conftest.cpp:23:28: fatal error: ac_nonexistent.h: No such file or directory
+ #include <ac_nonexistent.h>
+                            ^
+compilation terminated.
+configure:12750: $? = 1
+configure: failed program was:
+| /* confdefs.h */
+| #define PACKAGE_NAME "asimon"
+| #define PACKAGE_TARNAME "asimon"
+| #define PACKAGE_VERSION "UNKNOWN"
+| #define PACKAGE_STRING "asimon UNKNOWN"
+| #define PACKAGE_BUGREPORT "Melissa Gymrek mgymrek@eng.ucsd.edu"
+| #define PACKAGE_URL ""
+| #define PACKAGE "asimon"
+| #define VERSION "UNKNOWN"
+| #define STDC_HEADERS 1
+| #define HAVE_SYS_TYPES_H 1
+| #define HAVE_SYS_STAT_H 1
+| #define HAVE_STDLIB_H 1
+| #define HAVE_STRING_H 1
+| #define HAVE_MEMORY_H 1
+| #define HAVE_STRINGS_H 1
+| #define HAVE_INTTYPES_H 1
+| #define HAVE_STDINT_H 1
+| #define HAVE_UNISTD_H 1
+| #define HAVE_DLFCN_H 1
+| #define LT_OBJDIR ".libs/"
+| /* end confdefs.h.  */
+| #include <ac_nonexistent.h>
+configure:12919: checking for ld used by g++
+configure:12986: result: /usr/bin/ld -m elf_x86_64
+configure:12993: checking if the linker (/usr/bin/ld -m elf_x86_64) is GNU ld
+configure:13008: result: yes
+configure:13063: checking whether the g++ linker (/usr/bin/ld -m elf_x86_64) supports shared libraries
+configure:14068: result: yes
+configure:14104: g++ -c -g -O2  conftest.cpp >&5
+configure:14107: $? = 0
+configure:14627: checking for g++ option to produce PIC
+configure:14634: result: -fPIC -DPIC
+configure:14642: checking if g++ PIC flag -fPIC -DPIC works
+configure:14660: g++ -c -g -O2  -fPIC -DPIC -DPIC conftest.cpp >&5
+configure:14664: $? = 0
+configure:14677: result: yes
+configure:14700: checking if g++ static flag -static works
+configure:14728: result: no
+configure:14740: checking if g++ supports -c -o file.o
+configure:14761: g++ -c -g -O2  -o out/conftest2.o conftest.cpp >&5
+configure:14765: $? = 0
+configure:14787: result: yes
+configure:14792: checking if g++ supports -c -o file.o
+configure:14839: result: yes
+configure:14869: checking whether the g++ linker (/usr/bin/ld -m elf_x86_64) supports shared libraries
+configure:14905: result: yes
+configure:15046: checking dynamic linker characteristics
+configure:15717: result: GNU/Linux ld.so
+configure:15770: checking how to hardcode library paths into programs
+configure:15795: result: immediate
+configure:15837: checking whether gcc and cc understand -c and -o together
+configure:15868: gcc -c conftest.c -o conftest2.o >&5
+configure:15872: $? = 0
+configure:15878: gcc -c conftest.c -o conftest2.o >&5
+configure:15882: $? = 0
+configure:15893: cc -c conftest.c >&5
+configure:15897: $? = 0
+configure:15905: cc -c conftest.c -o conftest2.o >&5
+configure:15909: $? = 0
+configure:15915: cc -c conftest.c -o conftest2.o >&5
+configure:15919: $? = 0
+configure:15937: result: yes
+configure:16019: checking for pkg-config
+configure:16037: found /usr/bin/pkg-config
+configure:16049: result: /usr/bin/pkg-config
+configure:16074: checking pkg-config is at least version 0.9.0
+configure:16077: result: yes
+configure:16087: checking for HTSLIB
+configure:16094: $PKG_CONFIG --exists --print-errors "htslib"
+configure:16097: $? = 0
+configure:16111: $PKG_CONFIG --exists --print-errors "htslib"
+configure:16114: $? = 0
+configure:16172: result: yes
+configure:16225: checking for boostlib >= 1.67.0
+configure:16279: g++ -c -g -O2  -I/usr/include conftest.cpp >&5
+configure:16279: $? = 0
+configure:16281: result: yes
+configure:16568: checking that generated files are newer than configure
+configure:16574: result: done
+configure:16605: creating ./config.status
+
+## ---------------------- ##
+## Running config.status. ##
+## ---------------------- ##
+
+This file was extended by asimon config.status UNKNOWN, which was
+generated by GNU Autoconf 2.69.  Invocation command line was
+
+  CONFIG_FILES    = 
+  CONFIG_HEADERS  = 
+  CONFIG_LINKS    = 
+  CONFIG_COMMANDS = 
+  $ ./config.status 
+
+on snorlax
+
+config.status:1156: creating m4/Makefile
+config.status:1156: creating Makefile
+config.status:1156: creating src/Makefile
+config.status:1156: creating config.h
+config.status:1337: config.h is unchanged
+config.status:1385: executing depfiles commands
+config.status:1385: executing libtool commands
+configure:19096: result: 
+configure:19098: result:  Configuration summary for asimon
+configure:19100: result:     version UNKNOWN
+configure:19102: result:     CFLAGS:   -g -O2  -D_GIT_VERSION="\"UNKNOWN\"" -D_MACHTYPE="\"x86_64\"" -std=gnu++11
+configure:19104: result:     CPPFLAGS: 
+configure:19106: result:     CXXFLAGS: -g -O2  -I/usr/include -D_GIT_VERSION="\"UNKNOWN\"" -D_MACHTYPE="\"x86_64\"" -std=gnu++11
+configure:19108: result:     LDFLAGS:  
+configure:19110: result:     HTSLIB_LIBS:  -L/home/mlamkin/lib -lhts  
+configure:19112: result:     HTSLIB_CFLAGS: -I/home/mlamkin/include  
+configure:19114: result:     ASIMON_CFLAGS: -D_GIT_VERSION="\"UNKNOWN\"" -D_MACHTYPE="\"x86_64\"" -std=gnu++11
+configure:19116: result: 
+configure:19118: result:  Default installtion directories:
+configure:19120: result:     programs: /usr/local/bin/ 
+configure:19122: result: 
+configure:19124: result:  To change installtion path, use:
+configure:19126: result:     ./configure --prefix NEW-PATH
+configure:19128: result: 
 
 ## ---------------- ##
 ## Cache variables. ##
 ## ---------------- ##
 
+ac_cv_build=x86_64-unknown-linux-gnu
 ac_cv_c_compiler_gnu=yes
+ac_cv_cxx_compiler_gnu=yes
 ac_cv_env_CCC_set=
 ac_cv_env_CCC_value=
 ac_cv_env_CC_set=
@@ -171,8 +622,8 @@ ac_cv_env_LIBS_set=
 ac_cv_env_LIBS_value=
 ac_cv_env_PKG_CONFIG_LIBDIR_set=
 ac_cv_env_PKG_CONFIG_LIBDIR_value=
-ac_cv_env_PKG_CONFIG_PATH_set=
-ac_cv_env_PKG_CONFIG_PATH_value=
+ac_cv_env_PKG_CONFIG_PATH_set=set
+ac_cv_env_PKG_CONFIG_PATH_value=/home/mlamkin/lib/pkgconfig
 ac_cv_env_PKG_CONFIG_set=
 ac_cv_env_PKG_CONFIG_value=
 ac_cv_env_build_alias_set=
@@ -181,84 +632,144 @@ ac_cv_env_host_alias_set=
 ac_cv_env_host_alias_value=
 ac_cv_env_target_alias_set=
 ac_cv_env_target_alias_value=
+ac_cv_header_dlfcn_h=yes
+ac_cv_header_inttypes_h=yes
+ac_cv_header_memory_h=yes
+ac_cv_header_stdc=yes
+ac_cv_header_stdint_h=yes
+ac_cv_header_stdlib_h=yes
+ac_cv_header_string_h=yes
+ac_cv_header_strings_h=yes
+ac_cv_header_sys_stat_h=yes
+ac_cv_header_sys_types_h=yes
+ac_cv_header_unistd_h=yes
+ac_cv_host=x86_64-unknown-linux-gnu
 ac_cv_objext=o
+ac_cv_path_EGREP='/usr/bin/grep -E'
+ac_cv_path_FGREP='/usr/bin/grep -F'
+ac_cv_path_GREP=/usr/bin/grep
+ac_cv_path_SED=/usr/bin/sed
+ac_cv_path_ac_pt_PKG_CONFIG=/usr/bin/pkg-config
 ac_cv_path_install='/usr/bin/install -c'
 ac_cv_path_mkdir=/usr/bin/mkdir
 ac_cv_prog_AWK=gawk
+ac_cv_prog_CPP='gcc -E'
+ac_cv_prog_CXXCPP='g++ -E'
 ac_cv_prog_ac_ct_AR=ar
 ac_cv_prog_ac_ct_CC=gcc
+ac_cv_prog_ac_ct_CXX=g++
+ac_cv_prog_ac_ct_OBJDUMP=objdump
+ac_cv_prog_ac_ct_RANLIB=ranlib
+ac_cv_prog_ac_ct_STRIP=strip
 ac_cv_prog_cc_c89=
 ac_cv_prog_cc_g=yes
+ac_cv_prog_cc_gcc_c_o=yes
+ac_cv_prog_cxx_g=yes
 ac_cv_prog_make_make_set=yes
 am_cv_CC_dependencies_compiler_type=gcc3
+am_cv_CXX_dependencies_compiler_type=gcc3
 am_cv_ar_interface=ar
-am_cv_make_support_nested_variables=no
+am_cv_make_support_nested_variables=yes
+lt_cv_ar_at_file=@
+lt_cv_archive_cmds_need_lc=no
+lt_cv_deplibs_check_method=pass_all
+lt_cv_file_magic_cmd='$MAGIC_CMD'
+lt_cv_file_magic_test_file=
+lt_cv_ld_reload_flag=-r
+lt_cv_nm_interface='BSD nm'
+lt_cv_objdir=.libs
+lt_cv_path_LD=/usr/bin/ld
+lt_cv_path_LDCXX='/usr/bin/ld -m elf_x86_64'
+lt_cv_path_NM='/usr/bin/nm -B'
+lt_cv_path_mainfest_tool=no
+lt_cv_prog_compiler_c_o=yes
+lt_cv_prog_compiler_c_o_CXX=yes
+lt_cv_prog_compiler_pic='-fPIC -DPIC'
+lt_cv_prog_compiler_pic_CXX='-fPIC -DPIC'
+lt_cv_prog_compiler_pic_works=yes
+lt_cv_prog_compiler_pic_works_CXX=yes
+lt_cv_prog_compiler_rtti_exceptions=no
+lt_cv_prog_compiler_static_works=no
+lt_cv_prog_compiler_static_works_CXX=no
+lt_cv_prog_gnu_ld=yes
+lt_cv_prog_gnu_ldcxx=yes
+lt_cv_sharedlib_from_linklib_cmd='printf %s\n'
+lt_cv_shlibpath_overrides_runpath=no
+lt_cv_sys_global_symbol_pipe='sed -n -e '\''s/^.*[	 ]\([ABCDGIRSTW][ABCDGIRSTW]*\)[	 ][	 ]*\([_A-Za-z][_A-Za-z0-9]*\)$/\1 \2 \2/p'\'' | sed '\''/ __gnu_lto/d'\'''
+lt_cv_sys_global_symbol_to_c_name_address='sed -n -e '\''s/^: \([^ ]*\)[ ]*$/  {\"\1\", (void *) 0},/p'\'' -e '\''s/^[ABCDGIRSTW]* \([^ ]*\) \([^ ]*\)$/  {"\2", (void *) \&\2},/p'\'''
+lt_cv_sys_global_symbol_to_c_name_address_lib_prefix='sed -n -e '\''s/^: \([^ ]*\)[ ]*$/  {\"\1\", (void *) 0},/p'\'' -e '\''s/^[ABCDGIRSTW]* \([^ ]*\) \(lib[^ ]*\)$/  {"\2", (void *) \&\2},/p'\'' -e '\''s/^[ABCDGIRSTW]* \([^ ]*\) \([^ ]*\)$/  {"lib\2", (void *) \&\2},/p'\'''
+lt_cv_sys_global_symbol_to_cdecl='sed -n -e '\''s/^T .* \(.*\)$/extern int \1();/p'\'' -e '\''s/^[ABCDGIRSTW]* .* \(.*\)$/extern char \1;/p'\'''
+lt_cv_sys_max_cmd_len=1572864
+lt_cv_to_host_file_cmd=func_convert_file_noop
+lt_cv_to_tool_file_cmd=func_convert_file_noop
+pkg_cv_HTSLIB_CFLAGS='-I/home/mlamkin/include  '
+pkg_cv_HTSLIB_LIBS='-L/home/mlamkin/lib -lhts  '
 
 ## ----------------- ##
 ## Output variables. ##
 ## ----------------- ##
 
-ACLOCAL='${SHELL} /home/pandaman/projects/asimon/asimon-chip-sim/config/missing aclocal-1.13'
+ACLOCAL='${SHELL} /storage/mlamkin/projects/asimon-chip-sim/config/missing aclocal-1.13'
 AMDEPBACKSLASH='\'
 AMDEP_FALSE='#'
 AMDEP_TRUE=''
 AMTAR='$${TAR-tar}'
 AM_BACKSLASH='\'
-AM_DEFAULT_V='1'
+AM_DEFAULT_V='$(AM_DEFAULT_VERBOSITY)'
 AM_DEFAULT_VERBOSITY='1'
-AM_V='1'
+AM_V='$(V)'
 AR='ar'
-AUTOCONF='${SHELL} /home/pandaman/projects/asimon/asimon-chip-sim/config/missing autoconf'
-AUTOHEADER='${SHELL} /home/pandaman/projects/asimon/asimon-chip-sim/config/missing autoheader'
-AUTOMAKE='${SHELL} /home/pandaman/projects/asimon/asimon-chip-sim/config/missing automake-1.13'
+AUTOCONF='${SHELL} /storage/mlamkin/projects/asimon-chip-sim/config/missing autoconf'
+AUTOHEADER='${SHELL} /storage/mlamkin/projects/asimon-chip-sim/config/missing autoheader'
+AUTOMAKE='${SHELL} /storage/mlamkin/projects/asimon-chip-sim/config/missing automake-1.13'
 AWK='gawk'
-BOOST_CPPFLAGS=''
-BOOST_LDFLAGS=''
+BOOST_CPPFLAGS='-I/usr/include'
+BOOST_LDFLAGS='-L/usr/lib'
 CC='gcc'
 CCDEPMODE='depmode=gcc3'
-CFLAGS='-g -O2'
-CPP=''
+CFLAGS='-g -O2  -D_GIT_VERSION="\"UNKNOWN\"" -D_MACHTYPE="\"x86_64\"" -std=gnu++11'
+CPP='gcc -E'
 CPPFLAGS=''
-CXX=''
-CXXCPP=''
-CXXDEPMODE=''
-CXXFLAGS=''
+CXX='g++'
+CXXCPP='g++ -E'
+CXXDEPMODE='depmode=gcc3'
+CXXFLAGS='-g -O2  -I/usr/include -D_GIT_VERSION="\"UNKNOWN\"" -D_MACHTYPE="\"x86_64\"" -std=gnu++11'
 CYGPATH_W='echo'
-DEFS=''
+DEFS='-DHAVE_CONFIG_H'
 DEPDIR='.deps'
-DLLTOOL=''
+DLLTOOL='false'
 DSYMUTIL=''
 DUMPBIN=''
 ECHO_C=''
 ECHO_N='-n'
 ECHO_T=''
-EGREP=''
+EGREP='/usr/bin/grep -E'
 EXEEXT=''
-FGREP=''
-GIT_VERSION=''
-GREP=''
-HTSLIB_CFLAGS=''
-HTSLIB_LIBS=''
+FGREP='/usr/bin/grep -F'
+GIT_VERSION='UNKNOWN'
+GREP='/usr/bin/grep'
+HTSLIB_CFLAGS='-I/home/mlamkin/include  '
+HTSLIB_LIBS='-L/home/mlamkin/lib -lhts  '
 INSTALL_DATA='${INSTALL} -m 644'
 INSTALL_PROGRAM='${INSTALL}'
 INSTALL_SCRIPT='${INSTALL}'
 INSTALL_STRIP_PROGRAM='$(install_sh) -c -s'
-LD=''
+LD='/usr/bin/ld -m elf_x86_64'
 LDFLAGS=''
 LIBOBJS=''
 LIBS=''
-LIBTOOL=''
+LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 LIPO=''
-LN_S=''
+LN_S='ln -s'
 LTLIBOBJS=''
 LT_LDFLAGS=''
-MACHTYPE='x86_64-redhat-linux-gnu'
-MAKEINFO='${SHELL} /home/pandaman/projects/asimon/asimon-chip-sim/config/missing makeinfo'
-MANIFEST_TOOL=''
+MACHTYPE='x86_64'
+MAKEINFO='${SHELL} /storage/mlamkin/projects/asimon-chip-sim/config/missing makeinfo'
+MANIFEST_TOOL=':'
 MKDIR_P='/usr/bin/mkdir -p'
-NM=''
+NM='/usr/bin/nm -B'
 NMEDIT=''
-OBJDUMP=''
+OBJDUMP='objdump'
 OBJEXT='o'
 OTOOL64=''
 OTOOL=''
@@ -270,24 +781,24 @@ PACKAGE_TARNAME='asimon'
 PACKAGE_URL=''
 PACKAGE_VERSION='UNKNOWN'
 PATH_SEPARATOR=':'
-PKG_CONFIG=''
+PKG_CONFIG='/usr/bin/pkg-config'
 PKG_CONFIG_LIBDIR=''
-PKG_CONFIG_PATH=''
-RANLIB=''
-SED=''
+PKG_CONFIG_PATH='/home/mlamkin/lib/pkgconfig'
+RANLIB='ranlib'
+SED='/usr/bin/sed'
 SET_MAKE=''
 SHELL='/bin/sh'
-STRIP=''
+STRIP='strip'
 VERSION='UNKNOWN'
 ac_ct_AR='ar'
 ac_ct_CC='gcc'
-ac_ct_CXX=''
+ac_ct_CXX='g++'
 ac_ct_DUMPBIN=''
 am__EXEEXT_FALSE=''
-am__EXEEXT_TRUE=''
+am__EXEEXT_TRUE='#'
 am__fastdepCC_FALSE='#'
 am__fastdepCC_TRUE=''
-am__fastdepCXX_FALSE=''
+am__fastdepCXX_FALSE='#'
 am__fastdepCXX_TRUE=''
 am__include='include'
 am__isrc=''
@@ -297,25 +808,25 @@ am__quote=''
 am__tar='$${TAR-tar} chof - "$$tardir"'
 am__untar='$${TAR-tar} xf -'
 bindir='${exec_prefix}/bin'
-build=''
+build='x86_64-unknown-linux-gnu'
 build_alias=''
-build_cpu=''
-build_os=''
-build_vendor=''
+build_cpu='x86_64'
+build_os='linux-gnu'
+build_vendor='unknown'
 datadir='${datarootdir}'
 datarootdir='${prefix}/share'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
 dvidir='${docdir}'
-exec_prefix='NONE'
-host=''
+exec_prefix='${prefix}'
+host='x86_64-unknown-linux-gnu'
 host_alias=''
-host_cpu=''
-host_os=''
-host_vendor=''
+host_cpu='x86_64'
+host_os='linux-gnu'
+host_vendor='unknown'
 htmldir='${docdir}'
 includedir='${prefix}/include'
 infodir='${datarootdir}/info'
-install_sh='${SHELL} /home/pandaman/projects/asimon/asimon-chip-sim/config/install-sh'
+install_sh='${SHELL} /storage/mlamkin/projects/asimon-chip-sim/config/install-sh'
 libdir='${exec_prefix}/lib'
 libexecdir='${exec_prefix}/libexec'
 localedir='${datarootdir}/locale'
@@ -324,7 +835,7 @@ mandir='${datarootdir}/man'
 mkdir_p='$(MKDIR_P)'
 oldincludedir='/usr/include'
 pdfdir='${docdir}'
-prefix='NONE'
+prefix='/usr/local'
 program_transform_name='s,x,x,'
 psdir='${docdir}'
 sbindir='${exec_prefix}/sbin'
@@ -345,59 +856,18 @@ target_alias=''
 #define PACKAGE_URL ""
 #define PACKAGE "asimon"
 #define VERSION "UNKNOWN"
+#define STDC_HEADERS 1
+#define HAVE_SYS_TYPES_H 1
+#define HAVE_SYS_STAT_H 1
+#define HAVE_STDLIB_H 1
+#define HAVE_STRING_H 1
+#define HAVE_MEMORY_H 1
+#define HAVE_STRINGS_H 1
+#define HAVE_INTTYPES_H 1
+#define HAVE_STDINT_H 1
+#define HAVE_UNISTD_H 1
+#define HAVE_DLFCN_H 1
+#define LT_OBJDIR ".libs/"
+#define HAVE_BOOST /**/
 
-configure: exit 1
-
-## ---------------------- ##
-## Running config.status. ##
-## ---------------------- ##
-
-This file was extended by asimon config.status UNKNOWN, which was
-generated by GNU Autoconf 2.69.  Invocation command line was
-
-  CONFIG_FILES    = 
-  CONFIG_HEADERS  = 
-  CONFIG_LINKS    = 
-  CONFIG_COMMANDS = 
-  $ ./config.status src/Makefile depfiles
-
-on snorlax
-
-config.status:1156: creating src/Makefile
-config.status:1385: executing depfiles commands
-
-## ---------------------- ##
-## Running config.status. ##
-## ---------------------- ##
-
-This file was extended by asimon config.status UNKNOWN, which was
-generated by GNU Autoconf 2.69.  Invocation command line was
-
-  CONFIG_FILES    = 
-  CONFIG_HEADERS  = 
-  CONFIG_LINKS    = 
-  CONFIG_COMMANDS = 
-  $ ./config.status src/Makefile depfiles
-
-on snorlax
-
-config.status:1156: creating src/Makefile
-config.status:1385: executing depfiles commands
-
-## ---------------------- ##
-## Running config.status. ##
-## ---------------------- ##
-
-This file was extended by asimon config.status UNKNOWN, which was
-generated by GNU Autoconf 2.69.  Invocation command line was
-
-  CONFIG_FILES    = 
-  CONFIG_HEADERS  = 
-  CONFIG_LINKS    = 
-  CONFIG_COMMANDS = 
-  $ ./config.status src/Makefile depfiles
-
-on snorlax
-
-config.status:1156: creating src/Makefile
-config.status:1385: executing depfiles commands
+configure: exit 0

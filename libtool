@@ -272,7 +272,7 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2 /usr/local/lib64 /lib64 /usr/lib64 /usr/local/cuda-9.0/lib64 "
+sys_lib_search_path_spec="/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2 /usr/local/lib64 /lib64 /usr/lib64 "
 
 # Run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/lib64 /usr/lib64 /lib /usr/lib /usr/lib64/R/lib /usr/lib64/atlas /opt/illumina/bsfs /usr/local/cuda-8.0/targets/x86_64-linux/lib /usr/local/cuda-9.0/targets/x86_64-linux/lib /usr/local/cuda-9.1/targets/x86_64-linux/lib /usr/lib64/dyninst /usr/lib64/llvm /usr/lib64/mysql /usr/lib64/nvidia /usr/lib64/tcl8.5 "
@@ -10224,7 +10224,7 @@ file_list_spec=""
 hardcode_action=immediate
 
 # The directories searched by this compiler when creating a shared library.
-compiler_lib_search_dirs="/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2 /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/../../../../lib64 /lib/../lib64 /usr/lib/../lib64 /usr/local/cuda-9.0/lib64 . /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/../../.."
+compiler_lib_search_dirs="/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2 /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/../../../../lib64 /lib/../lib64 /usr/lib/../lib64 /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/../../.."
 
 # Dependencies to place before and after the objects being linked to
 # create a shared library.
@@ -10235,6 +10235,6 @@ postdeps="-lstdc++ -lm -lgcc_s -lc -lgcc_s"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2 -L/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/local/cuda-9.0/lib64 -L. -L/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/../../.."
+compiler_lib_search_path="-L/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2 -L/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/../../.."
 
 # ### END LIBTOOL TAG CONFIG: CXX
