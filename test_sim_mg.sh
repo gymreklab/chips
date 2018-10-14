@@ -2,7 +2,7 @@
 
 BAM=/storage/mlamkin/projects/encode_data/GM12878/ENCSR014YCR/released/hg19/alignments/bam/rep2/F1796-ENCFF037RQQ.sorted.flagged.bam
 REFFA=/storage/resources/dbase/human/hg19/hg19.fa
-OUTPREFIX=/storage/mgymrek/asimon-test
+OUTPREFIX=/storage/mlamkin/projects/asimon-evaluation/test-data/chr19-region
 PEAKS=/storage/mlamkin/projects/encode_data/GM12878/ENCSR014YCR/released/hg19/alignments/bam/rep2/tags/peaks_lessthan404.txt
 TYPE=homer
 COLUMN=5
