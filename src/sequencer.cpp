@@ -57,11 +57,11 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments, int& fast
   // save into file
   if (paired){
     int temp = fastq_index;
-    save_into_fastq(reads_1, ids, outprefix + "/reads_"+std::to_string(thread_index)+"_1.fastq", temp, copy_index);
-    save_into_fastq(reads_2, ids, outprefix + "/reads_"+std::to_string(thread_index)+"_2.fastq", fastq_index, copy_index);
+    save_into_fastq(reads_1, ids, outprefix + "_"+std::to_string(thread_index)+"_1.fastq", temp, copy_index);
+    save_into_fastq(reads_2, ids, outprefix + "_"+std::to_string(thread_index)+"_2.fastq", fastq_index, copy_index);
     //    save_into_sam(reads_1, reads_2, chroms, starts_1, starts_2, outprefix + "/reads_"+std::to_string(thread_index)+".sam");
   }else{
-    save_into_fastq(reads_1, ids, outprefix + "/reads_"+std::to_string(thread_index)+".fastq", fastq_index, copy_index);
+    save_into_fastq(reads_1, ids, outprefix + "_"+std::to_string(thread_index)+".fastq", fastq_index, copy_index);
   }
 }
 
