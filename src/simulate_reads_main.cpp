@@ -3,6 +3,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <vector>
+#include <stdio.h>
 
 #include "src/bingenerator.h"
 #include "src/common.h"
@@ -154,6 +155,18 @@ int simulate_reads_main(int argc, char* argv[]) {
     TaskQueue<int> task_queue;
     fill_queue(options.numcopies, task_queue);
 
+    // Remove previous existing fastqs
+    if (options.paired){
+      std::string reads1 = options.outprefix+"_1.fastq";
+      std::string reads2 = options.outprefix+"_2.fastq";
+      std::remove(reads1.c_str());
+      std::remove(reads2.c_str());
+    }
+    else{
+      std::string reads = options.outprefix+".fastq";
+      std::remove(reads.c_str());
+    }
+
     /***************** Main implementation ***************/
     // Perform in bins so we don't keep everything in memory at once
     PeakIntervals* pintervals = \
@@ -176,17 +189,20 @@ int simulate_reads_main(int argc, char* argv[]) {
     
     for (int thread_index=0; thread_index<options.n_threads; thread_index++){
       if (options.paired){
-        std::string ifilename_1 = options.outprefix+"/reads_"+std::to_string(thread_index)+"_1.fastq";
-        std::string ofilename_1 = options.outprefix+"/reads_1.fastq";
+        std::string ifilename_1 = options.outprefix+"_"+std::to_string(thread_index)+"_1.fastq";
+        std::string ofilename_1 = options.outprefix+"_1.fastq";
         merge_files(ifilename_1, ofilename_1);
+        std::remove(ifilename_1.c_str());
 
-        std::string ifilename_2 = options.outprefix+"/reads_"+std::to_string(thread_index)+"_2.fastq";
-        std::string ofilename_2 = options.outprefix+"/reads_2.fastq";
+        std::string ifilename_2 = options.outprefix+"_"+std::to_string(thread_index)+"_2.fastq";
+        std::string ofilename_2 = options.outprefix+"_2.fastq";
         merge_files(ifilename_2, ofilename_2);
+        std::remove(ifilename_2.c_str());
       }else{
-        std::string ifilename = options.outprefix+"/reads_"+std::to_string(thread_index)+".fastq";
-        std::string ofilename = options.outprefix+"/reads.fastq";
+        std::string ifilename = options.outprefix+"_"+std::to_string(thread_index)+".fastq";
+        std::string ofilename = options.outprefix+".fastq";
         merge_files(ifilename, ofilename);
+        std::remove(ifilename.c_str());
       }
     }
 

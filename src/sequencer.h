@@ -25,8 +25,18 @@ class Sequencer {
 
   bool Fragment2Read(const std::string frag, std::string& read);
   std::string ReverseComplement(const std::string seq);
-  bool save_into_fastq(const std::vector<std::string> reads, const std::string ofilename,
+  bool save_into_fastq(const std::vector<std::string> reads,
+		       const std::vector<std::string> ids,
+		       const std::string ofilename,
                         int& fastq_index, int copy_index);
+  /*
+  bool save_into_sam(const std::vector<std::string> reads1,
+		     const std::vector<std::string> reads2,
+		     const std::vector<std::string> chroms,
+		     const std::vector<int> starts1,
+		     const std::vector<int> starts2,
+		     const std::string ofilename);
+  */
 };
 
 #endif  // SRC_SEQUENCER_H__

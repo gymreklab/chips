@@ -176,7 +176,9 @@ libasimon_a-sequencer.o: sequencer.cpp /usr/include/stdc-predef.h \
  /usr/local/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/include/adxintrin.h \
  /usr/local/include/c++/4.9.2/bits/random.tcc \
  /usr/local/include/c++/4.9.2/numeric \
- /usr/local/include/c++/4.9.2/bits/stl_numeric.h
+ /usr/local/include/c++/4.9.2/bits/stl_numeric.h \
+ /usr/local/include/c++/4.9.2/sstream \
+ /usr/local/include/c++/4.9.2/bits/sstream.tcc
 
 /usr/include/stdc-predef.h:
 
@@ -625,3 +627,7 @@ libasimon_a-sequencer.o: sequencer.cpp /usr/include/stdc-predef.h \
 /usr/local/include/c++/4.9.2/numeric:
 
 /usr/local/include/c++/4.9.2/bits/stl_numeric.h:
+
+/usr/local/include/c++/4.9.2/sstream:
+
+/usr/local/include/c++/4.9.2/bits/sstream.tcc:
