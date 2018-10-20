@@ -19,6 +19,7 @@ class Options {
 
   // Required learn inputs
   std::string chipbam;
+  float remove_pct;
 
   // Simulation experiment parameters
   int numcopies;

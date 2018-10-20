@@ -15,7 +15,7 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
 
   prev_chrom = _prev_chrom;
   peakIndexStart = _peakIndexStart;
-  start_offset = _start_offset;
+  start_offset_ptr = & _start_offset;
 
   debug_pulldown = true; // TODO remove
   if (debug_pulldown) {
@@ -42,14 +42,14 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   // Perform separate shearing for each copy of the genome
   //for (int i = 0; i < numcopies; i++) {
   pintervals->resetSearchScope(peakIndexStart); 
-  current_pos = start + start_offset;
+  current_pos = start + *start_offset_ptr;
   // Break up into fragment lengths drawn from gamma distribution
   while (current_pos < end) {
     fsize = fragdist(generator);
     fstart = current_pos; fend = current_pos+fsize;
     if (fend > end) {
       if (fstart < end){
-        start_offset = fend-end;
+        *start_offset_ptr = fend-end;
       }else{
         break;
       }

@@ -21,7 +21,8 @@ const bool DEBUG = true;
 void learn_help(void);
 bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
                     const std::string& peakfileType, const std::int32_t count_colidx,
-                    float* ab_ratio_ptr, float *s_ptr, float* f_ptr);
+                    const float remove_pct, float* ab_ratio_ptr, 
+                    float *s_ptr, float* f_ptr);
 bool compare_location(Fragment a, Fragment b);
 bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
 
@@ -113,8 +114,8 @@ bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
 
 
 bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
-        const std::string& peakfileType, const std::int32_t count_colidx,
-        float* ab_ratio_ptr, float *s_ptr, float* f_ptr){
+        const std::string& peakfileType, const std::int32_t count_colidx, 
+        const float remove_pct, float* ab_ratio_ptr, float *s_ptr, float* f_ptr){
   /*
     Learn the ratio of alpha to beta from an input BAM file,
     and its correspounding peak file.
@@ -140,6 +141,15 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
   std::vector<Fragment> peaks;
   PeakLoader peakloader(peakfile, peakfileType, bamfile, count_colidx);
   peakloader.Load(peaks);
+
+  // Remove top remove_pct% of peaks default is do not remove
+  if (remove_pct > 0)
+  {
+    int keep_peaks = floor(peaks.size()*(1 - remove_pct));
+    auto score_min = [](Fragment a, Fragment b) {return a.score < b.score;};
+    std::sort(peaks.begin(), peaks.end(), score_min);
+    peaks.resize(keep_peaks, Fragment("", 0, 0));
+  }
 
   int plen = 0;
   cout<<peaks.size()<<endl;
@@ -217,6 +227,11 @@ int learn_main(int argc, char* argv[]) {
     options.countindex = std::atoi(argv[i+1]);
 	i++;
       }
+    } else if (PARAMETER_CHECK("-r", 2, parameterLength)){
+      if ((i+1) < argc) {
+    options.remove_pct = (float) (std::atof(argv[i+1])/100);
+    i++;
+      }
     } else {
       cerr << endl << "******ERROR: Unrecognized parameter: " << argv[i] << " ******" << endl << endl;
       showHelp = true;
@@ -252,7 +267,7 @@ int learn_main(int argc, char* argv[]) {
     float ab_ratio;
     float s;
     float f;
-    if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex,
+    if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
         &ab_ratio, &s, &f)){
       PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
     }
@@ -270,6 +285,7 @@ int learn_main(int argc, char* argv[]) {
   }
 }
 
+//TODO add in -r argument not required
 void learn_help(void) {
   cerr << "\nTool:    asimon learn" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
