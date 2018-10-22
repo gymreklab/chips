@@ -135,7 +135,6 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
     - ab_ratio (float): the ratio of alpha to beta
    */
 
-
   // Read peak locations from the ChIP-seq file,
   // and calculate the total length of peaks across the genomes
   std::vector<Fragment> peaks;

@@ -23,3 +23,4 @@ libtool
 config/compile
 config/config.*
 m4/*.m4
+igv.log
