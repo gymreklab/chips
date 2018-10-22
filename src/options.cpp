@@ -15,6 +15,7 @@ Options::Options() {
 
   // Required learn inputs
   chipbam = "";
+  remove_pct = 0;
 
   // Simulation experiment parameters
   numcopies = 100;

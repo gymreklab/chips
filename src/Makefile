@@ -216,7 +216,7 @@ AUTOHEADER = ${SHELL} /storage/mlamkin/projects/asimon-chip-sim/config/missing a
 AUTOMAKE = ${SHELL} /storage/mlamkin/projects/asimon-chip-sim/config/missing automake-1.13
 AWK = gawk
 BOOST_CPPFLAGS = -I/usr/include
-BOOST_LDFLAGS = -L/usr/lib
+BOOST_LDFLAGS = -L/usr/lib64
 CC = gcc
 CCDEPMODE = depmode=gcc3
 CFLAGS = -g -O2  -D_GIT_VERSION="\"UNKNOWN\"" -D_MACHTYPE="\"x86_64\"" -std=gnu++11
