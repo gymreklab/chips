@@ -1,4 +1,5 @@
 #include "src/pulldown.h"
+#include <chrono>
 
 #include <iostream>
 #include <random>
@@ -24,8 +25,9 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
 }
 
 void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals) {
-  // Set up 
-  std::default_random_engine generator;
+  // Set up
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::default_random_engine generator(seed);
   std::gamma_distribution<float> fragdist(gamma_alpha, gamma_beta);
   int32_t current_pos;
   int32_t fstart, fend;

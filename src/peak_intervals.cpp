@@ -108,6 +108,7 @@ float PeakIntervals::SearchList(const Fragment& frag){
               probBoundList.push_back(peaks[peakIndex].score/max_coverage);
             }else{
               overlap = (float)(peak_end-frag_start) / (float)(frag_end-frag_start);
+              //overlap = 1;
               probBoundList.push_back(overlap*peaks[peakIndex].score/max_coverage);
             }
         }else{
@@ -116,6 +117,7 @@ float PeakIntervals::SearchList(const Fragment& frag){
         }
       }else if (peak_start < frag_end){
         overlap = (float)( std::min(peak_end,frag_end) - peak_start)/(float)(frag_end-frag_start);
+        //overlap = 1;
         probBoundList.push_back(overlap*peaks[peakIndex].score/max_coverage);
       }else{
         overlap = 0;

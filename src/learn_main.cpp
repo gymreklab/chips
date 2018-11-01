@@ -228,7 +228,7 @@ int learn_main(int argc, char* argv[]) {
       }
     } else if (PARAMETER_CHECK("-r", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.remove_pct = (float) (std::atof(argv[i+1])/100);
+    options.remove_pct = std::atof(argv[i+1]);
     i++;
       }
     } else {
