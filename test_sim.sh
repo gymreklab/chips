@@ -16,7 +16,7 @@ COLUMN=3
     -c ${COLUMN}\
     -o ${OUTPREFIX} \
     --numcopies 10000 \
-    --numreads 1000 \
+    --numreads 100000 \
     --readlen 50 \
     --gamma-frag 200,0.5 \
     --spot 0.0035 --frac 0.00017 \

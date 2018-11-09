@@ -18,7 +18,7 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
   peakIndexStart = _peakIndexStart;
   start_offset_ptr = & _start_offset;
 
-  debug_pulldown = true; // TODO remove
+  debug_pulldown = false; // TODO remove
   if (debug_pulldown) {
     PrintMessageDieOnError("Loading peaks", M_DEBUG);
   }
@@ -59,22 +59,27 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
     Fragment frag(chrom, current_pos, fsize);
     peak_score = pintervals->GetOverlap(frag);
 
-    //if (peak_score > 0){bound = true;}else{bound = false;}
-    bound = (rand()/double(RAND_MAX) < peak_score);
+    if (peak_score > 0){
+      //if (peak_score > 0){bound = true;}else{bound = false;}
+      bound = (rand()/double(RAND_MAX) < peak_score*(pintervals->prob_frag_kept));
 
-    // TODO debug below
-    if (peak_score > 0 && debug_pulldown) {
-    cerr << chrom << " " << fstart << " " << fend << " " << " " << peak_score << " " << bound << " " << ratio_beta << endl;
-    }
+      // TODO debug below
+      if (peak_score > 0 && debug_pulldown) {
+        //cerr << pintervals->prob_frag_kept << endl;
+        cerr << chrom << " " << fstart << " " << fend << " " << " " << peak_score << " " << bound << " " << ratio_beta << endl;
+      }
 
-    if (bound) {
-      output_fragments->push_back(frag); // alpha=1
-    }else {
-      if (rand()/double(RAND_MAX) < (ratio_beta * (pintervals->prob_pd_given_b) )) {
+      if (bound) {
+        output_fragments->push_back(frag); // alpha=1
+      }
+
+    }else{
+      if (rand()/double(RAND_MAX) < (ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )) {
         output_fragments->push_back(frag);
       }
     }
-      current_pos += fsize;
+    
+    current_pos += fsize;
   }
   //}
   peakIndexStart = pintervals->peakIndexStart;

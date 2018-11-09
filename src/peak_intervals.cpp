@@ -1,9 +1,10 @@
 #include "src/common.h"
 #include "src/peak_intervals.h"
+#include "src/ref_genome.h"
 
-PeakIntervals::PeakIntervals(const std::string peakfile, const std::string peakfileType,
+PeakIntervals::PeakIntervals(const Options& options, const std::string peakfile, const std::string peakfileType,
         const std::string bamfile, const std::int32_t count_colidx) {
-  if (!LoadPeaks(peakfile, peakfileType, bamfile, count_colidx)) {
+  if (!LoadPeaks(options, peakfile, peakfileType, bamfile, count_colidx)) {
     PrintMessageDieOnError("Error loading peaks from " + peakfile, M_ERROR);
   }
 }
@@ -19,7 +20,8 @@ PeakIntervals::~PeakIntervals() {}
 
   This function puts the peaks into a searachable data structure
  */
-bool PeakIntervals::LoadPeaks(const std::string peakfile, const std::string peakfileType,
+bool PeakIntervals::LoadPeaks(const Options& options,
+        const std::string peakfile, const std::string peakfileType,
         const std::string bamfile, const std::int32_t count_colidx) {
   PeakLoader peakloader(peakfile, peakfileType, bamfile, count_colidx);
 
@@ -48,10 +50,80 @@ bool PeakIntervals::LoadPeaks(const std::string peakfile, const std::string peak
     for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
       peak_map[peaks[peakIndex].chrom].push_back(peaks[peakIndex]);
     }
-  } 
+  }
+
+  EstNumFrags(options, peaks);
   return dataLoaded;
 }
 
+void PeakIntervals::EstNumFrags(const Options& options, std::vector<Fragment> peaks){
+    int total_length = 0;
+    int length_b = 0;
+    double numfrags_b = 0;
+    double numfrags_ub = 0;
+    double ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
+    double prob_pd_given_ub = ratio_beta * prob_pd_given_b;
+    double frag_length = options.gamma_alpha * options.gamma_beta;
+    if(options.region.empty()){
+      // estimate number of reads per run
+      // bound regions
+      for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
+        length_b += peaks[peakIndex].length;
+        numfrags_b += ((double) peaks[peakIndex].length / frag_length) * (peaks[peakIndex].score/max_coverage);
+      }
+
+      // unbound regions
+      std::map<std::string, int> chromLengths;
+      RefGenome ref (options.reffa);
+      if (!ref.GetLengths(&chromLengths))
+        PrintMessageDieOnError("Could not gather chromosome lengths from "
+                                + options.reffa, M_ERROR);
+      for (auto _chrom : chromLengths){total_length += _chrom.second;}
+      numfrags_ub = prob_pd_given_ub * (double) (total_length - length_b) / frag_length;
+    }else{
+      // parse "chrID:start-end"
+      std::vector<std::string> parts;
+      std::stringstream ss(options.region);
+      std::string split;
+      while(std::getline(ss, split, ':')) parts.push_back(split);
+      if (parts.size() != 2) PrintMessageDieOnError("Improper region input format should be chrom:start-end", M_ERROR);
+      std::string region_chrom = parts[0];
+      std::string start_end = parts[1];
+
+      parts.clear();
+      ss.str(start_end);
+      ss.clear();
+
+      while(getline(ss, split, '-')) parts.push_back(split);
+      if (parts.size() != 2) PrintMessageDieOnError("Improper region input format should be chrom:start-end", M_ERROR);
+      int region_start = stoi(parts[0]);
+      int region_end = stoi(parts[1]);
+      total_length = region_end - region_start;
+
+      // estimate number of reads per run
+      // bound regions
+      int peak_start, peak_end;
+      for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
+        if (peaks[peakIndex].chrom == region_chrom){
+          peak_start = peaks[peakIndex].start;
+          peak_end = peaks[peakIndex].start + peaks[peakIndex].length;
+          int overlap = std::min(peak_end, region_end) - std::max(peak_start, region_start);
+          overlap = std::max(0, overlap);
+
+          if (overlap > 0){
+            length_b += overlap;
+            numfrags_b += ((double) overlap / frag_length) * (peaks[peakIndex].score/max_coverage);
+          }
+        }
+      }
+      // unbound regions
+      numfrags_ub = prob_pd_given_ub * (double) (total_length - length_b) / frag_length;
+    }
+
+    // put together
+    double numfrags_per_run = numfrags_ub + numfrags_b;
+    prob_frag_kept = (double) (options.numreads) / (double) (numfrags_per_run * options.numcopies);
+}
 
 void PeakIntervals::resetSearchScope(const int index){
   peakIndexStart = index;

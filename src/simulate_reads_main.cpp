@@ -170,7 +170,7 @@ int simulate_reads_main(int argc, char* argv[]) {
     /***************** Main implementation ***************/
     // Perform in bins so we don't keep everything in memory at once
     PeakIntervals* pintervals = \
-               new PeakIntervals(options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
+               new PeakIntervals(options, options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
 
     //BinQueue<GenomeBin> bq;
     //fill_queue(bingenerator, bq);
