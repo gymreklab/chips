@@ -59,9 +59,9 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
     Fragment frag(chrom, current_pos, fsize);
     peak_score = pintervals->GetOverlap(frag);
 
-    if (peak_score > 0){
-      //if (peak_score > 0){bound = true;}else{bound = false;}
-      bound = (rand()/double(RAND_MAX) < peak_score*(pintervals->prob_frag_kept));
+    if (peak_score > 0) {
+        bound = (rand()/double(RAND_MAX) < peak_score*(pintervals->prob_frag_kept));
+    }
 
     // debug
     if (peak_score > 0 && debug_pulldown) {

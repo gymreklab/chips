@@ -187,10 +187,10 @@ libasimon_a-simulate_reads_main.o: simulate_reads_main.cpp \
  /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
  /usr/include/bits/confname.h /usr/include/getopt.h \
  /usr/local/include/htslib/hts_defs.h /usr/local/include/htslib/sam.h \
- /usr/local/include/htslib/hts.h /usr/local/include/htslib/hts_log.h \
- ../src/sequencer.h ../src/ref_genome.h /usr/local/include/htslib/faidx.h \
- ../src/stringops.h ../src/multithread.h \
- /usr/local/include/c++/4.9.2/queue /usr/local/include/c++/4.9.2/deque \
+ /usr/local/include/htslib/hts.h ../src/sequencer.h ../src/ref_genome.h \
+ /usr/local/include/htslib/faidx.h ../src/stringops.h \
+ ../src/multithread.h /usr/local/include/c++/4.9.2/queue \
+ /usr/local/include/c++/4.9.2/deque \
  /usr/local/include/c++/4.9.2/bits/stl_deque.h \
  /usr/local/include/c++/4.9.2/bits/deque.tcc \
  /usr/local/include/c++/4.9.2/bits/stl_queue.h \
@@ -698,8 +698,6 @@ libasimon_a-simulate_reads_main.o: simulate_reads_main.cpp \
 /usr/local/include/htslib/sam.h:
 
 /usr/local/include/htslib/hts.h:
-
-/usr/local/include/htslib/hts_log.h:
 
 ../src/sequencer.h:
 
