@@ -184,9 +184,9 @@ libasimon_a-pulldown.o: pulldown.cpp /usr/include/stdc-predef.h \
  /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
  /usr/include/bits/confname.h /usr/include/getopt.h \
  /usr/local/include/htslib/hts_defs.h /usr/local/include/htslib/sam.h \
- /usr/local/include/htslib/hts.h /usr/local/include/htslib/hts_log.h \
- ../src/common.h /usr/local/include/c++/4.9.2/chrono \
- /usr/local/include/c++/4.9.2/ratio /usr/local/include/c++/4.9.2/ctime \
+ /usr/local/include/htslib/hts.h ../src/common.h \
+ /usr/local/include/c++/4.9.2/chrono /usr/local/include/c++/4.9.2/ratio \
+ /usr/local/include/c++/4.9.2/ctime \
  /usr/local/include/c++/4.9.2/bits/parse_numbers.h
 
 /usr/include/stdc-predef.h:
@@ -666,8 +666,6 @@ libasimon_a-pulldown.o: pulldown.cpp /usr/include/stdc-predef.h \
 /usr/local/include/htslib/sam.h:
 
 /usr/local/include/htslib/hts.h:
-
-/usr/local/include/htslib/hts_log.h:
 
 ../src/common.h:
 
