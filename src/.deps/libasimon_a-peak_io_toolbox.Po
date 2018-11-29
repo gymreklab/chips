@@ -185,8 +185,7 @@ libasimon_a-peak_io_toolbox.o: peak_io_toolbox.cpp \
  /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
  /usr/include/bits/confname.h /usr/include/getopt.h \
  /usr/local/include/htslib/hts_defs.h /usr/local/include/htslib/sam.h \
- /usr/local/include/htslib/hts.h /usr/local/include/htslib/hts_log.h \
- ../src/common.h
+ /usr/local/include/htslib/hts.h ../src/common.h
 
 /usr/include/stdc-predef.h:
 
@@ -655,7 +654,5 @@ libasimon_a-peak_io_toolbox.o: peak_io_toolbox.cpp \
 /usr/local/include/htslib/sam.h:
 
 /usr/local/include/htslib/hts.h:
-
-/usr/local/include/htslib/hts_log.h:
 
 ../src/common.h:

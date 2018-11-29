@@ -1,17 +1,46 @@
 #include "src/sequencer.h"
 #include <iostream>
 #include <sstream>
+#include <random>
+#include <algorithm>
+#include <iterator>
 
 const std::map<char, char> Sequencer::NucleotideMap = {
                     {'A', 'T'}, {'C', 'G'}, {'T', 'A'}, {'G', 'C'}, {'N', 'N'},
                     {'a', 't'}, {'c', 'g'}, {'t', 'a'}, {'g', 'c'}, {'n', 'n'}};
+
+const char Sequencer::NucleotideTypesUpper[] = {'A','T','C','G'};
+const char Sequencer::NucleotideTypesLower[] = {'a','t','c','g'};
+
+const std::map<char, std::vector<char> > Sequencer::SubMap{
+                    {'A', {'T','C','G'}},
+                    {'T', {'A','C','G'}},
+                    {'C', {'A','T','G'}},
+                    {'G', {'A','T','C'}},
+                    {'a', {'t','c','g'}},
+                    {'t', {'a','c','g'}},
+                    {'c', {'a','t','g'}},
+                    {'g', {'a','t','c'}}};
 
 Sequencer::Sequencer(const Options& options) {
   ref_genome = new RefGenome(options.reffa);
   paired = options.paired;
   outprefix = options.outprefix;
   readlen = options.readlen;
+
+  sequencer_type = options.sequencer_type;
+  if (sequencer_type == ""){
+    sub_rate = options.sub_rate;
+    del_rate = options.del_rate;
+    ins_rate = options.ins_rate;
+  }else if(sequencer_type == "HiSeq"){
+    //https://academic.oup.com/bib/article/17/1/154/1742474
+    sub_rate = 2.640*1e-3;
+    del_rate = 2.433*1e-4;
+    ins_rate = 1.833*1e-4;
+  }
 }
+
 
 void Sequencer::Sequence(const std::vector<Fragment>& input_fragments, int& fastq_index, int thread_index, int copy_index) {
   std::string frag_seq;
@@ -24,7 +53,6 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments, int& fast
   std::vector<std::string> ids;
   std::vector<int> starts_1;
   std::vector<int> starts_2;
-
   for (int frag_index=0; frag_index<input_fragments.size(); frag_index++){
     if(ref_genome->GetSequence(input_fragments[frag_index].chrom,
             input_fragments[frag_index].start,
@@ -67,9 +95,55 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments, int& fast
 
 bool Sequencer::Fragment2Read(const std::string frag, std::string& read){
   try{
-    read = frag.substr(0, readlen);
-    if (frag.length() < readlen){ return false;}
-    return true;
+    //read = frag.substr(0, readlen);
+    //if (frag.length() < readlen){ return false;}
+    read = "";
+    double dice;
+    int elem_index = 0;
+    while (read.size() < readlen){
+      dice = (rand()/double(RAND_MAX));
+      if (dice <= ins_rate){
+        // randomly insert a nucleotide
+        int ins_index = rand() % 4;
+        read += NucleotideTypesUpper[ins_index];
+      }else if (dice <= (ins_rate + del_rate)){
+        // skip this nucleotide
+        if (elem_index < frag.size()){
+          elem_index += 1;
+          continue;
+        }else{
+          break;
+        }
+      }else if (dice <= (ins_rate + del_rate + sub_rate)){
+        // substitude this nucleotide with another
+        if (elem_index < frag.size()){
+          char nuc_to_mut = frag[elem_index];
+          if ((nuc_to_mut == 'N') || (nuc_to_mut == 'n')){
+            read += frag[elem_index];
+          }else{
+            int sub_index = rand() % 3;
+            read += (SubMap.at(nuc_to_mut))[sub_index];
+          }
+          elem_index += 1;
+        }else{
+          break;
+        }
+      }else{
+        if (elem_index < frag.size()){
+          // correctly sequenced
+          read += frag[elem_index];
+          elem_index += 1;
+        }else{
+          break;
+        }
+      }
+    }
+
+    if (read.size() != readlen){
+      return false;
+    }else{
+      return true;
+    }
   } catch (const char* msg){
     std::cerr << msg << " in Sequencer::Fragment2Read!"<< std::endl;
     return false;

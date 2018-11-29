@@ -178,7 +178,9 @@ libasimon_a-sequencer.o: sequencer.cpp /usr/include/stdc-predef.h \
  /usr/local/include/c++/4.9.2/numeric \
  /usr/local/include/c++/4.9.2/bits/stl_numeric.h \
  /usr/local/include/c++/4.9.2/sstream \
- /usr/local/include/c++/4.9.2/bits/sstream.tcc
+ /usr/local/include/c++/4.9.2/bits/sstream.tcc \
+ /usr/local/include/c++/4.9.2/iterator \
+ /usr/local/include/c++/4.9.2/bits/stream_iterator.h
 
 /usr/include/stdc-predef.h:
 
@@ -631,3 +633,7 @@ libasimon_a-sequencer.o: sequencer.cpp /usr/include/stdc-predef.h \
 /usr/local/include/c++/4.9.2/sstream:
 
 /usr/local/include/c++/4.9.2/bits/sstream.tcc:
+
+/usr/local/include/c++/4.9.2/iterator:
+
+/usr/local/include/c++/4.9.2/bits/stream_iterator.h:

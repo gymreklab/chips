@@ -127,6 +127,26 @@ int simulate_reads_main(int argc, char* argv[]) {
     options.n_threads = std::atoi(argv[i+1]);
     i++;
       }
+    } else if (PARAMETER_CHECK("--sequencer", 11, parameterLength)){
+      if ((i+1) < argc){
+    options.sequencer_type = argv[i+1];
+    i++;
+      }
+    } else if (PARAMETER_CHECK("--sub", 5, parameterLength)){
+      if ((i+1) < argc){
+    options.sub_rate = std::atof(argv[i+1]);
+    i++;
+      }
+    } else if (PARAMETER_CHECK("--ins", 5, parameterLength)){
+      if ((i+1) < argc){
+    options.ins_rate = std::atof(argv[i+1]);
+    i++;
+      }
+    } else if (PARAMETER_CHECK("--del", 5, parameterLength)){
+      if ((i+1) < argc){
+    options.del_rate = std::atof(argv[i+1]);
+    i++;
+      }
     } else {
       cerr << endl << "*****ERROR: Unrecognized parameter: " << argv[i] << " *****" << endl << endl;
       showHelp = true;
@@ -266,6 +286,7 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, in
       /*** Step 4: Sequencing ***/
       Sequencer seq(options);
       seq.Sequence(lib_fragments, total_reads, thread_index, copy_index);
+      //std::cout << total_reads << "    " << thread_index << "    " << copy_index <<std::endl;
     }
   }
 }

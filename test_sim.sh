@@ -8,6 +8,7 @@ PEAKS=testpeaks.tab
 #TYPE=homer
 TYPE=test
 COLUMN=3
+SEQUENCER=HiSeq
 
 ./src/asimon simreads \
     -p ${PEAKS} \
@@ -22,4 +23,5 @@ COLUMN=3
     --spot 0.0035 --frac 0.00017 \
     --region chr20:45195673-45395941 \
     --binsize 200000\
+    --sequencer ${SEQUENCER}\
     --paired

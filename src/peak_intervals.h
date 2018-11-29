@@ -26,7 +26,7 @@ class PeakIntervals {
  private:
   // peakmap:  key: chromID,  data: fragments
   std::map<std::string, std::vector<Fragment> > peak_map;
-  std::uint32_t max_coverage;
+  float max_coverage;
   /* Load peaks from file */
   bool LoadPeaks(const Options& options, const std::string peakfile, const std::string peakfileType, const std::string bamfile, const std::int32_t count_colidx);
   float SearchList(const Fragment& frag);

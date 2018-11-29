@@ -21,7 +21,15 @@ class Sequencer {
   bool paired;
   std::string outprefix;
   int readlen;
+  std::string sequencer_type;
+  float sub_rate;
+  float del_rate;
+  float ins_rate;
+
   static const std::map<char, char> NucleotideMap;
+  static const char NucleotideTypesUpper[];
+  static const char NucleotideTypesLower[];
+  static const std::map<char, std::vector<char> > SubMap;
 
   bool Fragment2Read(const std::string frag, std::string& read);
   std::string ReverseComplement(const std::string seq);
