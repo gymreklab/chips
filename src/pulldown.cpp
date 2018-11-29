@@ -59,8 +59,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
     Fragment frag(chrom, current_pos, fsize);
     peak_score = pintervals->GetOverlap(frag);
 
-    //if (peak_score > 0){bound = true;}else{bound = false;}
-    bound = (rand()/double(RAND_MAX) < peak_score);
+    bound = (rand()/double(RAND_MAX) < peak_score*(pintervals->prob_frag_kept));
 
     // debug
     if (peak_score > 0 && debug_pulldown) {
@@ -68,13 +67,20 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
     }
 
     if (bound) {
-      output_fragments->push_back(frag); // alpha=1
-    }else {
-      if (rand()/double(RAND_MAX) < (ratio_beta * (pintervals->prob_pd_given_b) )) {
+        //std::cout<<  peak_score * (pintervals->prob_frag_kept)<<std::endl;
+        output_fragments->push_back(frag); // alpha=1
+    }else{
+      //std::cout<<(ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )<<std::endl;
+      //std::cout<<fsize<<std::endl;
+      //std::cout<<(ratio_beta) << " " << (pintervals->prob_pd_given_b) << " "<<pintervals->prob_frag_kept <<std::endl;
+      if (rand()/double(RAND_MAX) <
+              (ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )) {
+        //std::cout<<(ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )<<std::endl;
         output_fragments->push_back(frag);
       }
     }
-      current_pos += fsize;
+    
+    current_pos += fsize;
   }
   //}
   peakIndexStart = pintervals->peakIndexStart;

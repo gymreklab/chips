@@ -33,6 +33,12 @@ Options::Options() {
   // Additional simulation parameters
   region = "";
   binsize = 100000;
+
+  // sequencer
+  sequencer_type = "";
+  sub_rate = 0;
+  ins_rate = 0;
+  del_rate = 0;
 }
 
 Options::~Options() {}

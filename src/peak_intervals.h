@@ -5,6 +5,7 @@
 #include <vector>
 #include "src/fragment.h"
 #include "src/peak_loader.h"
+#include "src/options.h"
 
 class PeakIntervals {
   /*
@@ -12,7 +13,7 @@ class PeakIntervals {
     It is used to determine whether a fragment overlaps a peak and what the score is
    */
  public:
-  PeakIntervals(const std::string peakfile, const std::string peakfileType, const std::string bamfile, const std::int32_t count_colidx);
+  PeakIntervals(const Options& options, const std::string peakfile, const std::string peakfileType, const std::string bamfile, const std::int32_t count_colidx);
   virtual ~PeakIntervals();
 
   /* Get score of peak overlapping fragment */
@@ -20,14 +21,16 @@ class PeakIntervals {
   void resetSearchScope(const int index);
   int peakIndexStart;
   double prob_pd_given_b;
+  double prob_frag_kept;
 
  private:
   // peakmap:  key: chromID,  data: fragments
   std::map<std::string, std::vector<Fragment> > peak_map;
-  std::uint32_t max_coverage;
+  float max_coverage;
   /* Load peaks from file */
-  bool LoadPeaks(const std::string peakfile, const std::string peakfileType, const std::string bamfile, const std::int32_t count_colidx);
+  bool LoadPeaks(const Options& options, const std::string peakfile, const std::string peakfileType, const std::string bamfile, const std::int32_t count_colidx);
   float SearchList(const Fragment& frag);
+  void EstNumFrags(const Options& options, std::vector<Fragment> peaks);
 };
 
 #endif  // SRC_PEAKINTERVALS_H__
