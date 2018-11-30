@@ -146,7 +146,7 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
 
     for (int seq_index=0; seq_index<seq_names.size(); seq_index++){
       if (seq_names[seq_index] == region_chrom){
-        bamreader.SetRegion(seq_names[seq_index], region_start, (region_end-region_start));
+        bamreader.SetRegion(seq_names[seq_index], region_start, region_end);
         BamAlignment aln;
         while (bamreader.GetNextAlignment(aln)){
           Fragment read_location(seq_names[seq_index], aln.Position(), aln.Length(), 0);

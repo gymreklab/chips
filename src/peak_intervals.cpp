@@ -108,9 +108,10 @@ void PeakIntervals::EstNumFrags(const Options& options, std::vector<Fragment> pe
     //std::cout<<numfrags_per_run<<"****"<<prob_frag_kept<<std::endl;
 }
 
+/*
 void PeakIntervals::resetSearchScope(const int index){
   peakIndexStart = index;
-}
+}*/
 
 /*
  * Inputs:
@@ -120,7 +121,7 @@ void PeakIntervals::resetSearchScope(const int index){
  * Outputs:
  *   - float: probablity of the input fragment being bound
  * */
-float PeakIntervals::SearchList(const Fragment& frag){
+float PeakIntervals::SearchList(const Fragment& frag, int& peakIndexStart){
   std::vector<float> probBoundList;
   uint32_t frag_start, frag_end, peak_start, peak_end;
   float overlap;
@@ -209,8 +210,7 @@ float PeakIntervals::SearchList(const Fragment& frag){
   If the fragment doesn't overlap a peak, return 0
   If it overlaps one ore more peak, return the max score across all peaks
  */
-float PeakIntervals::GetOverlap(const Fragment& frag) {
-  float score = SearchList(frag);
+float PeakIntervals::GetOverlap(const Fragment& frag, int& peakIndexStart) {
+  float score = SearchList(frag, peakIndexStart);
   return score;
-  
 }

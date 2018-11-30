@@ -17,9 +17,9 @@ class PeakIntervals {
   virtual ~PeakIntervals();
 
   /* Get score of peak overlapping fragment */
-  float GetOverlap(const Fragment& frag);
+  float GetOverlap(const Fragment& frag, int& peakIndexStart);
   void resetSearchScope(const int index);
-  int peakIndexStart;
+  //int peakIndexStart;
   double prob_pd_given_b;
   double prob_frag_kept;
 
@@ -29,7 +29,7 @@ class PeakIntervals {
   float max_coverage;
   /* Load peaks from file */
   bool LoadPeaks(const Options& options, const std::string peakfile, const std::string peakfileType, const std::string bamfile, const std::int32_t count_colidx);
-  float SearchList(const Fragment& frag);
+  float SearchList(const Fragment& frag, int& peakIndexStart);
   void EstNumFrags(const Options& options, std::vector<Fragment> peaks);
 };
 
