@@ -238,13 +238,6 @@ int simulate_reads_main(int argc, char* argv[]) {
 /*
  * A thread that keep generate bins
  * */
-/*
-void fill_queue(BinGenerator bingenerator, BinQueue <GenomeBin> & q){
-  while(bingenerator.GotoNextBin()) {
-    q.push(bingenerator.GetCurrentBin());
-  }
-}
-*/
 void fill_queue(const int numcopies, TaskQueue<int> & q){
   for (int copy_index=0; copy_index<numcopies; copy_index++){
     q.push(copy_index);
@@ -288,12 +281,13 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, in
       seq.Sequence(lib_fragments, total_reads, thread_index, copy_index);
       //std::cout << total_reads << "    " << thread_index << "    " << copy_index <<std::endl;
     }
+    //std::cout << thread_index << "    " << copy_index <<std::endl;
   }
 }
 
 void merge_files(std::string ifilename, std::string ofilename){
   std::ifstream ifile(ifilename.c_str());
-  std::ofstream ofile(ofilename.c_str());
+  std::ofstream ofile(ofilename.c_str(), std::ofstream::app);
   std::string line;
   while (std::getline(ifile, line)){
     ofile<<line<<"\n";
@@ -308,16 +302,17 @@ void simulate_reads_help(void) {
   cerr << "Usage:   " << PROGRAM_NAME << " simreads -p peaks.bed -f ref.fa -o outprefix [OPTIONS] " << endl;
   cerr << "\n[Required arguments]: " << "\n";
   cerr << "     -p <peaks.bed>: BED file with peak regions" << "\n";
+  cerr << "     -t <str>: The file format of your input peak file" << "\n";
   cerr << "     -f <ref.fa>: FASTA file with reference genome" << "\n";
   cerr << "     -o <outprefix>: Prefix for output files" << "\n";
   cerr << "\n[Experiment parameters]: " << "\n";
-  cerr << "     --numcopies <int>: Number of copies of the genome to simulate.\n"
+  cerr << "     --numcopies <int>: Number of copies of the genome to simulate\n"
        << "                        Default: " << options.numcopies << "\n";
-  cerr << "     --numreads <int> : Number of reads (or read pairs) to simulate.\n"
+  cerr << "     --numreads <int> : Number of reads (or read pairs) to simulate\n"
        << "                        Default: " << options.numreads << "\n";
-  cerr << "     --readlen <int>  : Read length to generate.\n"
+  cerr << "     --readlen <int>  : Read length to generate\n"
        << "                        Default: " << options.readlen << "\n";
-  cerr << "     --paired         : Simulate paired-end reads.\n"
+  cerr << "     --paired         : Simulate paired-end reads\n"
        << "                        Default: false \n";
   cerr << "\n[Model parameters]: " << "\n";
   cerr << "     --gamma-frag <float>,<float>: Parameters for fragment length distribution (alpha, beta).\n"
@@ -327,11 +322,21 @@ void simulate_reads_help(void) {
        << "                                   Default: " << options.ratio_s << "\n";
   cerr << "     --frac <float>              : Fraction of the genome that is bound \n"
        << "                                   Default: " << options.ratio_f << "\n";
+  cerr << "\n[Peak scoring]: " << "\n";
+  cerr << "     -b <reads.bam>:             : Read BAM file used to score each peak\n"
+       << "                                 : Default: None (use the scores from the peak file)\n";
   cerr << "\n[Other options]: " << "\n";
   cerr << "     --region <str>              : Only simulate reads from this region chrom:start-end\n"
        << "                                   Default: genome-wide \n";
   cerr << "     --binsize <int>             : Consider bins of this size when simulating\n"
        << "                                 : Default: " << options.binsize << "\n";
+  cerr << "     --thread <int>              : Number of threads used for computing\n"
+       << "                                 : Default: " << options.n_threads << "\n";
+  cerr << "     --sequencer <std>           : Sequencing error values\n"
+       << "                                 : Default: None (no sequencing errors)\n";
+  cerr << "     --sub <float>               : Customized substitution value in sequecing\n";
+  cerr << "     --ins <float>               : Customized insertion value in sequecing\n";
+  cerr << "     --del <float>               : Customized deletion value in sequecing\n";
   cerr << "\n";
   exit(1);
 }

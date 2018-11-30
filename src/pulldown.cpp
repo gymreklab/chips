@@ -42,8 +42,8 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   }
 
   // Perform separate shearing for each copy of the genome
-  //for (int i = 0; i < numcopies; i++) {
-  pintervals->resetSearchScope(peakIndexStart); 
+  // pintervals->resetSearchScope(peakIndexStart); 
+  int peakIndex = peakIndexStart;
   current_pos = start + *start_offset_ptr;
   // Break up into fragment lengths drawn from gamma distribution
   while (current_pos < end) {
@@ -57,15 +57,9 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
       }
     }
     Fragment frag(chrom, current_pos, fsize);
-    peak_score = pintervals->GetOverlap(frag);
+    peak_score = pintervals->GetOverlap(frag, peakIndex);
 
     bound = (rand()/double(RAND_MAX) < peak_score*(pintervals->prob_frag_kept));
-
-    // debug
-    if (peak_score > 0 && debug_pulldown) {
-    cerr << chrom << " " << fstart << " " << fend << " " << " " << peak_score << " " << bound << " " << ratio_beta << endl;
-    }
-
     if (bound) {
         //std::cout<<  peak_score * (pintervals->prob_frag_kept)<<std::endl;
         output_fragments->push_back(frag); // alpha=1
@@ -82,7 +76,8 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
     
     current_pos += fsize;
   }
-  //}
-  peakIndexStart = pintervals->peakIndexStart;
+
+  //peakIndexStart = pintervals->peakIndexStart;
+  peakIndexStart = peakIndex;
 }
 
