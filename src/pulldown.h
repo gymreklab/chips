@@ -26,6 +26,6 @@ class Pulldown {
 
   int peakIndexStart;
   std::string prev_chrom;
-  int start_offset;
+  int* start_offset_ptr;
 };
 #endif  // SRC_PULLDOWN_H__

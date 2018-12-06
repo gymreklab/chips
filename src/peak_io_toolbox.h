@@ -22,13 +22,16 @@
 class PeakReader{
   public:
     PeakReader(const std::string& peakfile);
-    bool HomerPeakReader(std::vector<Fragment>& peaks, const std::int32_t count_colidx);
-    bool TestPeakReader(std::vector<Fragment>& peaks, const std::int32_t count_colidx);
+    bool HomerPeakReader(std::vector<Fragment>& peaks,
+            const std::int32_t count_colidx, const std::string region);
+    bool TestPeakReader(std::vector<Fragment>& peaks, const std::int32_t count_colidx, const std::string region);
     bool UpdateTagCount(std::vector<Fragment>& peaks, const std::string bamfile,
-            uint32_t* ptr_total_genome_length, uint32_t* ptr_total_tagcount, uint32_t* ptr_tagcount_in_peaks);
+            uint32_t* ptr_total_genome_length, uint32_t* ptr_total_tagcount,
+            uint32_t* ptr_tagcount_in_peaks,const std::string region);
   private:
     std::string peakfile;
     static bool compare_location(Fragment a, Fragment b);
+    static void RegionParser(const std::string region, std::string& chromID, std::int32_t& start, std::int32_t& end);
 };
 
 

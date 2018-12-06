@@ -24,7 +24,7 @@ class PeakLoader{
   public:
     PeakLoader(const std::string _peakfile, const std::string _peakfileType="",
                         const std::string _bamfile="", const std::int32_t _count_colidx=-1);
-    bool Load(std::vector<Fragment>& peaks);
+    bool Load(std::vector<Fragment>& peaks, const std::string region="");
     std::uint32_t total_genome_length;
     std::uint32_t total_tagcount;
     std::uint32_t tagcount_in_peaks;

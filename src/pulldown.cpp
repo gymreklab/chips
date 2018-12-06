@@ -1,4 +1,5 @@
 #include "src/pulldown.h"
+#include <chrono>
 
 #include <iostream>
 #include <random>
@@ -15,17 +16,18 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
 
   prev_chrom = _prev_chrom;
   peakIndexStart = _peakIndexStart;
-  start_offset = _start_offset;
+  start_offset_ptr = & _start_offset;
 
-  debug_pulldown = true; // TODO remove
+  debug_pulldown = false; // TODO remove
   if (debug_pulldown) {
     PrintMessageDieOnError("Loading peaks", M_DEBUG);
   }
 }
 
 void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals) {
-  // Set up 
-  std::default_random_engine generator;
+  // Set up
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::default_random_engine generator(seed);
   std::gamma_distribution<float> fragdist(gamma_alpha, gamma_beta);
   int32_t current_pos;
   int32_t fstart, fend;
@@ -40,41 +42,42 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   }
 
   // Perform separate shearing for each copy of the genome
-  //for (int i = 0; i < numcopies; i++) {
-  pintervals->resetSearchScope(peakIndexStart); 
-  current_pos = start + start_offset;
+  // pintervals->resetSearchScope(peakIndexStart); 
+  int peakIndex = peakIndexStart;
+  current_pos = start + *start_offset_ptr;
   // Break up into fragment lengths drawn from gamma distribution
   while (current_pos < end) {
     fsize = fragdist(generator);
     fstart = current_pos; fend = current_pos+fsize;
     if (fend > end) {
       if (fstart < end){
-        start_offset = fend-end;
+        *start_offset_ptr = fend-end;
       }else{
         break;
       }
     }
     Fragment frag(chrom, current_pos, fsize);
-    peak_score = pintervals->GetOverlap(frag);
+    peak_score = pintervals->GetOverlap(frag, peakIndex);
 
-    //if (peak_score > 0){bound = true;}else{bound = false;}
-    bound = (rand()/double(RAND_MAX) < peak_score);
-
-    // TODO debug below
-    if (peak_score > 0 && debug_pulldown) {
-    cerr << chrom << " " << fstart << " " << fend << " " << " " << peak_score << " " << bound << " " << ratio_beta << endl;
-    }
-
+    bound = (rand()/double(RAND_MAX) < peak_score*(pintervals->prob_frag_kept));
     if (bound) {
-      output_fragments->push_back(frag); // alpha=1
-    }else {
-      if (rand()/double(RAND_MAX) < (ratio_beta * (pintervals->prob_pd_given_b) )) {
+        //std::cout<<  peak_score * (pintervals->prob_frag_kept)<<std::endl;
+        output_fragments->push_back(frag); // alpha=1
+    }else{
+      //std::cout<<(ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )<<std::endl;
+      //std::cout<<fsize<<std::endl;
+      //std::cout<<(ratio_beta) << " " << (pintervals->prob_pd_given_b) << " "<<pintervals->prob_frag_kept <<std::endl;
+      if (rand()/double(RAND_MAX) <
+              (ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )) {
+        //std::cout<<(ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )<<std::endl;
         output_fragments->push_back(frag);
       }
     }
-      current_pos += fsize;
+    
+    current_pos += fsize;
   }
-  //}
-  peakIndexStart = pintervals->peakIndexStart;
+
+  //peakIndexStart = pintervals->peakIndexStart;
+  peakIndexStart = peakIndex;
 }
 

@@ -1,11 +1,12 @@
 #include <cstring>
 #include <iostream>
 #include <stdlib.h>
+#include <stdio.h>
 #include <vector>
 #include <sstream>
 #include <math.h>
-#include <boost/math/special_functions/digamma.hpp>
-#include <boost/math/special_functions/polygamma.hpp>
+#include <time.h>
+#include <algorithm>
 
 #include "src/bam_io.h"
 #include "src/common.h"
@@ -21,7 +22,8 @@ const bool DEBUG = true;
 void learn_help(void);
 bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
                     const std::string& peakfileType, const std::int32_t count_colidx,
-                    float* ab_ratio_ptr, float *s_ptr, float* f_ptr);
+                    const float remove_pct, float* ab_ratio_ptr, 
+                    float *s_ptr, float* f_ptr);
 bool compare_location(Fragment a, Fragment b);
 bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
 
@@ -44,65 +46,69 @@ bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
   // Get first chrom to look at fragment lengths
   std::vector<std::string> seq_names = bamheader->seq_names();
   std::vector<uint32_t> seq_lengths = bamheader->seq_lengths();
-  if (seq_names.size() > 0 && seq_lengths.size() > 0) {
-    bamreader.SetRegion(seq_names[0], 0, seq_lengths[0]);
-  } else {
-    return false;
-  }
   std::vector<int32_t> fraglengths;
   int32_t tlen;
   BamAlignment aln;
-  while(bamreader.GetNextAlignment(aln) && numreads<maxreads) {
-    tlen = aln.TemplateLength();
-    if (tlen > 0) {
-      fraglengths.push_back(abs(tlen));
-      numreads++;
+
+  // Randomly grab fragments
+  if (seq_names.size() > 0 && seq_lengths.size() > 0) {
+    srand(time(NULL));
+
+    while(numreads<maxreads) {
+      int chrom = rand() % seq_names.size();
+      int start = rand() % seq_lengths[chrom];
+      
+      if ((seq_names[chrom].find("_") != std::string::npos) || (seq_names[chrom] == "chrM")){continue;}
+      bamreader.SetRegion(seq_names[chrom], start, seq_lengths[chrom]);
+
+      if (!bamreader.GetNextAlignment(aln)) {continue;}
+      tlen = aln.TemplateLength();
+      if (tlen > 0) {
+        fraglengths.push_back(abs(tlen));
+        numreads++;
+      }
+      //    cerr << abs(tlen) << endl; // if you want to print out for debugging
     }
-    //    cerr << abs(tlen) << endl; // if you want to print out for debugging
+
+    // find median to use to filter
+    nth_element(fraglengths.begin(), fraglengths.begin() + fraglengths.size()/2, fraglengths.end());
+    int first = fraglengths[fraglengths.size()/2];
+    nth_element(fraglengths.begin(), fraglengths.begin() + fraglengths.size()/2 - 1, fraglengths.end());
+    int second = fraglengths[fraglengths.size()/2 - 1];
+    float median = (first + second)/2;
+
+    for (int fragment=0; fragment < fraglengths.size(); fragment++)
+    {
+      if (fraglengths[fragment] > (3*median))
+      {
+        fraglengths.erase(fraglengths.begin() + fragment);
+        fragment--;
+      }
+    }
+  } else {
+    return false;
   }
 
-  /* Now, fit fraglengths to a gamma distribution.
-     Use Maximum Likelihood Estimation to estimate the
-     Gamma Distribution parameters */
- 
-  const float EPSILON = 1e-4; // Value to check for convergence
-  
   float total_frag_len = 0;     // sum of all the frag lengths
-  float total_log = 0;          // sum of log of each frag length
 
   // get sum of all frag lengths and log sum of each frag length
   for (int frag = 0; frag < fraglengths.size(); frag++)
   {
     total_frag_len += fraglengths[frag];
-    total_log += log(fraglengths[frag]);
   }
 
   // mean of frag lengths and log mean of fraglengths
   float mean_frag_length = total_frag_len/fraglengths.size();
-  float total_log_mean = total_log/fraglengths.size();
-  
-  // Starting point for the value of a
-  float a = 0.5/(log(mean_frag_length) - total_log_mean);
-  float new_a = 0;
-  
-  // estimate the value for a using maximum likelihood estimate
-  while (true)
+
+  /* Using method of moments to estimate the shape and scale parameters */
+  float moment_sum = 0;
+  for (int n = 0; n < fraglengths.size(); n++)
   {
-    // evaluate updated a
-    float update = (1/a) + ((total_log_mean - log(mean_frag_length) + log(a)
-                 - boost::math::digamma(a))/(a - a*a*boost::math::polygamma(1, a)));
-    new_a = 1 / update;
-
-    // a converges
-    if (abs(new_a - a) < EPSILON)
-      break;
-
-    a = new_a;
+    moment_sum += (fraglengths[n] - mean_frag_length)*(fraglengths[n] - mean_frag_length);
   }
+  *beta = (moment_sum/(mean_frag_length*fraglengths.size()));
+  *alpha = mean_frag_length / *beta;
 
-  *beta = mean_frag_length/a;
-  *alpha = a;
-  
   if (DEBUG) {
     std::stringstream ss;
     ss << "Learned fragment length params alpha: " << *alpha << " and beta: " << *beta;
@@ -113,8 +119,8 @@ bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
 
 
 bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
-        const std::string& peakfileType, const std::int32_t count_colidx,
-        float* ab_ratio_ptr, float *s_ptr, float* f_ptr){
+        const std::string& peakfileType, const std::int32_t count_colidx, 
+        const float remove_pct, float* ab_ratio_ptr, float *s_ptr, float* f_ptr){
   /*
     Learn the ratio of alpha to beta from an input BAM file,
     and its correspounding peak file.
@@ -134,12 +140,20 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
     - ab_ratio (float): the ratio of alpha to beta
    */
 
-
   // Read peak locations from the ChIP-seq file,
   // and calculate the total length of peaks across the genomes
   std::vector<Fragment> peaks;
   PeakLoader peakloader(peakfile, peakfileType, bamfile, count_colidx);
   peakloader.Load(peaks);
+
+  // Remove top remove_pct% of peaks default is do not remove
+  if (remove_pct > 0)
+  {
+    int keep_peaks = floor(peaks.size()*(1 - remove_pct));
+    auto score_min = [](Fragment a, Fragment b) {return a.score < b.score;};
+    std::sort(peaks.begin(), peaks.end(), score_min);
+    peaks.resize(keep_peaks, Fragment("", 0, 0));
+  }
 
   int plen = 0;
   cout<<peaks.size()<<endl;
@@ -217,6 +231,11 @@ int learn_main(int argc, char* argv[]) {
     options.countindex = std::atoi(argv[i+1]);
 	i++;
       }
+    } else if (PARAMETER_CHECK("-r", 2, parameterLength)){
+      if ((i+1) < argc) {
+    options.remove_pct = std::atof(argv[i+1]);
+    i++;
+      }
     } else {
       cerr << endl << "******ERROR: Unrecognized parameter: " << argv[i] << " ******" << endl << endl;
       showHelp = true;
@@ -252,16 +271,22 @@ int learn_main(int argc, char* argv[]) {
     float ab_ratio;
     float s;
     float f;
-    if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex,
+    if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
         &ab_ratio, &s, &f)){
       PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
     }
-    cout << "ab_ratio: " << ab_ratio << endl;
-    cout << "f: " << f << endl;
-    cout << "s: " << s << endl;
+
+    // remove previous existing file
+    string params = options.outprefix + ".txt";
+    remove(params.c_str());
 
     /*** Write params to file ***/
-    // TODO
+    ofstream outfile;
+ 
+    outfile.open(params, ios_base::app);
+    outfile << "ab_ratio: " << ab_ratio << endl;
+    outfile << "f: " << f << endl;
+    outfile << "s: " << s << endl;
 
     return 0;
   } else {
@@ -270,6 +295,7 @@ int learn_main(int argc, char* argv[]) {
   }
 }
 
+//TODO add in -r argument not required
 void learn_help(void) {
   cerr << "\nTool:    asimon learn" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
