@@ -39,6 +39,9 @@ Options::Options() {
   sub_rate = 0;
   ins_rate = 0;
   del_rate = 0;
+
+  // pcr
+  pcr_rate = 1.0;
 }
 
 Options::~Options() {}

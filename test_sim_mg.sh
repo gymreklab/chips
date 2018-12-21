@@ -28,6 +28,7 @@ do
 	--binsize 200000 \
     --thread 10 \
     --sequencer ${SEQUENCER}\
+    --pcr_rate 0.8 \
 	--paired
     
     bowtie2 -x $(echo $REFFA | cut -d'.' -f 1) -1 ${OUTDIR}/reads_1.fastq -2 ${OUTDIR}/reads_2.fastq > ${OUTDIR}/reads.${nc}.sam

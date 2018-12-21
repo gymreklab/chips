@@ -104,7 +104,8 @@ void PeakIntervals::EstNumFrags(const Options& options, std::vector<Fragment> pe
     numfrags_ub = prob_pd_given_ub * (double) (total_length - length_b) / frag_length;
     // put together
     double numfrags_per_run = numfrags_ub + numfrags_b;
-    prob_frag_kept = (double) (options.numreads) / (double) (numfrags_per_run * options.numcopies);
+    prob_frag_kept = (double) (options.numreads * options.pcr_rate)
+                        / (double) (numfrags_per_run * options.numcopies);
     //std::cout<<numfrags_per_run<<"****"<<prob_frag_kept<<std::endl;
 }
 

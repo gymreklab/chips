@@ -181,8 +181,9 @@ libasimon_a-learn_main.o: learn_main.cpp /usr/include/stdc-predef.h \
  /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
  /usr/include/bits/confname.h /usr/include/getopt.h \
  /usr/local/include/htslib/hts_defs.h /usr/local/include/htslib/sam.h \
- /usr/local/include/htslib/hts.h ../src/common.h ../src/options.h \
- ../src/peak_loader.h /usr/local/include/c++/4.9.2/fstream \
+ /usr/local/include/htslib/hts.h /usr/local/include/htslib/hts_log.h \
+ ../src/common.h ../src/options.h ../src/peak_loader.h \
+ /usr/local/include/c++/4.9.2/fstream \
  /usr/local/include/c++/4.9.2/bits/codecvt.h \
  /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/basic_file.h \
  /usr/local/include/c++/4.9.2/x86_64-unknown-linux-gnu/bits/c++io.h \
@@ -646,6 +647,8 @@ libasimon_a-learn_main.o: learn_main.cpp /usr/include/stdc-predef.h \
 /usr/local/include/htslib/sam.h:
 
 /usr/local/include/htslib/hts.h:
+
+/usr/local/include/htslib/hts_log.h:
 
 ../src/common.h:
 

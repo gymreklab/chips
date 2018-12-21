@@ -15,6 +15,8 @@ class PCR:
         for exp_index in range(pcr_rounds):
             freq_dict = {}
             for n_samples in freq_dict_prev:
+                if n_samples > 128:
+                    continue
                 current_prob = freq_dict_prev[n_samples]
                 new_samples_freq_list = self._run_one_step(n_samples)
                 for (n_new_samples, new_prob) in new_samples_freq_list:
@@ -43,11 +45,12 @@ class PCR:
         return (fac(n) / (fac(r)*fac(n-r)))
 
 if __name__ == "__main__":
-    pcr = PCR(kept_rate = 0.5)
-    freq_dict = pcr.perform_pcr(pcr_rounds = 5)
+    pcr = PCR(kept_rate = 0.00935/150.0)
+    freq_dict = pcr.perform_pcr(pcr_rounds = 150)
     exp = 0
     for n_samples in freq_dict:
         prob = freq_dict[n_samples]
-        print ("%d\t%s" %(n_samples, prob))
+        if n_samples < 10:
+            print ("%d\t%s" %(n_samples, prob))
         exp += n_samples * prob
     print ("Expectation: %s" %(exp))

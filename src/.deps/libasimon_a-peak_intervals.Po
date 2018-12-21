@@ -183,8 +183,8 @@ libasimon_a-peak_intervals.o: peak_intervals.cpp \
  /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
  /usr/include/bits/confname.h /usr/include/getopt.h \
  /usr/local/include/htslib/hts_defs.h /usr/local/include/htslib/sam.h \
- /usr/local/include/htslib/hts.h ../src/options.h ../src/ref_genome.h \
- /usr/local/include/htslib/faidx.h
+ /usr/local/include/htslib/hts.h /usr/local/include/htslib/hts_log.h \
+ ../src/options.h ../src/ref_genome.h /usr/local/include/htslib/faidx.h
 
 /usr/include/stdc-predef.h:
 
@@ -659,6 +659,8 @@ libasimon_a-peak_intervals.o: peak_intervals.cpp \
 /usr/local/include/htslib/sam.h:
 
 /usr/local/include/htslib/hts.h:
+
+/usr/local/include/htslib/hts_log.h:
 
 ../src/options.h:
 
