@@ -147,6 +147,11 @@ int simulate_reads_main(int argc, char* argv[]) {
     options.del_rate = std::atof(argv[i+1]);
     i++;
       }
+    } else if (PARAMETER_CHECK("--pcr_rate", 10, parameterLength)){
+      if ((i+1) < argc){
+    options.pcr_rate = std::atof(argv[i+1]);
+    i++;
+      }
     } else {
       cerr << endl << "*****ERROR: Unrecognized parameter: " << argv[i] << " *****" << endl << endl;
       showHelp = true;
@@ -337,6 +342,8 @@ void simulate_reads_help(void) {
   cerr << "     --sub <float>               : Customized substitution value in sequecing\n";
   cerr << "     --ins <float>               : Customized insertion value in sequecing\n";
   cerr << "     --del <float>               : Customized deletion value in sequecing\n";
+  cerr << "     --pcr_rate <float>          : The rate of geometric distribution for PCR simulation\n"
+       << "                                   Default: " << options.pcr_rate << "\n";
   cerr << "\n";
   exit(1);
 }

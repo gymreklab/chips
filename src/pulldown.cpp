@@ -14,6 +14,8 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
   gamma_beta = options.gamma_beta;
   ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
 
+  pcr_rate = options.pcr_rate;
+
   prev_chrom = _prev_chrom;
   peakIndexStart = _peakIndexStart;
   start_offset_ptr = & _start_offset;
@@ -28,6 +30,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   // Set up
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   std::default_random_engine generator(seed);
+  srand(seed);
   std::gamma_distribution<float> fragdist(gamma_alpha, gamma_beta);
   int32_t current_pos;
   int32_t fstart, fend;
@@ -61,16 +64,20 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
 
     bound = (rand()/double(RAND_MAX) < peak_score*(pintervals->prob_frag_kept));
     if (bound) {
-        //std::cout<<  peak_score * (pintervals->prob_frag_kept)<<std::endl;
-        output_fragments->push_back(frag); // alpha=1
+        while (true){
+          output_fragments->push_back(frag);
+          if (rand()/double(RAND_MAX) < pcr_rate) break;
+        }
     }else{
       //std::cout<<(ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )<<std::endl;
       //std::cout<<fsize<<std::endl;
       //std::cout<<(ratio_beta) << " " << (pintervals->prob_pd_given_b) << " "<<pintervals->prob_frag_kept <<std::endl;
       if (rand()/double(RAND_MAX) <
               (ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )) {
-        //std::cout<<(ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )<<std::endl;
-        output_fragments->push_back(frag);
+        while (true){
+          output_fragments->push_back(frag);
+          if (rand()/double(RAND_MAX) < pcr_rate) break;
+        }
       }
     }
     

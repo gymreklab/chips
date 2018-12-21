@@ -23,6 +23,7 @@ class Pulldown {
   float gamma_alpha, gamma_beta;
   float ratio_beta;
   bool debug_pulldown;
+  float pcr_rate;
 
   int peakIndexStart;
   std::string prev_chrom;
