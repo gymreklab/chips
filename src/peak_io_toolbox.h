@@ -24,6 +24,7 @@ class PeakReader{
     PeakReader(const std::string& peakfile);
     bool HomerPeakReader(std::vector<Fragment>& peaks,
             const std::int32_t count_colidx, const std::string region);
+    bool BedPeakReader(std::vector<Fragment>& peaks, const std::int32_t count_colidx, const std::string region);
     bool TestPeakReader(std::vector<Fragment>& peaks, const std::int32_t count_colidx, const std::string region);
     bool UpdateTagCount(std::vector<Fragment>& peaks, const std::string bamfile,
             uint32_t* ptr_total_genome_length, uint32_t* ptr_total_tagcount,

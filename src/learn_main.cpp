@@ -7,11 +7,13 @@
 #include <math.h>
 #include <time.h>
 #include <algorithm>
+#include <chrono>
 
 #include "src/bam_io.h"
 #include "src/common.h"
 #include "src/options.h"
 #include "src/peak_loader.h"
+#include "src/fragment.h"
 using namespace std;
 
 // define our parameter checking macro
@@ -26,6 +28,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
                     float *s_ptr, float* f_ptr);
 bool compare_location(Fragment a, Fragment b);
 bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
+bool learn_pcr(const std::string& bamfile, float* geo_rate);
 
 bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
   /*
@@ -52,9 +55,11 @@ bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
 
   // Randomly grab fragments
   if (seq_names.size() > 0 && seq_lengths.size() > 0) {
-    srand(time(NULL));
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    srand(seed);
 
-    while(numreads<maxreads) {
+    int guard_count = 0; // prevent the dead loop
+    while(numreads<maxreads && guard_count<(100*maxreads)) {
       int chrom = rand() % seq_names.size();
       int start = rand() % seq_lengths[chrom];
       
@@ -62,11 +67,14 @@ bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
       bamreader.SetRegion(seq_names[chrom], start, seq_lengths[chrom]);
 
       if (!bamreader.GetNextAlignment(aln)) {continue;}
+      if (aln.IsDuplicate()) {continue;}
+      if ( (!aln.IsMapped()) || aln.IsSecondary()){continue;}
       tlen = aln.TemplateLength();
       if (tlen > 0) {
         fraglengths.push_back(abs(tlen));
         numreads++;
       }
+      guard_count++;
       //    cerr << abs(tlen) << endl; // if you want to print out for debugging
     }
 
@@ -117,7 +125,6 @@ bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
   return true;
 }
 
-
 bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
         const std::string& peakfileType, const std::int32_t count_colidx, 
         const float remove_pct, float* ab_ratio_ptr, float *s_ptr, float* f_ptr){
@@ -164,14 +171,75 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
   // calculate f and s, and then ab_ratio
   float f = (float)plen / (float) (peakloader.total_genome_length);
   float s = (float)(peakloader.tagcount_in_peaks) / (float)(peakloader.total_tagcount);
-  std::cout <<"peak-length: "<<plen<<"\ttotal: "<< peakloader.total_genome_length<<std::endl;
-  std::cout <<"#reads in peaks: "<<peakloader.tagcount_in_peaks<<"\t#reads: "<<peakloader.total_tagcount<<std::endl;
 
   // outputs
   float ab_ratio = (s/(1-s)) * ((1-f)/f);
   *ab_ratio_ptr = ab_ratio;
   *f_ptr = f;
   *s_ptr = s;
+  if (DEBUG) {
+    std::stringstream ss;
+    ss <<"peak-length: "<<plen<<"\ttotal: "<< peakloader.total_genome_length<<"\n";
+    ss <<"#reads in peaks: "<<peakloader.tagcount_in_peaks<<"\t#reads: "<<peakloader.total_tagcount<<"\n";
+    ss <<"ab_ratio: " << *ab_ratio_ptr << " f: " << *f_ptr << " s: " << *s_ptr << "\n";
+    PrintMessageDieOnError(ss.str(), M_DEBUG);
+  }
+  return true;
+}
+
+bool learn_pcr(const std::string& bamfile, float* geo_rate){
+  BamCramReader bamreader(bamfile);
+  const BamHeader* bamheader = bamreader.bam_header();
+  std::vector<std::string> seq_names = bamheader->seq_names();
+  std::vector<uint32_t> seq_lengths = bamheader->seq_lengths();
+
+  std::map<int, int> n_pcr_copies = {{1, 0}};
+  std::map<std::string, int> duplicated_reads;
+  int count_unmapped = 0;
+  for (int seq_index=0; seq_index<seq_names.size(); seq_index++){
+    if ((seq_names[seq_index].find("_") == std::string::npos) && (seq_names[seq_index] != "chrM")){
+      bamreader.SetRegion(seq_names[seq_index], 0, seq_lengths[seq_index]);
+      BamAlignment aln;
+      while (bamreader.GetNextAlignment(aln)){
+       if ( (!aln.IsMapped()) || aln.IsSecondary()){count_unmapped+=1; continue;}
+       if (aln.IsDuplicate()){
+        std::string read_location = seq_names[seq_index] + ":" + std::to_string(aln.Position());
+        if (duplicated_reads.find(read_location) != duplicated_reads.end()){
+          duplicated_reads[read_location] += 1;
+        }else{
+          duplicated_reads[read_location] = 2;
+        }
+       }else{
+        n_pcr_copies[1] += 1;
+       }
+      }
+    }
+  }
+
+  std::cout<<count_unmapped<<std::endl;
+  //for (std::map<Fragment, int, bool(*)(Fragment, Fragment)>::iterator it=duplicated_reads.begin();
+  for (std::map<std::string, int>::iterator it=duplicated_reads.begin();
+          it!=duplicated_reads.end(); ++it){
+    if (n_pcr_copies.find(it->second) != n_pcr_copies.end()){
+      n_pcr_copies[it->second] += 1;
+    }else{
+      n_pcr_copies[it->second] = 1;
+    }
+  }
+
+  int total_n_samples = 0;
+  *geo_rate = 0;
+  for (std::map<int, int>::iterator it=n_pcr_copies.begin(); it!=n_pcr_copies.end(); ++it){
+    *geo_rate += (it->first) * (it->second);
+    total_n_samples += it->second;
+  }
+  *geo_rate /= float(total_n_samples);
+  *geo_rate = 1.0/(*geo_rate);
+  if (DEBUG) {
+    std::stringstream ss;
+    ss << "Geo_rate: " << *geo_rate;
+    PrintMessageDieOnError(ss.str(), M_DEBUG);
+  }
   return true;
 }
 
@@ -186,6 +254,7 @@ bool compare_location(Fragment a, Fragment b){
     return true;
   }
 }
+
 
 int learn_main(int argc, char* argv[]) {
   bool showHelp = false;
@@ -276,17 +345,24 @@ int learn_main(int argc, char* argv[]) {
       PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
     }
 
+    /*** Learn PCR geometric distribution parameter **/
+    float geo_rate;
+    if (!learn_pcr(options.chipbam, &geo_rate)){
+      PrintMessageDieOnError("Error learning PCR rate", M_ERROR);
+    }
+
     // remove previous existing file
     string params = options.outprefix + ".txt";
     remove(params.c_str());
 
     /*** Write params to file ***/
     ofstream outfile;
- 
     outfile.open(params, ios_base::app);
     outfile << "ab_ratio: " << ab_ratio << endl;
     outfile << "f: " << f << endl;
     outfile << "s: " << s << endl;
+    outfile << "pcr rate: " << geo_rate << endl;
+    outfile.close();
 
     return 0;
   } else {
