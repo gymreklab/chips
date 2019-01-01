@@ -8,7 +8,7 @@
  */
 #include "src/peak_loader.h"
 
-const std::map<std::string, int> PeakLoader::peakfileTypeList = {{"homer", 0}, {"test", 1}};
+const std::map<std::string, int> PeakLoader::peakfileTypeList = {{"homer", 0}, {"test", 1},{"bed", 2}};
 
 PeakLoader::PeakLoader(const std::string _peakfile, const std::string _peakfileType,
                         const std::string _bamfile, const std::int32_t _count_colidx){
@@ -34,6 +34,9 @@ bool PeakLoader::Load(std::vector<Fragment>& peaks, const std::string region){
       break;
     case 1:
       peakreader.TestPeakReader(peaks, count_colidx, region);
+      break;
+    case 2:
+      peakreader.BedPeakReader(peaks, count_colidx, region);
       break;
     default:
       std::cerr << "An unexpected error happened in PeakLoader->Load()" << std::endl;

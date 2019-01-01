@@ -16,6 +16,8 @@ src/.*
 src/asimon
 *.o
 *.a
+src/*.a
+src/*.o
 stamp-h1
 *~
 ltmain.sh
