@@ -263,6 +263,8 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, in
       break;
     }
 
+    if (copy_index%100 == 0) {std::cout<<copy_index<<std::endl;}
+
     int total_reads = 0;
     int peakIndexStart = 0;
     int start_offset = 0;

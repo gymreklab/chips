@@ -60,6 +60,59 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
   return 0;
 }
 
+bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
+        const std::int32_t count_colidx, const std::string region){
+  std::ifstream infile(peakfile.c_str());
+  std::string line;
+  while (std::getline(infile, line)){
+      std::string chr;
+      std::int32_t start;
+      std::int32_t end;
+      std::int32_t length;
+      float count = -1;
+      
+      std::stringstream linestream(line);
+      std::string element;
+      uint32_t elem_idx=0;
+      while(!linestream.eof()){
+        linestream >> element;
+        if (elem_idx == 0){
+          chr = element;
+        }else if(elem_idx == 1){
+          start = std::stol(element);
+        }else if(elem_idx == 2){
+          end = std::stol(element);
+        }else if((count_colidx != -1) && (elem_idx == count_colidx)){
+          count = std::stof(element);
+          //std::cout<< count<<std::endl;
+        }
+        elem_idx++;
+      }
+      
+      if (region.empty()){
+        length = end-start;
+        Fragment peak_location(chr, start, length, count);
+        peaks.push_back(peak_location);
+      }else{
+        std::int32_t region_start;
+        std::int32_t region_end;
+        std::string region_chrom;
+        RegionParser(region, region_chrom, region_start, region_end);
+
+        if (region_chrom == chr){
+          std::int32_t overlap = std::min(end, region_end) - std::max(start, region_start);
+          overlap = std::max(0, overlap);
+          if (overlap > 0){
+            Fragment peak_location(chr, std::max(start, region_start), overlap, count);
+            peaks.push_back(peak_location);
+          }
+        }
+      }
+  }
+  std::sort(peaks.begin(), peaks.end(), compare_location);
+  return 0;
+}
+
 bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks,
         const std::int32_t count_colidx, const std::string region){
   std::ifstream infile(peakfile.c_str());
@@ -131,6 +184,8 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
         bamreader.SetRegion(seq_names[seq_index], 0, seq_lengths[seq_index]);
         BamAlignment aln;
         while (bamreader.GetNextAlignment(aln)){
+          if (aln.IsDuplicate()) {continue;} // skip the duplicated ones
+          if ( (!aln.IsMapped()) || aln.IsSecondary()){continue;}
           Fragment read_location(seq_names[seq_index], aln.Position(), aln.Length(), 0);
           reads.push_back(read_location);
         }
@@ -149,6 +204,8 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
         bamreader.SetRegion(seq_names[seq_index], region_start, region_end);
         BamAlignment aln;
         while (bamreader.GetNextAlignment(aln)){
+          if (aln.IsDuplicate()) {continue;} // skip the duplicated ones
+          if ( (!aln.IsMapped()) || aln.IsSecondary()){continue;}
           Fragment read_location(seq_names[seq_index], aln.Position(), aln.Length(), 0);
           reads.push_back(read_location);
         }
