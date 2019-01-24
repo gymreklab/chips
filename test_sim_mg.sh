@@ -11,7 +11,8 @@ SEQUENCER=HiSeq
 # spot: fraction of reads in peaks
 # frac: fraction of genome that is bound
 
-for nc in 1000 10000 100000 1000000
+#for nc in 1000 10000 100000 1000000
+for nc in 1000
 do
     ./src/asimon simreads \
 	-p ${PEAKS} \

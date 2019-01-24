@@ -44,8 +44,11 @@ bool PeakIntervals::LoadPeaks(const Options& options,
       total_signals_max += (peaks[peakIndex].length * max_coverage);
       total_signals += (peaks[peakIndex].length * peaks[peakIndex].score);
     }
-    prob_pd_given_b = total_signals/total_signals_max;
-
+    if (total_signals_max == 0){
+        prob_pd_given_b = 1.0;
+    }else{
+        prob_pd_given_b = total_signals/total_signals_max;
+    }
     // convert the vector into a map with keys as chromosome names
     for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
       peak_map[peaks[peakIndex].chrom].push_back(peaks[peakIndex]);

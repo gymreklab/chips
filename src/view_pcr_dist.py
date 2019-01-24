@@ -14,20 +14,24 @@ with pysam.AlignmentFile(bamfile, "rb") as samfile:
     frag_count_dict = {}
     for rn in ref_names:
         for frag in samfile.fetch(rn, 0, samfile.get_reference_length(rn)):
-            #if (frag.is_paired) and\
-            #        (frag.is_proper_pair) and\
-            #        (not frag.is_unmapped) and\
-            #        (not frag.mate_is_unmapped):
-            if (not frag.is_unmapped) :
-                count_filtered += 1
+            if (frag.is_paired) and\
+                    (frag.is_proper_pair) and\
+                    (not frag.is_unmapped) and\
+                    (not frag.mate_is_unmapped):
+                #if (not frag.is_unmapped) :
+                #    count_filtered += 1
                 if (not frag.is_read1) and (not frag.is_read2):
                     print (frag)
                     exit(1)
                 frag_ref = frag.reference_name
                 frag_start = frag.reference_start
-                frag_len = frag.reference_length
+                read_len = frag.reference_length
                 frag_mate_start = frag.next_reference_start
-                
+                read_len_infer = frag.infer_read_length()
+                frag_len = frag.template_length
+                print (frag_ref, frag_start, read_len, read_len_infer, frag_len, frag_mate_start, frag.is_read1, frag.is_read2)
+               
+'''
                 #frag_key = (frag_ref,\
                 #                min(frag_start, frag_mate_start),\
                 #                max(frag_start, frag_mate_start))
@@ -47,3 +51,4 @@ for key in frag_count_dict:
 
 print (count_dict)
 print ("filtered:"+str(count_filtered))
+'''
