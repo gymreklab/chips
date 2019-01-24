@@ -15,6 +15,7 @@ Options::Options() {
 
   // Required learn inputs
   chipbam = "";
+  remove_pct = 0;
 
   // Simulation experiment parameters
   numcopies = 100;
@@ -32,6 +33,15 @@ Options::Options() {
   // Additional simulation parameters
   region = "";
   binsize = 100000;
+
+  // sequencer
+  sequencer_type = "";
+  sub_rate = 0;
+  ins_rate = 0;
+  del_rate = 0;
+
+  // pcr
+  pcr_rate = 1.0;
 }
 
 Options::~Options() {}

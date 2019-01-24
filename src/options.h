@@ -19,6 +19,7 @@ class Options {
 
   // Required learn inputs
   std::string chipbam;
+  float remove_pct;
 
   // Simulation experiment parameters
   int numcopies;
@@ -33,9 +34,15 @@ class Options {
   float ratio_s;
   float ratio_f;
 
+  std::string sequencer_type;
+  float sub_rate;
+  float del_rate;
+  float ins_rate;
   // Additional simulation parameters
   std::string region;
   int binsize;
+
+  float pcr_rate; 
 
   virtual ~Options();
 };

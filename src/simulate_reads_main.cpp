@@ -3,6 +3,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <vector>
+#include <stdio.h>
 
 #include "src/bingenerator.h"
 #include "src/common.h"
@@ -126,6 +127,31 @@ int simulate_reads_main(int argc, char* argv[]) {
     options.n_threads = std::atoi(argv[i+1]);
     i++;
       }
+    } else if (PARAMETER_CHECK("--sequencer", 11, parameterLength)){
+      if ((i+1) < argc){
+    options.sequencer_type = argv[i+1];
+    i++;
+      }
+    } else if (PARAMETER_CHECK("--sub", 5, parameterLength)){
+      if ((i+1) < argc){
+    options.sub_rate = std::atof(argv[i+1]);
+    i++;
+      }
+    } else if (PARAMETER_CHECK("--ins", 5, parameterLength)){
+      if ((i+1) < argc){
+    options.ins_rate = std::atof(argv[i+1]);
+    i++;
+      }
+    } else if (PARAMETER_CHECK("--del", 5, parameterLength)){
+      if ((i+1) < argc){
+    options.del_rate = std::atof(argv[i+1]);
+    i++;
+      }
+    } else if (PARAMETER_CHECK("--pcr_rate", 10, parameterLength)){
+      if ((i+1) < argc){
+    options.pcr_rate = std::atof(argv[i+1]);
+    i++;
+      }
     } else {
       cerr << endl << "*****ERROR: Unrecognized parameter: " << argv[i] << " *****" << endl << endl;
       showHelp = true;
@@ -154,10 +180,22 @@ int simulate_reads_main(int argc, char* argv[]) {
     TaskQueue<int> task_queue;
     fill_queue(options.numcopies, task_queue);
 
+    // Remove previous existing fastqs
+    if (options.paired){
+      std::string reads1 = options.outprefix+"_1.fastq";
+      std::string reads2 = options.outprefix+"_2.fastq";
+      std::remove(reads1.c_str());
+      std::remove(reads2.c_str());
+    }
+    else{
+      std::string reads = options.outprefix+".fastq";
+      std::remove(reads.c_str());
+    }
+
     /***************** Main implementation ***************/
     // Perform in bins so we don't keep everything in memory at once
     PeakIntervals* pintervals = \
-               new PeakIntervals(options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
+               new PeakIntervals(options, options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
 
     //BinQueue<GenomeBin> bq;
     //fill_queue(bingenerator, bq);
@@ -176,17 +214,20 @@ int simulate_reads_main(int argc, char* argv[]) {
     
     for (int thread_index=0; thread_index<options.n_threads; thread_index++){
       if (options.paired){
-        std::string ifilename_1 = options.outprefix+"/reads_"+std::to_string(thread_index)+"_1.fastq";
-        std::string ofilename_1 = options.outprefix+"/reads_1.fastq";
+        std::string ifilename_1 = options.outprefix+"_"+std::to_string(thread_index)+"_1.fastq";
+        std::string ofilename_1 = options.outprefix+"_1.fastq";
         merge_files(ifilename_1, ofilename_1);
+        std::remove(ifilename_1.c_str());
 
-        std::string ifilename_2 = options.outprefix+"/reads_"+std::to_string(thread_index)+"_2.fastq";
-        std::string ofilename_2 = options.outprefix+"/reads_2.fastq";
+        std::string ifilename_2 = options.outprefix+"_"+std::to_string(thread_index)+"_2.fastq";
+        std::string ofilename_2 = options.outprefix+"_2.fastq";
         merge_files(ifilename_2, ofilename_2);
+        std::remove(ifilename_2.c_str());
       }else{
-        std::string ifilename = options.outprefix+"/reads_"+std::to_string(thread_index)+".fastq";
-        std::string ofilename = options.outprefix+"/reads.fastq";
+        std::string ifilename = options.outprefix+"_"+std::to_string(thread_index)+".fastq";
+        std::string ofilename = options.outprefix+".fastq";
         merge_files(ifilename, ofilename);
+        std::remove(ifilename.c_str());
       }
     }
 
@@ -202,13 +243,6 @@ int simulate_reads_main(int argc, char* argv[]) {
 /*
  * A thread that keep generate bins
  * */
-/*
-void fill_queue(BinGenerator bingenerator, BinQueue <GenomeBin> & q){
-  while(bingenerator.GotoNextBin()) {
-    q.push(bingenerator.GetCurrentBin());
-  }
-}
-*/
 void fill_queue(const int numcopies, TaskQueue<int> & q){
   for (int copy_index=0; copy_index<numcopies; copy_index++){
     q.push(copy_index);
@@ -228,6 +262,8 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, in
       cerr << e.what() << endl;
       break;
     }
+
+    if (copy_index%100 == 0) {std::cout<<copy_index<<std::endl;}
 
     int total_reads = 0;
     int peakIndexStart = 0;
@@ -250,13 +286,15 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, in
       /*** Step 4: Sequencing ***/
       Sequencer seq(options);
       seq.Sequence(lib_fragments, total_reads, thread_index, copy_index);
+      //std::cout << total_reads << "    " << thread_index << "    " << copy_index <<std::endl;
     }
+    //std::cout << thread_index << "    " << copy_index <<std::endl;
   }
 }
 
 void merge_files(std::string ifilename, std::string ofilename){
   std::ifstream ifile(ifilename.c_str());
-  std::ofstream ofile(ofilename.c_str());
+  std::ofstream ofile(ofilename.c_str(), std::ofstream::app);
   std::string line;
   while (std::getline(ifile, line)){
     ofile<<line<<"\n";
@@ -271,16 +309,17 @@ void simulate_reads_help(void) {
   cerr << "Usage:   " << PROGRAM_NAME << " simreads -p peaks.bed -f ref.fa -o outprefix [OPTIONS] " << endl;
   cerr << "\n[Required arguments]: " << "\n";
   cerr << "     -p <peaks.bed>: BED file with peak regions" << "\n";
+  cerr << "     -t <str>: The file format of your input peak file" << "\n";
   cerr << "     -f <ref.fa>: FASTA file with reference genome" << "\n";
   cerr << "     -o <outprefix>: Prefix for output files" << "\n";
   cerr << "\n[Experiment parameters]: " << "\n";
-  cerr << "     --numcopies <int>: Number of copies of the genome to simulate.\n"
+  cerr << "     --numcopies <int>: Number of copies of the genome to simulate\n"
        << "                        Default: " << options.numcopies << "\n";
-  cerr << "     --numreads <int> : Number of reads (or read pairs) to simulate.\n"
+  cerr << "     --numreads <int> : Number of reads (or read pairs) to simulate\n"
        << "                        Default: " << options.numreads << "\n";
-  cerr << "     --readlen <int>  : Read length to generate.\n"
+  cerr << "     --readlen <int>  : Read length to generate\n"
        << "                        Default: " << options.readlen << "\n";
-  cerr << "     --paired         : Simulate paired-end reads.\n"
+  cerr << "     --paired         : Simulate paired-end reads\n"
        << "                        Default: false \n";
   cerr << "\n[Model parameters]: " << "\n";
   cerr << "     --gamma-frag <float>,<float>: Parameters for fragment length distribution (alpha, beta).\n"
@@ -290,11 +329,23 @@ void simulate_reads_help(void) {
        << "                                   Default: " << options.ratio_s << "\n";
   cerr << "     --frac <float>              : Fraction of the genome that is bound \n"
        << "                                   Default: " << options.ratio_f << "\n";
+  cerr << "\n[Peak scoring]: " << "\n";
+  cerr << "     -b <reads.bam>:             : Read BAM file used to score each peak\n"
+       << "                                 : Default: None (use the scores from the peak file)\n";
   cerr << "\n[Other options]: " << "\n";
   cerr << "     --region <str>              : Only simulate reads from this region chrom:start-end\n"
        << "                                   Default: genome-wide \n";
   cerr << "     --binsize <int>             : Consider bins of this size when simulating\n"
        << "                                 : Default: " << options.binsize << "\n";
+  cerr << "     --thread <int>              : Number of threads used for computing\n"
+       << "                                 : Default: " << options.n_threads << "\n";
+  cerr << "     --sequencer <std>           : Sequencing error values\n"
+       << "                                 : Default: None (no sequencing errors)\n";
+  cerr << "     --sub <float>               : Customized substitution value in sequecing\n";
+  cerr << "     --ins <float>               : Customized insertion value in sequecing\n";
+  cerr << "     --del <float>               : Customized deletion value in sequecing\n";
+  cerr << "     --pcr_rate <float>          : The rate of geometric distribution for PCR simulation\n"
+       << "                                   Default: " << options.pcr_rate << "\n";
   cerr << "\n";
   exit(1);
 }

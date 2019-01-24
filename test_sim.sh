@@ -8,6 +8,7 @@ PEAKS=testpeaks.tab
 #TYPE=homer
 TYPE=test
 COLUMN=3
+SEQUENCER=HiSeq
 
 ./src/asimon simreads \
     -p ${PEAKS} \
@@ -15,11 +16,12 @@ COLUMN=3
     -f ${REFFA} \
     -c ${COLUMN}\
     -o ${OUTPREFIX} \
-    --numcopies 5 \
-    --numreads 1000 \
+    --numcopies 100 \
+    --numreads 10 \
     --readlen 50 \
     --gamma-frag 200,0.5 \
     --spot 0.0035 --frac 0.00017 \
     --region chr20:45195673-45395941 \
     --binsize 200000\
+    --sequencer ${SEQUENCER}\
     --paired
