@@ -332,7 +332,7 @@ void simulate_reads_help(void) {
   cerr << "\n[Peak scoring: choose one]: " << "\n";
   cerr << "     -b <reads.bam>:             : Read BAM file used to score each peak\n"
        << "                                 : Default: None (use the scores from the peak file)\n";
-  cerr << "     -c <int>:                   : The index of the BED file column used to to score each peak (index starting from 1)\n"
+  cerr << "     -c <int>:                   : The index of the BED file column used to score each peak (index starting from 1)\n"
        << "                                 : Default: " << options.countindex << "\n";
   cerr << "\n[Other options]: " << "\n";
   cerr << "     --region <str>              : Only simulate reads from this region chrom:start-end\n"
