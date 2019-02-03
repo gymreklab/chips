@@ -12,6 +12,8 @@ configure
 depcomp
 install-sh
 missing
+src/.deps/
+src/.libs/
 src/.*
 src/asimon
 *.o
