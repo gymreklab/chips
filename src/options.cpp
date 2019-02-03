@@ -25,8 +25,8 @@ Options::Options() {
   n_threads = 1;
 
   // Simulation model parameters
-  gamma_alpha = 100;
-  gamma_beta = 0.5;
+  gamma_alpha = 15.7;
+  gamma_beta = 15.5;
   ratio_s = 0.001;
   ratio_f = 0.001;
 
