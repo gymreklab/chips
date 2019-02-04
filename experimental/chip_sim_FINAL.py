@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import pysam
 import numpy as np
 import matplotlib
@@ -12,10 +13,12 @@ parser = argparse.ArgumentParser(
 parser.add_argument('bamfile')
 parser.add_argument('bedfile')
 parser.add_argument('threshold', type=float)
+parser.add_argument('outdir', type=str)
 
 args = parser.parse_args()
 bamfile = args.bamfile
 bedfile = args.bedfile
+OUTDIR = args.outdir
 threshold = args.threshold
 
 peaks = []
@@ -83,6 +86,8 @@ def find_mv(lefts, rights):
     mu = avg_ends - avg_starts #avg_len
 
     len_lefts = len(lefts)
+#    lmax = int(lmax)
+#    lmin = int(lmin)
     lefts_pdf = np.zeros(lmax-lmin+10)
     for x in lefts:
         lefts_pdf[math.ceil(x)] += 1
@@ -205,10 +210,16 @@ def plot_gamma(mu, v, mu_act, var_act):
     x, bins, z = plt.hist(frag_lens, 100, normed=True)
     plt.plot(bins, spst.gamma(shape, 0, scale).pdf(bins), color='r')
     plt.plot(bins, spst.gamma(shape_act, 0, scale_act).pdf(bins), color='g')
-    plt.savefig("./figures/" + bamfile.split("/")[-1] + "_" + str(int(threshold)) + "_" + str(np.random.randint(1000)) + ".png")
+    plt.savefig(OUTDIR + "/" + bamfile.split("/")[-1] + "_" + str(int(threshold)) + "_" + str(np.random.randint(1000)) + ".png")
+
+def print_frags():
+    f = open(OUTDIR+ "/" + bamfile.split("/")[-1] + "_"+ str(int(threshold)) + "_" + str(np.random.randint(1000)) + ".frags.txt", "w")
+    for fl in frag_lens: f.write("%s\n"%fl)
+    f.close()
 
 mu_act, var_act = find_mv_act(frag_lens)
 mu, v = find_mv(agg_starts, agg_ends)
 print(mu_act, var_act)
 print(mu, v)
 plot_gamma(mu, v, mu_act, var_act)
+print_frags()
