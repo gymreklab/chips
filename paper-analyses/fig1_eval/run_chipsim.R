@@ -16,10 +16,12 @@ bindingFeature <- function(start, length=200, shape=1, scale=20, enrichment=5, r
  avgWeight <- shape * scale * enrichment
  lowerBound <- ((r - 1) * avgWeight)
  weight <- 1
- params <- list(start = start, length = length, weight = weight)
+ params <- list(start = start, length = length, weight = weight, overlap = 0)
  class(params) <- c("Binding", "SimulatedFeature")
  params
 }
+
+# TODO - background as non-binding sites. ugh I have to define myself??
 
 # Update "features" function to read from the BED file
 getpeakfeatures <- function(..., maxTail=0.01, compoundFeatures=list("Binding")) {
@@ -32,13 +34,15 @@ getpeakfeatures <- function(..., maxTail=0.01, compoundFeatures=list("Binding"))
      if (length(line) == 0) {
        break
      }
-     start = as.integer(strsplit(line, '\t')[[1]][7])
+     # TODO need to use length
+     start = as.integer(strsplit(line, '\t')[[1]][2])
+     end = as.integer(strsplit(line, '\t')[[1]][3])
      f = bindingFeature(start)
      features[[fnum]] = f
      fnum = fnum + 1
    }
    close(con)
-   head(features, 1)
+   head(features, 100)
 }
 
 constRegion <- function(weight, length) rep(weight, length)
