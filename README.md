@@ -14,7 +14,7 @@ asimon simreads <insert all parameters and types here>
 ```
 
 Default parameters:
-
+```
 numcopies = 100
 numreads = 1000000
 readlen = 36
