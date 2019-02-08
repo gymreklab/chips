@@ -15,6 +15,9 @@ PeakLoader::PeakLoader(const std::string _peakfile, const std::string _peakfileT
   if(_peakfileType == ""){
     std::cerr << "****** ERROR: Need to specify the type of the peak file ******" << std::endl;
     std::exit(1);
+  }else if ((_bamfile == "") && (_count_colidx == -1)){
+    std::cerr << "****** ERROR: Need to specify either parameter -c or parameter -b ******" << std::endl;
+    std::exit(1);
   }else{
     peakfile = _peakfile;
     peakfileType = _peakfileType;
