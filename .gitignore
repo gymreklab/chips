@@ -27,4 +27,6 @@ libtool
 config/compile
 config/config.*
 m4/*.m4
+m4/Makefile
+m4/Makefile.in
 igv.log
