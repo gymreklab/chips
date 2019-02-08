@@ -97,12 +97,6 @@ bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
     return false;
   }
 
-  if (DEBUG) {
-    for (int ind = 0; ind < fraglengths.size(); ind++)
-    {
-      cout << fraglengths[ind] << endl;
-    }
-  }
 
   float total_frag_len = 0;     // sum of all the frag lengths
 
