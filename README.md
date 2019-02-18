@@ -48,4 +48,3 @@ pcr rate = <Need to fill out>
 ```
 
 Note: For the gamma distribution parameters alpha = k, beta = theta.
-
