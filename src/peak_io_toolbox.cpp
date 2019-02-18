@@ -30,7 +30,7 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
           start = std::stol(element);
         }else if(elem_idx == 3){
           end = std::stol(element);
-        }else if((count_colidx != -1) && (elem_idx == count_colidx)){
+        }else if((count_colidx > 0) && (elem_idx == count_colidx-1)){
           count = std::stof(element);
         }
         elem_idx++;
@@ -82,7 +82,7 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
           start = std::stol(element);
         }else if(elem_idx == 2){
           end = std::stol(element);
-        }else if((count_colidx != -1) && (elem_idx == (count_colidx-1))){
+        }else if((count_colidx > 0) && (elem_idx == (count_colidx-1))){
           count = std::stof(element);
           //std::cout<< count<<std::endl;
         }
@@ -135,7 +135,7 @@ bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks,
           start = std::stol(element);
         }else if(elem_idx == 2){
           end = std::stol(element);
-        }else if((count_colidx != -1) && (elem_idx == count_colidx)){
+        }else if((count_colidx > 0) && (elem_idx == count_colidx-1)){
           count = std::stof(element);
           //std::cout<< count<<std::endl;
         }
