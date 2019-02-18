@@ -12,10 +12,14 @@ configure
 depcomp
 install-sh
 missing
+src/.deps/
+src/.libs/
 src/.*
 src/asimon
 *.o
 *.a
+src/*.a
+src/*.o
 stamp-h1
 *~
 ltmain.sh
@@ -23,4 +27,6 @@ libtool
 config/compile
 config/config.*
 m4/*.m4
+m4/Makefile
+m4/Makefile.in
 igv.log

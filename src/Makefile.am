@@ -4,7 +4,7 @@ bin_PROGRAMS = asimon
 
 noinst_LIBRARIES = libasimon.a
 
-libasimon_a_CPPFLAGS = $(AM_CPPFLAGS)
+libasimon_a_CPPFLAGS = $(AM_CPPFLAGS) $(HTSLIB_CFLAGS)
 libasimon_a_SOURCES = simulate_reads_main.cpp learn_main.cpp \
 	multithread.h multithread.cpp\
 	fragment.h fragment.cpp \

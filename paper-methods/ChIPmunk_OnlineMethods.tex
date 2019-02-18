@@ -1,0 +1,68 @@
+\documentclass[12pt]{article}
+
+% Imports
+\usepackage{hyperref}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{ctable}
+\usepackage{array}
+\usepackage{titlesec}
+
+% Paragraph spacing
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0.5em}
+
+% Default font
+\renewcommand*{\familydefault}{\sfdefault}
+
+% title spacing
+\titlespacing*{\section}
+{0pt}{2pt}{0pt}
+\titlespacing*{\subsection}
+{0pt}{2pt}{0pt}
+
+% table lines
+\newcolumntype{?}{!{\vrule width 1pt}}
+
+% hyperlinks
+\hypersetup{
+  breaklinks=true,  % so long urls are correctly broken across lines
+  colorlinks=true,
+  urlcolor=blue,
+  linkcolor=red,
+  citecolor=red,
+ }
+
+\begin{document}
+
+\section*{Online Methods}
+
+\subsection*{ChIPmunk model}
+
+ChIPmunk models the shearing, pulldown, PCR, and sequencing steps of ChIP-seq and learns the parameters for each of these steps described in Table 1. 
+
+\subsubsection*{Shearing}
+
+Paired end
+
+Single end
+
+
+\subsubsection*{Pulldown}
+
+\subsubsection*{PCR}
+
+\subsubsection*{Sequencing}
+
+\subsection*{ChIPmunk implementation}
+
+two modules
+file formats
+binning
+C++, any special libraries we use, open source
+
+\subsection*{Peak caller evaluation}
+
+\subsection*{Data sources}
+
+
+\end{document}

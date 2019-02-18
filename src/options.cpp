@@ -25,10 +25,10 @@ Options::Options() {
   n_threads = 1;
 
   // Simulation model parameters
-  gamma_alpha = 100;
-  gamma_beta = 0.5;
-  ratio_s = 0.001;
-  ratio_f = 0.001;
+  gamma_alpha = 15.67;
+  gamma_beta = 15.49;
+  ratio_s = 0.17594;
+  ratio_f = 0.03713;
 
   // Additional simulation parameters
   region = "";
