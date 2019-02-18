@@ -97,6 +97,7 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta) {
     return false;
   }
 
+
   float total_frag_len = 0;     // sum of all the frag lengths
 
   // get sum of all frag lengths and log sum of each frag length
@@ -117,7 +118,7 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta) {
   *beta = (moment_sum/(mean_frag_length*fraglengths.size()));
   *alpha = mean_frag_length / *beta;
 
-  if (DEBUG) {
+  if (DEBUG) { 
     std::stringstream ss;
     ss << "Learned fragment length params alpha: " << *alpha << " and beta: " << *beta;
     PrintMessageDieOnError(ss.str(), M_DEBUG);
@@ -529,6 +530,7 @@ int learn_main(int argc, char* argv[]) {
     /*** Write params to file ***/
     ofstream outfile;
     outfile.open(params, ios_base::app);
+    outfile << "alpha: " << frag_param_a << " beta: " << frag_param_b << endl;
     outfile << "ab_ratio: " << ab_ratio << endl;
     outfile << "f: " << f << endl;
     outfile << "s: " << s << endl;
