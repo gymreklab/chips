@@ -382,8 +382,11 @@ void learn_help(void) {
   cerr << "[Required arguments]: " << "\n";
   cerr << "         -b <reads.bam>: BAM file with ChIP reads (.bai index required)" << "\n";
   cerr << "         -p <peaks.bed>: BED file with peak regions (Homer format)" << "\n";
-  cerr << "         -t <peakfile_type>: File type of the input peak file" << "\n";
+  cerr << "         -t <peakfile_type>: File type of the input peak file. Only `homer` or `bed` supported." << "\n";
   cerr << "         -o <outprefix>: Prefix for output files" << "\n";
+  cerr << "\n";
+  cerr  << "[ General help ]:" << endl;
+  cerr  << "    --help        "  << "Print this help menu.\n";
   cerr << "\n";
   exit(1);
 }

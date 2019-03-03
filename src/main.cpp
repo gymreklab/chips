@@ -38,7 +38,7 @@ int chipmunk_help(void) {
   cout << "     simreads      " << "Simulate ChIP-seq reads given a set of intervals.\n";
   cout << "     learn         " << "Learn model from real ChIP data.\n";
   cout  << endl;
-  cout  << "[ General help ]" << endl;
+  cout  << "[ General help ]:" << endl;
   cout  << "    --help        "  << "Print this help menu.\n";
   cout  << "    --version     "  << "What version are you using?.\n";
   return 0;
