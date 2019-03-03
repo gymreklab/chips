@@ -303,13 +303,13 @@ void merge_files(std::string ifilename, std::string ofilename){
 
 void simulate_reads_help(void) {
   Options options;
-  cerr << "\nTool:    asimon simreads" << endl;
+  cerr << "\nTool:    chipmunk simreads" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
   cerr << "Summary: Simulate ChIP-seq reads for a set of peaks." << endl << endl;
   cerr << "Usage:   " << PROGRAM_NAME << " simreads -p peaks.bed -f ref.fa -o outprefix [OPTIONS] " << endl;
   cerr << "\n[Required arguments]: " << "\n";
   cerr << "     -p <peaks.bed>: BED file with peak regions" << "\n";
-  cerr << "     -t <str>: The file format of your input peak file" << "\n";
+  cerr << "     -t <str>: The file format of your input peak file. Only `homer` or `bed` are supported." << "\n";
   cerr << "     -f <ref.fa>: FASTA file with reference genome" << "\n";
   cerr << "     -o <outprefix>: Prefix for output files" << "\n";
   cerr << "\n[Experiment parameters]: " << "\n";
@@ -332,7 +332,7 @@ void simulate_reads_help(void) {
   cerr << "\n[Peak scoring: choose one]: " << "\n";
   cerr << "     -b <reads.bam>:             : Read BAM file used to score each peak\n"
        << "                                 : Default: None (use the scores from the peak file)\n";
-  cerr << "     -c <int>:                   : The index of the BED file column used to score each peak (index starting from 1)\n"
+  cerr << "     -c <int>:                   : The index of the BED file column used to score each peak (index starting from 1). Required if -b not used.\n"
        << "                                 : Default: " << options.countindex << "\n";
   cerr << "\n[Other options]: " << "\n";
   cerr << "     --region <str>              : Only simulate reads from this region chrom:start-end\n"
@@ -349,5 +349,7 @@ void simulate_reads_help(void) {
   cerr << "     --pcr_rate <float>          : The rate of geometric distribution for PCR simulation\n"
        << "                                   Default: " << options.pcr_rate << "\n";
   cerr << "\n";
+  cerr  << "[ General help ]:" << endl;
+  cerr  << "    --help        "  << "Print this help menu.\n";
   exit(1);
 }

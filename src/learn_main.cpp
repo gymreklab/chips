@@ -384,15 +384,18 @@ int learn_main(int argc, char* argv[]) {
 
 //TODO add in -r argument not required
 void learn_help(void) {
-  cerr << "\nTool:    asimon learn" << endl;
+  cerr << "\nTool:    chipmunk learn" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
   cerr << "Summary: Learn parameters from a ChIP dataset." << endl << endl;
   cerr << "Usage:   " << PROGRAM_NAME << " learn -b reads.bam -p peak.bed -o outprefix [OPTIONS] " << endl << endl;
   cerr << "[Required arguments]: " << "\n";
   cerr << "         -b <reads.bam>: BAM file with ChIP reads (.bai index required)" << "\n";
   cerr << "         -p <peaks.bed>: BED file with peak regions (Homer format)" << "\n";
-  cerr << "         -t <peakfile_type>: File type of the input peak file" << "\n";
+  cerr << "         -t <peakfile_type>: File type of the input peak file. Only `homer` or `bed` supported." << "\n";
   cerr << "         -o <outprefix>: Prefix for output files" << "\n";
+  cerr << "\n";
+  cerr  << "[ General help ]:" << endl;
+  cerr  << "    --help        "  << "Print this help menu.\n";
   cerr << "\n";
   exit(1);
 }
