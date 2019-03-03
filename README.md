@@ -1,50 +1,86 @@
-# asimon-chip-sim
-Simulation tool for ChIP- and other -seq experiments
+# ChIPmunk
 
+ChIPmunk is a tool for simulating ChIP-sequencing experiments.
 
+For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
 
-## Main functions 
-### learn
-### Structure
-```
-asimon learn -b BAM_file.bam -p Peaks.bed -t Peak_File_type -o /path/to/output/prefix_to_file
-```
-### simreads
-### Structure
-```
-asimon simreads 
-    -p Peaks.bed \
-    -t TYPE \
-    -f genome_reference.fa \
-    -o /path/to/output/prefix_to_file \
-    -b BAM_file.bam \
-    --numcopies # copies \
-    --numreads # reads \
-    --readlen length of reads \
-    --gamma-frag alpha,beta \ 
-    --spot spot_score --frac frac_score \
-    --region chr:start-end \
-    --binsize bin_length \
-    --thread # threads \
-    --sequencer Type of sequencer\
-    --pcr_rate rate \
-    --paired
+[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats)
+
+<a name="download"></a>
+## Download
+
+The latest ChIPmunk release is available on the [releases page](https://github.com/gymreklab/ChIPmunk/releases).
+
+<a name="install"></a>
+## Basic Install
+
+ChIPmunk requires the third party package [htslib](http://www.htslib.org/).
+
+If you are installing from the tarball, type the following commands.
 
 ```
+tar -xzvf ChIPmunk-X.X.tar.gz
+cd ChIPmunk-X.X
+./configure [--prefix=$PREFIX]
+make
+make install
+``` 
 
-##Simreads default parameters:
+If you do not have root access, you can set `--prefix=$HOME`, which will install `chipmunk` to `~/bin/chipmunk`.
+If you get a pkg-config error, you may need to set PKG_CONFIG_PATH to a directory where it kind find `htslib.pc`.
+
+Typing `chipmunk --help` should show a help message if ChIPmunk was successfully installed.
+
+## Compiling from git source
+
+To compile from git source, first make sure htslib is installed. Then run:
 ```
-numcopies = 100
-numreads = 1000000
-readlen = 36
-paired = False
-gamma-frag = alpha: 15.67, beta: 15.49
-spot = 0.17594
-frac = 0.03713
-region = "" (Whole Genome)
-binsize = 100000
-thread = 1
-pcr rate = <Need to fill out>
+git clone https://github.com/gymreklab/ChIPmunk
+cd ChIPmunk/
+./reconf
+./configure
+make
+make install
 ```
 
-Note: For the gamma distribution parameters alpha = k, beta = theta.
+<a name="usage"></a>
+## Basic usage
+
+ChIPmunk is a single command line tool that contains several modules. To see available modules type:
+
+```
+chipmunk
+```
+
+The following modules are available:
+
+* `learn`: Learn key parameters from existing ChIP-seq datasets. Learn takes in alinged reads (BAM) and peaks (BED) and outputs a model parameters file.
+* `simreads`: Simulate ChIP-seq reads based on model and experimental parameters. Simulate takes in peaks (BED), model parameters (either user-specified, or learned from an existing dataset using `learn`) and outputs raw reads (FASTQ).
+
+Basic usage is shown below. See [detailed usage](#detailed) below for more info.
+
+```
+chipmunk learn \
+  -b <reads.bam> \
+  -p <peaks.bed> \
+  -t <homer|bed>
+  -o <outprefix>
+```
+
+```
+chipmunk simreads \
+  -p <peaks.bed \
+  -f <ref.fa>
+  -t <homer|bed> \
+  -o <outprefix>
+```
+
+<a name="detailed"></a>
+## Detailed usage
+
+### `chipmunk learn`
+
+### `chipmunk simreads`
+
+<a name="formats"></a>
+## File formats
