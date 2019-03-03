@@ -66,7 +66,7 @@ void PeakIntervals::EstNumFrags(const Options& options, std::vector<Fragment> pe
     double numfrags_ub = 0;
     double ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
     double prob_pd_given_ub = ratio_beta * prob_pd_given_b;
-    double frag_length = options.gamma_alpha * options.gamma_beta;
+    double frag_length = options.gamma_k * options.gamma_theta;
     //if(options.region.empty()){
 
     // estimate number of reads per run

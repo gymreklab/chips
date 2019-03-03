@@ -11,6 +11,7 @@
 
 #include "src/bam_io.h"
 #include "src/common.h"
+#include "src/model.h"
 #include "src/options.h"
 #include "src/peak_loader.h"
 #include "src/fragment.h"
@@ -329,6 +330,7 @@ int learn_main(int argc, char* argv[]) {
 
   if (!showHelp) {
     /***************** Main implementation ***************/
+    ChIPModel model;
 
     /*** Learn fragment size disbribution parameters ***/
     float frag_param_a;
@@ -336,6 +338,7 @@ int learn_main(int argc, char* argv[]) {
     if (!learn_frag(options.chipbam, &frag_param_a, &frag_param_b)) {
       PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
     }
+    model.SetFrag(frag_param_a, frag_param_b);
 
     /*** Learn pulldown ratio parameters ***/
     float ab_ratio;
@@ -345,27 +348,19 @@ int learn_main(int argc, char* argv[]) {
         &ab_ratio, &s, &f)){
       PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
     }
+    model.SetF(f);
+    model.SetS(s);
 
     /*** Learn PCR geometric distribution parameter **/
     float geo_rate;
     if (!learn_pcr(options.chipbam, &geo_rate)){
       PrintMessageDieOnError("Error learning PCR rate", M_ERROR);
     }
+    model.SetPCR(geo_rate);
 
-    // remove previous existing file
-    string params = options.outprefix + ".txt";
-    remove(params.c_str());
-
-    /*** Write params to file ***/
-    ofstream outfile;
-    outfile.open(params, ios_base::app);
-    outfile << "alpha: " << frag_param_a << " beta: " << frag_param_b << endl;
-    outfile << "ab_ratio: " << ab_ratio << endl;
-    outfile << "f: " << f << endl;
-    outfile << "s: " << s << endl;
-    outfile << "pcr rate: " << geo_rate << endl;
-    outfile.close();
-
+    /*** Output learned model **/
+    model.WriteModel(options.outprefix + ".json");
+    model.PrintModel();
     return 0;
   } else {
     learn_help();

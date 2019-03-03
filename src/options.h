@@ -29,10 +29,12 @@ class Options {
   int n_threads;
 
   // Simulation model parameters
-  float gamma_alpha;
-  float gamma_beta;
+  float gamma_k;
+  float gamma_theta;
   float ratio_s;
   float ratio_f;
+  float pcr_rate; 
+  std::string model_file;
 
   std::string sequencer_type;
   float sub_rate;
@@ -41,8 +43,6 @@ class Options {
   // Additional simulation parameters
   std::string region;
   int binsize;
-
-  float pcr_rate; 
 
   virtual ~Options();
 };

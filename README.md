@@ -104,6 +104,7 @@ Model parameters: (either user-specified or learned from `chipmunk learn`:
 * `--gamma-frag <float>,<float>`: Parameters for fragment length distribution (k, theta for Gamma distribution). Default: 15.67,15,49
 * `--spot <float>`: SPOT score (fraction of reads in peaks). Default: 0.18
 * `--frac <float>`: Fraction of the genome that is bound. Default: 0.03
+* `--pcr_rate <float>`: The geometric step size paramters for simulating PCR. Default: 1.0.
 
 Peark scoring:
 * `-b <reads.bam>`: Use a provided BAM file to obtain scores for each peak. No BAM is required. If a BAM is not given, scores in the peak files are used.
@@ -117,5 +118,4 @@ Other options:
 * `--sub <float>`: Substitution error rate. Default: 0.
 * `--ins <float>`: Insertion error rate. Default: 0.
 * `--del <float>`: Deletion error rate. Default: 0.
-* `--pcr_rate <float>`: The geometric step size paramters for simulating PCR. Default: 1.0.
 

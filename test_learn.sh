@@ -5,10 +5,9 @@
 BAM=/storage/pandaman/project/asimon-data/ENCFF431YXJ.marked.bam
 PEAKS=/storage/pandaman/project/asimon-data/ENCFF878DLA.bed
 TYPE=bed
-OUTDIR=/home/pandaman/projects/asimon/asimon-chip-sim/test/
 
-./src/asimon learn \
+./src/chipmunk learn \
     -p ${PEAKS} \
     -b ${BAM} \
     -t ${TYPE} \
-    -o ${OUTDIR}
+    -o test
