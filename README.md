@@ -4,7 +4,7 @@ ChIPmunk is a tool for simulating ChIP-sequencing experiments.
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
 
-[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats)
+[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [Detailed usage](#detailed) 
 
 <a name="download"></a>
 ## Download
@@ -78,19 +78,19 @@ chipmunk simreads \
 <a name="detailed"></a>
 ## Detailed usage
 
-### `chipmunk learn`
+### chipmunk learn
 
 Required parameters:
 * `-b <file.bam>`: BAM file containing aligned reads. Must be sorted and indexed. Paired end or single end data are supported.
 * `-p <peaks>`: file containing peaks. 
-* `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer". See [file formats](#formats) below with more info.
-* `-o <outprefix>`: Prefix to name output files. Outputs file `<outprefix>.txt` with learned model parameters. See [file formats](#formats) below with more info.
+* `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
+* `-o <outprefix>`: Prefix to name output files. Outputs file `<outprefix>.txt` with learned model parameters.
 
-### `chipmunk simreads`
+### chipmunk simreads
 
 Required parameters:
 * `-p <peaks>`: file containing peaks. 
-* `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer". See [file formats](#formats) below with more info.
+* `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
 * `-f <ref.fa>`: Reference genome fasta file. Must be indexed (e.g. `samtools faidx <ref.fa>`)
 * `-o <outprefix>`: Prefix to name output files. Outputs `<outprefix>.fastq` for single-end data or `<outprefix>_1.fastq` and `<outprefix>_2.fastq` for paired-end data.
 
@@ -119,5 +119,3 @@ Other options:
 * `--del <float>`: Deletion error rate. Default: 0.
 * `--pcr_rate <float>`: The geometric step size paramters for simulating PCR. Default: 1.0.
 
-<a name="formats"></a>
-## File formats
