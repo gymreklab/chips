@@ -375,7 +375,7 @@ int learn_main(int argc, char* argv[]) {
 
 //TODO add in -r argument not required
 void learn_help(void) {
-  cerr << "\nTool:    asimon learn" << endl;
+  cerr << "\nTool:    chipmunk learn" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
   cerr << "Summary: Learn parameters from a ChIP dataset." << endl << endl;
   cerr << "Usage:   " << PROGRAM_NAME << " learn -b reads.bam -p peak.bed -o outprefix [OPTIONS] " << endl << endl;

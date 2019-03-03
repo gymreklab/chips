@@ -5,13 +5,13 @@
 using namespace std;
 
 // Function declarations
-int asimon_help(void);
+int chipmunk_help(void);
 int simulate_reads_main(int argc, char* argv[1]);
 int learn_main(int argc, char* argv[1]);
 
 int main(int argc, char* argv[]) {
   // make sure the user at least entered a sub_command
-  if (argc < 2) return asimon_help();
+  if (argc < 2) return chipmunk_help();
 
   std::string sub_cmd = argv[1];
 
@@ -21,9 +21,9 @@ int main(int argc, char* argv[]) {
     return learn_main(argc-1, argv+1);
   } else if (sub_cmd == "-h" || sub_cmd == "--help" ||
 	   sub_cmd == "-help") {
-    return asimon_help();
+    return chipmunk_help();
   } else if (sub_cmd == "-version" || sub_cmd == "--version") {
-    cout << "asimon " << _GIT_VERSION << endl;
+    cout << "chipmunk " << _GIT_VERSION << endl;
   } else {
     cerr << "error: unrecognized command: " << argv[1] << endl << endl;
     return 1;
@@ -31,10 +31,10 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-int asimon_help(void) {
+int chipmunk_help(void) {
   cout << PROGRAM_NAME << ": Simulator for ChIP-seq and other -seq experiments.\n";
-  cout << "usage:   asimon <subcommand> [options]" << endl << endl;
-  cout << "The asimon sub-commands include:"<<endl;
+  cout << "usage:   chipmunk <subcommand> [options]" << endl << endl;
+  cout << "The chipmunk sub-commands include:"<<endl;
   cout << "     simreads      " << "Simulate ChIP-seq reads given a set of intervals.\n";
   cout << "     learn         " << "Learn model from real ChIP data.\n";
   cout  << endl;
