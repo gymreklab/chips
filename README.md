@@ -62,14 +62,14 @@ Basic usage is shown below. See [detailed usage](#detailed) below for more info.
 ```
 chipmunk learn \
   -b <reads.bam> \
-  -p <peaks.bed> \
+  -p <peaks> \
   -t <homer|bed>
   -o <outprefix>
 ```
 
 ```
 chipmunk simreads \
-  -p <peaks.bed \
+  -p <peaks> \
   -f <ref.fa>
   -t <homer|bed> \
   -o <outprefix>
@@ -80,7 +80,44 @@ chipmunk simreads \
 
 ### `chipmunk learn`
 
+Required parameters:
+* `-b <file.bam>`: BAM file containing aligned reads. Must be sorted and indexed. Paired end or single end data are supported.
+* `-p <peaks>`: file containing peaks. 
+* `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer". See [file formats](#formats) below with more info.
+* `-o <outprefix>`: Prefix to name output files. Outputs file `<outprefix>.txt` with learned model parameters. See [file formats](#formats) below with more info.
+
 ### `chipmunk simreads`
+
+Required parameters:
+* `-p <peaks>`: file containing peaks. 
+* `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer". See [file formats](#formats) below with more info.
+* `-f <ref.fa>`: Reference genome fasta file. Must be indexed (e.g. `samtools faidx <ref.fa>`)
+* `-o <outprefix>`: Prefix to name output files. Outputs `<outprefix>.fastq` for single-end data or `<outprefix>_1.fastq` and `<outprefix>_2.fastq` for paired-end data.
+
+Experiment parameters:
+* `--numcopies <int>`: Number of copies of the genome to simulate (Default: 100)
+* `--numreads <int>`: Number of reads (or read pairs) to simulate (Default: 1000000)
+* `--readlen <int>`: Read length to generate (Default: 36bp)
+* --paired`: Simulated paired-end reads (by default single-end reads are generated).
+
+Model parameters: (either user-specified or learned from `chipmunk learn`:
+* `--gamma-frag <float>,<float>`: Parameters for fragment length distribution (k, theta for Gamma distribution). Default: 15.67,15,49
+* `--spot <float>`: SPOT score (fraction of reads in peaks). Default: 0.18
+* `--frac <float>`: Fraction of the genome that is bound. Default: 0.03
+
+Peark scoring:
+* `-b <reads.bam>`: Use a provided BAM file to obtain scores for each peak. No BAM is required. If a BAM is not given, scores in the peak files are used.
+* `-c <int>`: The index of the BED file column used to score each peak (index starting from 1). Required if not using `-b`.
+
+Other options:
+* `--region <str>`: Only simulate reads from this region chrom:start-end. By default, simulate genome-wide.
+* `--binsize <int>`: Consider bins of this size when simulating. Default: 100000.
+* `--thread <int>`: Number of threads to use. Default: 1.
+* `--sequencer <str>`: Sequencing error mode. If not set, use `--sub`,`--ins`, and `--del`. Specify `--sequencer HiSeq` to set `--sub 2.65e-3 --del 2.43e-4 --ins 1.83e-4`.
+* `--sub <float>`: Substitution error rate. Default: 0.
+* `--ins <float>`: Insertion error rate. Default: 0.
+* `--del <float>`: Deletion error rate. Default: 0.
+* `--pcr_rate <float>`: The geometric step size paramters for simulating PCR. Default: 1.0.
 
 <a name="formats"></a>
 ## File formats
