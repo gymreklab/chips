@@ -33,6 +33,7 @@ Options::Options() {
   // Additional simulation parameters
   region = "";
   binsize = 100000;
+  skip_frag = false;
 
   // sequencer
   sequencer_type = "";

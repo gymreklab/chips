@@ -42,6 +42,7 @@ class Options {
   std::string region;
   int binsize;
 
+  bool skip_frag;
   float pcr_rate; 
 
   virtual ~Options();
