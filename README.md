@@ -4,7 +4,7 @@ ChIPmunk is a tool for simulating ChIP-sequencing experiments.
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
 
-[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [Detailed usage](#detailed) 
+[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats)
 
 <a name="download"></a>
 ## Download
@@ -120,3 +120,33 @@ Other options:
 * `--ins <float>`: Insertion error rate. Default: 0.
 * `--del <float>`: Deletion error rate. Default: 0.
 
+<a name="formats"></a>
+## Formats
+
+### Peak files
+
+Peak files may be either in Homer or Bed format. For all modules, the option `-t` should specify either "homer" or "bed" appropriately.
+
+With `-t bed`, your peak file must be tab-delimited with no header line. The first three columns are chromosome, start, and end. For `chipmunk simreads` if you don't supply a BAM file you'll also need to specify which column contains the peak score using `-c <colnum>`. For example if your file just has four columns, chrom, start, end, and score, set `-c 4`. If your peaks don't have scores you can modify your peak file to set all peaks to have score 1.
+
+With `-t homer`, your peak file should be in the format output by the [Homer peak caller](http://homer.ucsd.edu/homer/ngs/peaks.html). For homer files, set `-c 6` since the peak score intensity is in column 6.
+
+### Model files
+
+Model files are in JSON syntax, and follow the example below:
+
+```
+{
+    "frag": {
+        "k": 14.176023483276367,
+        "theta": 16.013242721557617
+    },
+    "pcr_rate": 0.825218915939331,
+    "pulldown": {
+        "f": 0.043268248438835144,
+        "s": 0.1925637274980545
+    }
+}
+```
+
+`chipmunk learn` outputs a JSON model file. `chipmunk simreads` can take in a model file with all or some of these parameters specified. Model parameters set on the command line override those set in the JSON model file.
