@@ -84,7 +84,7 @@ Required parameters:
 * `-b <file.bam>`: BAM file containing aligned reads. Must be sorted and indexed. Paired end or single end data are supported.
 * `-p <peaks>`: file containing peaks. 
 * `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
-* `-o <outprefix>`: Prefix to name output files. Outputs file `<outprefix>.txt` with learned model parameters.
+* `-o <outprefix>`: Prefix to name output files. Outputs file `<outprefix>.json` with learned model parameters.
 
 ### chipmunk simreads
 
@@ -101,6 +101,7 @@ Experiment parameters:
 * --paired`: Simulated paired-end reads (by default single-end reads are generated).
 
 Model parameters: (either user-specified or learned from `chipmunk learn`:
+* `--model <str>`: JSON file with model parameters (e.g. from running learn. Setting parameters with other options overrides anything in the JSON file.
 * `--gamma-frag <float>,<float>`: Parameters for fragment length distribution (k, theta for Gamma distribution). Default: 15.67,15,49
 * `--spot <float>`: SPOT score (fraction of reads in peaks). Default: 0.18
 * `--frac <float>`: Fraction of the genome that is bound. Default: 0.03
