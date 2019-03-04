@@ -31,17 +31,21 @@ bool compare_location(Fragment a, Fragment b);
 bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
 bool learn_pcr(const std::string& bamfile, float* geo_rate);
 
-bool learn_frag(const std::string& bamfile, float* alpha, float* beta) {
+bool learn_frag(const std::string& bamfile, float* alpha, float* beta, bool skip_frag) {
   /*
     Learn fragment length distribution from an input BAM file
     Fragment lengths follow a gamma distribution.
 
     Inputs:
     - bamfile (std::string): path to the BAM file
+    - skip_frag (bool): Skip fragment parameter learning process
     Outputs:
     - alpha (float): parameter of gamma distribution
     - beta  (float): parameter of gamma distribution
    */
+
+  /* Learning process should be skipped */
+  if (skip_frag){return true;}
 
   /* First, get a vector of the fragment lengths */
   int maxreads = 10000; int numreads = 0; // don't look at more than this many reads
@@ -294,18 +298,23 @@ int learn_main(int argc, char* argv[]) {
       }
     } else if (PARAMETER_CHECK("-t", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.peakfiletype = argv[i+1];
+    	options.peakfiletype = argv[i+1];
 	i++;
       }
     } else if (PARAMETER_CHECK("-c", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.countindex = std::atoi(argv[i+1]);
+    	options.countindex = std::atoi(argv[i+1]);
 	i++;
       }
     } else if (PARAMETER_CHECK("-r", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.remove_pct = std::atof(argv[i+1]);
-    i++;
+    	options.remove_pct = std::atof(argv[i+1]);
+    	i++;
+      }
+    } else if (PARAMETER_CHECK("--skip-frag", 11, parameterLength)){
+      if ((i+1) < argc) {
+    	options.skip_frag = true;
+    	i++;
       }
     } else {
       cerr << endl << "******ERROR: Unrecognized parameter: " << argv[i] << " ******" << endl << endl;
@@ -335,7 +344,7 @@ int learn_main(int argc, char* argv[]) {
     /*** Learn fragment size disbribution parameters ***/
     float frag_param_a;
     float frag_param_b;
-    if (!learn_frag(options.chipbam, &frag_param_a, &frag_param_b)) {
+    if (!learn_frag(options.chipbam, &frag_param_a, &frag_param_b, options.skip_frag)) {
       PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
     }
     model.SetFrag(frag_param_a, frag_param_b);

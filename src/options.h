@@ -44,6 +44,8 @@ class Options {
   std::string region;
   int binsize;
 
+  // Learn options
+  bool skip_frag;
   virtual ~Options();
 };
 
