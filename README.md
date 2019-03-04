@@ -86,6 +86,9 @@ Required parameters:
 * `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
 * `-o <outprefix>`: Prefix to name output files. Outputs file `<outprefix>.json` with learned model parameters.
 
+Optional parameters:
+* `--skip-frag`: Skip learning fragment parameters. Only learn pulldown and PCR.
+
 ### chipmunk simreads
 
 Required parameters:
