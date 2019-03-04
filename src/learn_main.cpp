@@ -298,23 +298,23 @@ int learn_main(int argc, char* argv[]) {
       }
     } else if (PARAMETER_CHECK("-t", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.peakfiletype = argv[i+1];
+    	options.peakfiletype = argv[i+1];
 	i++;
       }
     } else if (PARAMETER_CHECK("-c", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.countindex = std::atoi(argv[i+1]);
+    	options.countindex = std::atoi(argv[i+1]);
 	i++;
       }
     } else if (PARAMETER_CHECK("-r", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.remove_pct = std::atof(argv[i+1]);
-    i++;
+    	options.remove_pct = std::atof(argv[i+1]);
+    	i++;
       }
-    } else if (PARAMETER_CHECK("--skip-frag", 2, parameterLength)){
+    } else if (PARAMETER_CHECK("--skip-frag", 11, parameterLength)){
       if ((i+1) < argc) {
-    options.skip_frag = true;
-    i++;
+    	options.skip_frag = true;
+    	i++;
       }
     } else {
       cerr << endl << "******ERROR: Unrecognized parameter: " << argv[i] << " ******" << endl << endl;
