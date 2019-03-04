@@ -10,8 +10,8 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
   start = gbin.start;
   end = gbin.end;
   numcopies = options.numcopies;
-  gamma_alpha = options.gamma_alpha;
-  gamma_beta = options.gamma_beta;
+  gamma_k = options.gamma_k;
+  gamma_theta = options.gamma_theta;
   ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
 
   pcr_rate = options.pcr_rate;
@@ -31,7 +31,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   std::default_random_engine generator(seed);
   srand(seed);
-  std::gamma_distribution<float> fragdist(gamma_alpha, gamma_beta);
+  std::gamma_distribution<float> fragdist(gamma_k, gamma_theta);
   int32_t current_pos;
   int32_t fstart, fend;
   float fsize;

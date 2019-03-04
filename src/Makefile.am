@@ -19,7 +19,8 @@ libchipmunk_a_SOURCES = simulate_reads_main.cpp learn_main.cpp \
 	peak_intervals.h peak_intervals.cpp \
 	peak_io_toolbox.h peak_io_toolbox.cpp\
 	peak_loader.h peak_loader.cpp\
-	ref_genome.h ref_genome.cpp
+	ref_genome.h ref_genome.cpp \
+	model.h model.cpp json.hpp
 
 chipmunk_SOURCES = main.cpp
 
