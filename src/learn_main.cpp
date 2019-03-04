@@ -342,8 +342,8 @@ int learn_main(int argc, char* argv[]) {
     ChIPModel model;
 
     /*** Learn fragment size disbribution parameters ***/
-    float frag_param_a;
-    float frag_param_b;
+    float frag_param_a = -1;
+    float frag_param_b = -1;
     if (!learn_frag(options.chipbam, &frag_param_a, &frag_param_b, options.skip_frag)) {
       PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
     }
@@ -351,8 +351,8 @@ int learn_main(int argc, char* argv[]) {
 
     /*** Learn pulldown ratio parameters ***/
     float ab_ratio;
-    float s;
-    float f;
+    float s = -1;
+    float f = -1;
     if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
         &ab_ratio, &s, &f)){
       PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
@@ -361,7 +361,7 @@ int learn_main(int argc, char* argv[]) {
     model.SetS(s);
 
     /*** Learn PCR geometric distribution parameter **/
-    float geo_rate;
+    float geo_rate = -1;
     if (!learn_pcr(options.chipbam, &geo_rate)){
       PrintMessageDieOnError("Error learning PCR rate", M_ERROR);
     }
