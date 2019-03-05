@@ -598,11 +598,11 @@ int learn_main(int argc, char* argv[]) {
     /*** Learn fragment size disbribution parameters ***/
     float frag_param_a;
     float frag_param_b;
-    if (!options.paired){
+    if (options.paired){
       if (!learn_frag_paired(options.chipbam, &frag_param_a, &frag_param_b)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
-    //}else{
+    }else{
       if (!learn_frag_single(options.chipbam, options.peaksbed, options.peakfiletype,
                   options.countindex, options.intensity_threshold, options.estimate_frag_length,
                   &frag_param_a, &frag_param_b)) {
