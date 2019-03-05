@@ -26,14 +26,14 @@ void learn_help(void);
 bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
                     const std::string& peakfileType, const std::int32_t count_colidx,
                     const float remove_pct, float* ab_ratio_ptr, 
-                    float *s_ptr, float* f_ptr, bool skip_frag);
+                    float *s_ptr, float* f_ptr);
 bool compare_location(Fragment a, Fragment b);
 bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
 bool learn_pcr(const std::string& bamfile, float* geo_rate);
-bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta);
+bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag);
 bool learn_frag_single(const std::string& bamfile, const std::string& peakfile, const std::string peakfileType,
     const std::int32_t count_colidx, const int intensity_threshold, const int estimate_frag_length,
-    float* alpha, float* beta);
+    float* alpha, float* beta, bool skip_frag);
 void search(float& low, float& high, const float mu, const float gs,
     const std::int32_t start_lower_bound, const std::int32_t start_upper_bound, const std::vector<float> start_cdf, const std::vector<float> start_edf,
     const std::int32_t end_lower_bound, const std::int32_t end_upper_bound, const std::vector<float> end_cdf, const std::vector<float> end_edf);
