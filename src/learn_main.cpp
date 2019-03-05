@@ -11,6 +11,7 @@
 
 #include "src/bam_io.h"
 #include "src/common.h"
+#include "src/model.h"
 #include "src/options.h"
 #include "src/peak_loader.h"
 #include "src/fragment.h"
@@ -49,17 +50,21 @@ float calculate_gamma_pdf(const float x, const float k, const float theta);
 bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta);
 
 
-bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta) {
+bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag) {
   /*
     Learn fragment length distribution from an input BAM file
     Fragment lengths follow a gamma distribution.
 
     Inputs:
     - bamfile (std::string): path to the BAM file
+    - skip_frag (bool): Skip fragment parameter learning process
     Outputs:
     - alpha (float): parameter of gamma distribution
     - beta  (float): parameter of gamma distribution
    */
+
+  /* Learning process should be skipped */
+  if (skip_frag){return true;}
 
   /* First, get a vector of the fragment lengths */
   int maxreads = 10000; int numreads = 0; // don't look at more than this many reads
@@ -547,18 +552,23 @@ int learn_main(int argc, char* argv[]) {
       }
     } else if (PARAMETER_CHECK("-t", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.peakfiletype = argv[i+1];
+    	options.peakfiletype = argv[i+1];
 	i++;
       }
     } else if (PARAMETER_CHECK("-c", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.countindex = std::atoi(argv[i+1]);
+    	options.countindex = std::atoi(argv[i+1]);
 	i++;
       }
     } else if (PARAMETER_CHECK("-r", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.remove_pct = std::atof(argv[i+1]);
-    i++;
+    	options.remove_pct = std::atof(argv[i+1]);
+    	i++;
+      }
+    } else if (PARAMETER_CHECK("--skip-frag", 11, parameterLength)){
+      if ((i+1) < argc) {
+    	options.skip_frag = true;
+    	i++;
       }
     } else if (PARAMETER_CHECK("--thres", 7, parameterLength)){
       if ((i+1) < argc){
@@ -594,12 +604,13 @@ int learn_main(int argc, char* argv[]) {
 
   if (!showHelp) {
     /***************** Main implementation ***************/
+    ChIPModel model;
 
     /*** Learn fragment size disbribution parameters ***/
-    float frag_param_a;
-    float frag_param_b;
+    float frag_param_a = -1;
+    float frag_param_b = -1;
     if (options.paired){
-      if (!learn_frag_paired(options.chipbam, &frag_param_a, &frag_param_b)) {
+      if (!learn_frag_paired(options.chipbam, &frag_param_a, &frag_param_b, options.skip_frag)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
     }else{
@@ -609,37 +620,29 @@ int learn_main(int argc, char* argv[]) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
     }
-    std::exit(1);
+    model.SetFrag(frag_param_a, frag_param_b);
 
     /*** Learn pulldown ratio parameters ***/
     float ab_ratio;
-    float s;
-    float f;
+    float s = -1;
+    float f = -1;
     if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
         &ab_ratio, &s, &f)){
       PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
     }
+    model.SetF(f);
+    model.SetS(s);
 
     /*** Learn PCR geometric distribution parameter **/
-    float geo_rate;
+    float geo_rate = -1;
     if (!learn_pcr(options.chipbam, &geo_rate)){
       PrintMessageDieOnError("Error learning PCR rate", M_ERROR);
     }
+    model.SetPCR(geo_rate);
 
-    // remove previous existing file
-    string params = options.outprefix + ".txt";
-    remove(params.c_str());
-
-    /*** Write params to file ***/
-    ofstream outfile;
-    outfile.open(params, ios_base::app);
-    outfile << "alpha: " << frag_param_a << " beta: " << frag_param_b << endl;
-    outfile << "ab_ratio: " << ab_ratio << endl;
-    outfile << "f: " << f << endl;
-    outfile << "s: " << s << endl;
-    outfile << "pcr rate: " << geo_rate << endl;
-    outfile.close();
-
+    /*** Output learned model **/
+    model.WriteModel(options.outprefix + ".json");
+    model.PrintModel();
     return 0;
   } else {
     learn_help();
@@ -650,14 +653,14 @@ int learn_main(int argc, char* argv[]) {
 //TODO add in -r argument not required
 void learn_help(void) {
   Options options;
-  cerr << "\nTool:    asimon learn" << endl;
+  cerr << "\nTool:    chipmunk learn" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
   cerr << "Summary: Learn parameters from a ChIP dataset." << endl << endl;
   cerr << "Usage:   " << PROGRAM_NAME << " learn -b reads.bam -p peak.bed -o outprefix [OPTIONS] " << endl << endl;
   cerr << "[Required arguments]: " << "\n";
   cerr << "         -b <reads.bam>:     BAM file with ChIP reads (.bai index required)" << "\n";
-  cerr << "         -p <peaks.bed>:     BED file with peak regions (Homer format)" << "\n";
-  cerr << "         -t <peakfile_type>: File type of the input peak file" << "\n";
+  cerr << "         -p <peaks.bed>:     BED file with peak regions (Homer format or BED format)" << "\n";
+  cerr << "         -t <peakfile_type>: File type of the input peak file. Only `homer` or `bed` supported." << "\n";
   cerr << "         -o <outprefix>:     Prefix for output files" << "\n";
   cerr << "         -c <int>:           The index of the BED file column used to score each peak (index starting from 1)" << "\n";
   cerr << "[Optional arguments]: " << "\n";
@@ -670,7 +673,9 @@ void learn_help(void) {
        << "                             Default: false\n";
   cerr << "         --thres <float>:    Threshold for peak scores in single-end read length estimation\n"
        << "                             Default: " <<options.intensity_threshold<< "\n";
-
+  cerr << "\n";
+  cerr  << "[ General help ]:" << endl;
+  cerr  << "    --help        "  << "Print this help menu.\n";
   cerr << "\n";
   exit(1);
 }

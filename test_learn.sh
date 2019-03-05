@@ -13,7 +13,7 @@ OUTDIR=/home/pandaman/projects/asimon/asimon-chip-sim/test/
 THRES=1500
 COLUMN=7
 
-./src/asimon learn \
+./src/chipmunk learn \
     -p ${PEAKS} \
     -b ${BAM} \
     -t ${TYPE} \

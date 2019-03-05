@@ -9,6 +9,7 @@
 #include "src/common.h"
 #include "src/fragment.h"
 #include "src/library_constructor.h"
+#include "src/model.h"
 #include "src/options.h"
 #include "src/pulldown.h"
 #include "src/sequencer.h"
@@ -30,6 +31,9 @@ void fill_queue(const int numcopies, TaskQueue<int> & q);
 int simulate_reads_main(int argc, char* argv[]) {
   bool showHelp = false;
   Options options;
+
+  // keep track of model params. Command-line options override json
+  ChIPModel model;
 
   // check to see if we should print out some help
   if(argc <= 1) showHelp = true;
@@ -81,18 +85,27 @@ int simulate_reads_main(int argc, char* argv[]) {
       if ((i+1) < argc) {
 	std::vector<std::string> params;
 	split_by_delim(argv[i+1], ',', params);
-	options.gamma_alpha = atof(params[0].c_str());
-	options.gamma_beta = atof(params[1].c_str());
+	options.gamma_k = atof(params[0].c_str());
+	options.gamma_theta = atof(params[1].c_str());
+	model.SetFrag(options.gamma_k, options.gamma_theta);
 	i++;
       }
     } else if (PARAMETER_CHECK("--spot", 6, parameterLength)) {
       if ((i+1) < argc) {
 	options.ratio_s = atof(argv[i+1]);
+	model.SetS(options.ratio_s);
 	i++;
       }
     } else if (PARAMETER_CHECK("--frac", 6, parameterLength)) {
       if ((i+1) < argc) {
 	options.ratio_f = atof(argv[i+1]);
+	model.SetF(options.ratio_f);
+	i++;
+      }
+    } else if (PARAMETER_CHECK("--model", 7, parameterLength)) {
+      if ((i+1) < argc) {
+	options.model_file = argv[i+1];
+	model.ReadFromJSON(options.model_file);
 	i++;
       }
     } else if (PARAMETER_CHECK("--region", 8, parameterLength)) {
@@ -149,14 +162,19 @@ int simulate_reads_main(int argc, char* argv[]) {
       }
     } else if (PARAMETER_CHECK("--pcr_rate", 10, parameterLength)){
       if ((i+1) < argc){
-    options.pcr_rate = std::atof(argv[i+1]);
-    i++;
+	options.pcr_rate = std::atof(argv[i+1]);
+	model.SetPCR(options.pcr_rate);
+	i++;
       }
     } else {
       cerr << endl << "*****ERROR: Unrecognized parameter: " << argv[i] << " *****" << endl << endl;
       showHelp = true;
     }
   }
+  // Set model defaults if not set
+  model.UpdateParams(options);
+  // Keep final model in options since other classes use that
+  model.UpdateOptions(options);
 
   // Check inputs
   if (options.peaksbed.empty()) {
@@ -177,6 +195,9 @@ int simulate_reads_main(int argc, char* argv[]) {
   }
 
   if (!showHelp) {
+    // Print out parsed model
+    model.PrintModel();
+
     TaskQueue<int> task_queue;
     fill_queue(options.numcopies, task_queue);
 
@@ -303,13 +324,13 @@ void merge_files(std::string ifilename, std::string ofilename){
 
 void simulate_reads_help(void) {
   Options options;
-  cerr << "\nTool:    asimon simreads" << endl;
+  cerr << "\nTool:    chipmunk simreads" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
   cerr << "Summary: Simulate ChIP-seq reads for a set of peaks." << endl << endl;
   cerr << "Usage:   " << PROGRAM_NAME << " simreads -p peaks.bed -f ref.fa -o outprefix [OPTIONS] " << endl;
   cerr << "\n[Required arguments]: " << "\n";
   cerr << "     -p <peaks.bed>: BED file with peak regions" << "\n";
-  cerr << "     -t <str>: The file format of your input peak file" << "\n";
+  cerr << "     -t <str>: The file format of your input peak file. Only `homer` or `bed` are supported." << "\n";
   cerr << "     -f <ref.fa>: FASTA file with reference genome" << "\n";
   cerr << "     -o <outprefix>: Prefix for output files" << "\n";
   cerr << "\n[Experiment parameters]: " << "\n";
@@ -322,17 +343,21 @@ void simulate_reads_help(void) {
   cerr << "     --paired         : Simulate paired-end reads\n"
        << "                        Default: false \n";
   cerr << "\n[Model parameters]: " << "\n";
+  cerr << "     --model <str>               : JSON file with model parameters (e.g. from running learn\n";
+  cerr << "                                   Setting parameters below overrides anything in the JSON file\n";
   cerr << "     --gamma-frag <float>,<float>: Parameters for fragment length distribution (alpha, beta).\n"
-       << "                                   Default: " << options.gamma_alpha << ","
-       << options.gamma_beta << "\n";
+       << "                                   Default: " << options.gamma_k << ","
+       << options.gamma_theta << "\n";
   cerr << "     --spot <float>              : SPOT score (fraction of reads in peaks) \n"
        << "                                   Default: " << options.ratio_s << "\n";
   cerr << "     --frac <float>              : Fraction of the genome that is bound \n"
        << "                                   Default: " << options.ratio_f << "\n";
+  cerr << "     --pcr_rate <float>          : The rate of geometric distribution for PCR simulation\n"
+       << "                                   Default: " << options.pcr_rate << "\n";
   cerr << "\n[Peak scoring: choose one]: " << "\n";
   cerr << "     -b <reads.bam>:             : Read BAM file used to score each peak\n"
        << "                                 : Default: None (use the scores from the peak file)\n";
-  cerr << "     -c <int>:                   : The index of the BED file column used to score each peak (index starting from 1)\n"
+  cerr << "     -c <int>:                   : The index of the BED file column used to score each peak (index starting from 1). Required if -b not used.\n"
        << "                                 : Default: " << options.countindex << "\n";
   cerr << "\n[Other options]: " << "\n";
   cerr << "     --region <str>              : Only simulate reads from this region chrom:start-end\n"
@@ -346,8 +371,8 @@ void simulate_reads_help(void) {
   cerr << "     --sub <float>               : Customized substitution value in sequecing\n";
   cerr << "     --ins <float>               : Customized insertion value in sequecing\n";
   cerr << "     --del <float>               : Customized deletion value in sequecing\n";
-  cerr << "     --pcr_rate <float>          : The rate of geometric distribution for PCR simulation\n"
-       << "                                   Default: " << options.pcr_rate << "\n";
   cerr << "\n";
+  cerr  << "[ General help ]:" << endl;
+  cerr  << "    --help        "  << "Print this help menu.\n";
   exit(1);
 }
