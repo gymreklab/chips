@@ -42,6 +42,10 @@ Options::Options() {
 
   // pcr
   pcr_rate = 1.0;
+
+  // learn only: intensity threshold
+  intensity_threshold = 100;
+  estimate_frag_length = 200;
 }
 
 Options::~Options() {}

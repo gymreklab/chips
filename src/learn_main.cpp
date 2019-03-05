@@ -29,6 +29,25 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
 bool compare_location(Fragment a, Fragment b);
 bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
 bool learn_pcr(const std::string& bamfile, float* geo_rate);
+bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta);
+bool learn_frag_single(const std::string& bamfile, const std::string& peakfile, const std::string peakfileType,
+    const std::int32_t count_colidx, const int intensity_threshold, const int estimate_frag_length,
+    float* alpha, float* beta);
+void search(float& low, float& high, const float mu, const float gs,
+    const std::int32_t start_lower_bound, const std::int32_t start_upper_bound, const std::vector<float> start_cdf, const std::vector<float> start_edf,
+    const std::int32_t end_lower_bound, const std::int32_t end_upper_bound, const std::vector<float> end_cdf, const std::vector<float> end_edf);
+bool calculate_distribution(const std::vector<float> points, const std::int32_t lower_bound, const std::int32_t upper_bound,
+    std::vector<float>& pdf, std::vector<float>& cdf, std::vector<float>& edf);
+float calculate_gs(const std::int32_t lower_bound, const std::int32_t upper_bound,
+    const std::vector<float> cdf, const std::vector<float> edf, const std::vector<float> pdf, const float mu,
+    const float offset, const std::int32_t bound_baseline);
+float calculate_eexpl(const float k, const float theta, const std::int32_t lower_bound, const std::int32_t upper_bound,
+    const std::vector<float> cdf, const std::vector<float> edf, const float mu);
+float calculate_edf(const float x, const std::int32_t lower_bound, const std::int32_t upper_bound,
+    const std::vector<float> cdf, const std::vector<float> edf, const float mu);
+float calculate_gamma_pdf(const float x, const float k, const float theta);
+bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta);
+
 
 bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta) {
   /*
@@ -48,9 +67,9 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta) {
   const BamHeader* bamheader = bamreader.bam_header();
   // Get first chrom to look at fragment lengths
   std::vector<std::string> seq_names = bamheader->seq_names();
-  std::vector<uint32_t> seq_lengths = bamheader->seq_lengths();
-  std::vector<int32_t> fraglengths;
-  int32_t tlen;
+  std::vector<std::uint32_t> seq_lengths = bamheader->seq_lengths();
+  std::vector<std::int32_t> fraglengths;
+  std::int32_t tlen;
   BamAlignment aln;
 
   // Randomly grab fragments
@@ -97,7 +116,6 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta) {
     return false;
   }
 
-
   float total_frag_len = 0;     // sum of all the frag lengths
 
   // get sum of all frag lengths and log sum of each frag length
@@ -129,7 +147,8 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta) {
 
 bool learn_frag_single(const std::string& bamfile,
                         const std::string& peakfile, const std::string peakfileType,
-                        const std::int32_t count_colidx, const std::uint32_t intensity_threshold,
+                        const std::int32_t count_colidx, const int intensity_threshold,
+                        const int estimate_frag_length,
                         float* alpha, float* beta) {
   /*
     Predict fragment length distribution from an input BAM file (single-end reads)
@@ -143,6 +162,7 @@ bool learn_frag_single(const std::string& bamfile,
    */
 
   /* First read peaks and restrict reads origins */
+  // peak intensity is only used for filtering out unreliable reads
   PeakLoader peakloader(peakfile, peakfileType, "", count_colidx);
   std::vector<Fragment> peaks;
   if (!peakloader.Load(peaks)) PrintMessageDieOnError("Error loading peaks from " + peakfile, M_ERROR);
@@ -152,94 +172,90 @@ bool learn_frag_single(const std::string& bamfile,
 
   /* Read reads from the BAM file */
   BamCramReader bamreader(bamfile);
-  vector<float> starts;
-  vector<float> ends;
+  std::vector<float> starts;
+  std::vector<float> ends;
   for (int peak_index=0; peak_index<peaks.size(); peak_index++){
     bamreader.SetRegion(peaks[peak_index].chrom, peaks[peak_index].start, peaks[peak_index].start+peaks[peak_index].length);
     BamAlignment aln;
-    vector<std::int32_t> starts_in_peak;
-    vector<std::int32_t> ends_in_peak;
+    std::vector<float> starts_in_peak;
+    std::vector<float> ends_in_peak;
     while (bamreader.GetNextAlignment(aln)){
       if (aln.IsDuplicate()) {continue;}
       if ( (!aln.IsMapped()) || aln.IsSecondary()){continue;}
-      uint32_t aln_start = aln.Position();
-      uint32_t aln_end = aln.GetEndPosition();
-
-      // discard fragments that toch the exterior of the region
-      if ((aln_start < peaks[peak_index].start) || (aln_end > peaks[peak_index].start+peaks[peak_index].length)) continue;
+      float aln_start = aln.Position();
+      float aln_end = aln.GetEndPosition();
 
       if(aln.IsReverseStrand()){
-        ends_in_peak.push_back(aln_end);
+        if ( ((aln_end-estimate_frag_length) >= peaks[peak_index].start)
+                &&(aln_end <= peaks[peak_index].start+peaks[peak_index].length)){
+          ends_in_peak.push_back(aln_end);
+        }
       }else{
-        starts_in_peak.push_back(aln_start);
+        if ((aln_start >= peaks[peak_index].start) 
+                &&( (aln_start+estimate_frag_length) <= peaks[peak_index].start+peaks[peak_index].length)){
+          starts_in_peak.push_back(aln_start);
+        }
       }
     }
     
-    if (starts_in_peak.size() == 0) or (ends_in_peak.size() == 0) continue;
-    float avg_start = std::accumulate(starts_in_peak.begin(), starts_in_peak.end(), 0.0)/float(starts_in_peak.size());
-    float avg_end = std::accumulate(ends_in_peak.begin(), ends_in_peak.end(), 0.0)/float(ends_in_peak.size());
+    if ((starts_in_peak.size() == 0) || (ends_in_peak.size() == 0)) continue;
+    float avg_start = std::accumulate(starts_in_peak.begin(), starts_in_peak.end(), 0.0)/ (float) starts_in_peak.size();
+    float avg_end = std::accumulate(ends_in_peak.begin(), ends_in_peak.end(), 0.0)/ (float) ends_in_peak.size();
     float mid_pos = (avg_start + avg_end) / 2.0;
 
+    // note:
+    // starts will be float variables due to "mid_pos"
+    // starts are less then zero in most of the time; ends are the otherwise
     for (int start_idx=0; start_idx<starts_in_peak.size(); start_idx++) starts.push_back(starts_in_peak[start_idx] - mid_pos);
     for (int end_idx=0; end_idx<ends_in_peak.size(); end_idx++) ends.push_back(ends_in_peak[end_idx] - mid_pos);
   }
 
   /* mean value of fragment length*/
-  float mean_frag_length;
-  mean_frag_length = std::accumulate(ends.begin(), ends.end(), 0.0)/float(ends.size())
-                        - std::accumulate(starts.begin(), starts.end(), 0.0)/float(starts.size());
-  
+  float mean_frag_length = std::accumulate(ends.begin(), ends.end(), 0.0)/ (float) ends.size()
+                        - std::accumulate(starts.begin(), starts.end(), 0.0)/ (float) starts.size();
+
   /* calculate CDF of starts and ends */
-  std::int32_t start_lower_bound = std::floor(std::min_element(starts.begin(), starts.end()));
-  std::int32_t start_upper_bound = std::ceil(std::max_element(starts.begin(), starts.end()));
-  vector<float> start_pdf(start_upper_bound-start_lower_bound+10, 0);
-  for(int start_idx; start_idx<starts.size(); start_idx++){
-    std::uint32_t key = std::ceil(starts[start_idx]) - start_lower_bound;
-    start_pdf[key] += 1;
-  }
-  for(int pdf_idx=1; pdf_idx<start_pdf.size(); pdf_idx++) start_pdf /= float(starts.size());
-  vector<float> start_cdf(start_upper_bound-start_lower_bound+10, 0);
-  for(int pdf_idx=1; pdf_idx<start_pdf.size(); pdf_idx++){
-    start_cdf[pdf] = start_cdf[pdf_idx-1] + start_pdf[pdf_idx]
+  /* start */
+  std::int32_t start_lower_bound = std::floor(*std::min_element(starts.begin(), starts.end()));
+  std::int32_t start_upper_bound = std::ceil(*std::max_element(starts.begin(), starts.end()));
+  vector<float> start_pdf(start_upper_bound-start_lower_bound+1, 0);
+  vector<float> start_cdf(start_upper_bound-start_lower_bound+1, 0);
+  vector<float> start_edf(start_upper_bound-start_lower_bound+1, 0);
+  if (!calculate_distribution(starts, start_lower_bound, start_upper_bound,
+                        start_pdf, start_cdf, start_edf)){
+    PrintMessageDieOnError("Error happened when calculating position distributions", M_ERROR);
   }
 
-  std::uint32_t end_lower_bound = std::min_element(ends.begin(), ends.end());
-  std::uint32_t end_upper_bound = std::max_element(ends.begin(), ends.end());
-  uint32_t low = 200;
-  uint32_t high = 8000;
-  for experiment_idx in range(35) low, high = search(low, high);
-
-
-  float total_frag_len = 0;     // sum of all the frag lengths
-
-  float normed_lcdf;
-  float normed_ledf;
-  float normed_rcdf;
-  float normed_redf;
-
-  gs = std::max(
-          lefts_pdf[i] * rights_edf[(i+mu/2)/4+mu/2]
-          ????? );
-
-
-  // get sum of all frag lengths and log sum of each frag length
-  for (int frag = 0; frag < fraglengths.size(); frag++)
-  {
-    total_frag_len += fraglengths[frag];
+  std::int32_t end_lower_bound = std::floor(*std::min_element(ends.begin(), ends.end()));
+  std::int32_t end_upper_bound = std::ceil(*std::max_element(ends.begin(), ends.end()));
+  vector<float> end_pdf(end_upper_bound-end_lower_bound+1, 0);
+  vector<float> end_cdf(end_upper_bound-end_lower_bound+1, 0);
+  vector<float> end_edf(end_upper_bound-end_lower_bound+1, 0);
+  if (!calculate_distribution(ends, end_lower_bound, end_upper_bound,
+                        end_pdf, end_cdf, end_edf)){
+    PrintMessageDieOnError("Error happened when calculating position distributions", M_ERROR);
   }
 
-  // mean of frag lengths and log mean of fraglengths
-  float mean_frag_length = total_frag_len/fraglengths.size();
-
-  /* Using method of moments to estimate the shape and scale parameters */
-  float moment_sum = 0;
-  for (int n = 0; n < fraglengths.size(); n++)
-  {
-    moment_sum += (fraglengths[n] - mean_frag_length)*(fraglengths[n] - mean_frag_length);
+  float gs1 = calculate_gs(end_lower_bound, end_upper_bound, end_cdf, end_edf,
+                            start_pdf, mean_frag_length,
+                            (mean_frag_length + mean_frag_length/3.0)/2.0, start_lower_bound);
+  float gs2 = calculate_gs(start_lower_bound, start_upper_bound, start_cdf, start_edf,
+                            end_pdf, -mean_frag_length,
+                            -(mean_frag_length + mean_frag_length/3.0)/2.0, end_lower_bound);
+  float gs = std::max(gs1, gs2);
+  float low = 200;
+  float high = 8000;
+  for(int experiment_idx=0; experiment_idx<35; experiment_idx++){
+    search(low, high, mean_frag_length, gs,
+            start_lower_bound, start_upper_bound, start_cdf, start_edf,
+            end_lower_bound, end_upper_bound, end_cdf, end_edf);
   }
-  *beta = (moment_sum/(mean_frag_length*fraglengths.size()));
+  float var_frag_length = (low + high) / 2.0;
+
+  // mean_frag_length, var_frag_length
+  // --> k and theta
+  *beta = var_frag_length / mean_frag_length;
   *alpha = mean_frag_length / *beta;
-
   if (DEBUG) {
     std::stringstream ss;
     ss << "Learned fragment length params alpha: " << *alpha << " and beta: " << *beta;
@@ -248,46 +264,121 @@ bool learn_frag_single(const std::string& bamfile,
   return true;
 }
 
-void search(std::uint32_t& low, std::uint32_t& high, const float mu){
+void search(float& low, float& high, const float mu, const float gs,
+            const std::int32_t start_lower_bound, const std::int32_t start_upper_bound,
+            const std::vector<float> start_cdf, const std::vector<float> start_edf,
+            const std::int32_t end_lower_bound, const std::int32_t end_upper_bound,
+            const std::vector<float> end_cdf, const std::vector<float> end_edf){
   // calculate the score for the current setting
   float shape = mu * mu / (float(low + high)/2.0);
   float scale = (float(low + high)/2.0) / mu;
-  ???
+  float eexpl1 = calculate_eexpl(shape, scale, start_lower_bound, start_upper_bound, start_cdf, start_edf, -mu);
+  float eexpl2 = calculate_eexpl(shape, scale, end_lower_bound, end_upper_bound, end_cdf, end_edf, mu);
+  float eexpl = std::min(eexpl1, eexpl2);
 
-  if (res > 0){
+  if ((eexpl-gs) > 0){
     high = (float(low + high)/2.0);
   }else{
     low = (float(low + high)/2.0);
   }
-
   return;
 }
 
-{
-  std::uint32_t lower_bound = std::min_element(points.begin(), points.end());
-  std::uint32_t upper_bound = std::max_element(points.begin(), points.end());
-  
+
+bool calculate_distribution(const std::vector<float> points,
+        const std::int32_t lower_bound, const std::int32_t upper_bound,
+        std::vector<float>& pdf, std::vector<float>& cdf, std::vector<float>& edf){
+  // pdf
+  for(int pt_idx=0; pt_idx<points.size(); pt_idx++){
+    std::uint32_t key = std::ceil(points[pt_idx]) - lower_bound;
+    pdf[key] += 1;
+  }
+  for(int pdf_idx=0; pdf_idx<pdf.size(); pdf_idx++) pdf[pdf_idx] /= (float) points.size(); // norm
+
+  // cdf
+  cdf[0] = pdf[0];
+  for(int cdf_idx=1; cdf_idx<cdf.size(); cdf_idx++){
+    cdf[cdf_idx] = cdf[cdf_idx-1] + pdf[cdf_idx];
+  }
+
+  // edf - left
+  std::vector<float> edf_l(upper_bound-lower_bound+1, 0);
+  for(int pt_idx=0; pt_idx<points.size(); pt_idx++){
+    std::uint32_t key = std::floor(points[pt_idx]) - lower_bound;
+    edf_l[key] += (points[pt_idx] - std::floor(points[pt_idx]));
+  }
+  for(int edf_idx=0; edf_idx<edf_l.size(); edf_idx++){
+    edf_l[edf_idx] /= (float) points.size(); // norm
+  }
+  for(int edf_idx=edf_l.size()-1; edf_idx>0; edf_idx--){
+    edf_l[edf_idx-1] += edf_l[edf_idx] + (1 - cdf[edf_idx]);
+  }
+
+  // edf - right
+  vector<float> edf_r(upper_bound-lower_bound+1, 0);
+  for(int pt_idx=0; pt_idx<points.size(); pt_idx++){
+    std::uint32_t key = std::ceil(points[pt_idx]) - lower_bound;
+    edf_r[key] += (std::ceil(points[pt_idx]) - points[pt_idx]);
+  }
+  for(int edf_idx=0; edf_idx<edf_r.size(); edf_idx++){
+    edf_r[edf_idx] /= (float) points.size(); // norm
+  }
+  for(int edf_idx=0; edf_idx<(edf_r.size()-1); edf_idx++){
+    edf_r[edf_idx+1] += (edf_r[edf_idx] + cdf[edf_idx]);
+  }
+  // edf-normed
+  for (int edf_idx=0; edf_idx<edf.size(); edf_idx++){
+    edf[edf_idx] = (edf_l[edf_idx]+edf_r[edf_idx]);
+  }
+
+  return true;
 }
 
+float calculate_gs(const std::int32_t lower_bound, const std::int32_t upper_bound,
+        const std::vector<float> cdf, const std::vector<float> edf, 
+        const std::vector<float> pdf, const float mu,
+        const float offset, const std::int32_t bound_baseline){
+  float gs = 0;
+  for(int pdf_idx=0; pdf_idx<pdf.size(); pdf_idx++){
+    int abs_pos = pdf_idx + bound_baseline; // relative_pos + lower_bound - the_other_lower_bound
+    gs += (pdf[pdf_idx] * calculate_edf((abs_pos/3.0 + offset), lower_bound, upper_bound, cdf, edf, mu));
+  }
+  return gs;
+}
 
-float calculate_cdf(x, lower_bound, upper_bound, normed_cdf){
-  if (x >= upper_bound){
-    return 1;
-  }else if (x <= lower_bound){
-    return 0;
-  }else{
-    return (std::ceil(x)-x) * normed_cdf[std::floor(x)]
-            + ((x-std::floor(x)) * normed_cdf[std::ceil(x)];
+float calculate_eexpl(const float k, const float theta,
+                        const std::int32_t lower_bound, const std::int32_t upper_bound,
+                        const std::vector<float> cdf, const std::vector<float> edf, const float mu){
+  float result =0;
+  for(int idx=0; idx<800; idx++){
+    float edf_idx = idx;
+    if (mu < 0){
+      edf_idx = -edf_idx;
+    }
+    result += (calculate_gamma_pdf(idx, k, theta) *
+            calculate_edf(edf_idx/2.0, lower_bound, upper_bound, cdf, edf, mu));
+  }
+  return result;
+}
+
+float calculate_edf(const float x,
+                    const std::int32_t lower_bound, const std::int32_t upper_bound,
+                    const std::vector<float> cdf, const std::vector<float> edf, const float mu){
+  if (x <= lower_bound){
+    return (mu/2.0 - x);
+  } else if (x > upper_bound){
+    return (x - mu/2.0);
+  } else {
+    float key = std::floor(x-lower_bound);
+    return (edf[key] + (x-std::floor(x)) * (2 * cdf[key] - 1));
   }
 }
 
-float calculate_edf(x, lower_bound, upper_bound, normed_cdf, normed_edf, mu){
-  if (x <= lower_bound){
-    return -mu/2.0 - x;
-  } else if (x >= upper_bound){
-    return x + mu/2.0;
-  } else {
-    return normed_edf[std::floor(x)] + (x-std::floor(x)) * (2 * normed_cdf[std::floor(x)] - 1);
+float calculate_gamma_pdf(const float x, const float k, const float theta){
+  if (x <= 0 || k<= 0 || theta<=0){
+    return 0.0;
+  }else{
+    return (exp(-x/theta) * pow(x, k - 1.0) / (pow(theta, k) * std::tgamma(k)));
   }
 }
 
@@ -329,7 +420,6 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
   }
 
   int plen = 0;
-  cout<<peaks.size()<<endl;
   for(int peak_index = 0; peak_index < peaks.size(); peak_index++){
     plen += peaks[peak_index].length;
   }
@@ -382,7 +472,6 @@ bool learn_pcr(const std::string& bamfile, float* geo_rate){
     }
   }
 
-  std::cout<<count_unmapped<<std::endl;
   //for (std::map<Fragment, int, bool(*)(Fragment, Fragment)>::iterator it=duplicated_reads.begin();
   for (std::map<std::string, int>::iterator it=duplicated_reads.begin();
           it!=duplicated_reads.end(); ++it){
@@ -471,6 +560,18 @@ int learn_main(int argc, char* argv[]) {
     options.remove_pct = std::atof(argv[i+1]);
     i++;
       }
+    } else if (PARAMETER_CHECK("--thres", 7, parameterLength)){
+      if ((i+1) < argc){
+    options.intensity_threshold = std::atoi(argv[i+1]);
+    i++;
+      }
+    } else if (PARAMETER_CHECK("--paired", 8, parameterLength)){
+      options.paired = true;
+    } else if (PARAMETER_CHECK("--est", 5, parameterLength)){
+      if ((i+1) < argc){
+    options.estimate_frag_length = std::atoi(argv[i+1]);
+    i++;
+      }
     } else {
       cerr << endl << "******ERROR: Unrecognized parameter: " << argv[i] << " ******" << endl << endl;
       showHelp = true;
@@ -491,22 +592,24 @@ int learn_main(int argc, char* argv[]) {
     showHelp = true;
   }
 
-
   if (!showHelp) {
     /***************** Main implementation ***************/
 
     /*** Learn fragment size disbribution parameters ***/
     float frag_param_a;
     float frag_param_b;
-    if (options.paired){
+    if (!options.paired){
       if (!learn_frag_paired(options.chipbam, &frag_param_a, &frag_param_b)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
-    }else{
-      if (!learn_frag_single(options.chipbam, options.peaksbed, &frag_param_a, &frag_param_b)) {
+    //}else{
+      if (!learn_frag_single(options.chipbam, options.peaksbed, options.peakfiletype,
+                  options.countindex, options.intensity_threshold, options.estimate_frag_length,
+                  &frag_param_a, &frag_param_b)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
     }
+    std::exit(1);
 
     /*** Learn pulldown ratio parameters ***/
     float ab_ratio;
@@ -546,15 +649,28 @@ int learn_main(int argc, char* argv[]) {
 
 //TODO add in -r argument not required
 void learn_help(void) {
+  Options options;
   cerr << "\nTool:    asimon learn" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
   cerr << "Summary: Learn parameters from a ChIP dataset." << endl << endl;
   cerr << "Usage:   " << PROGRAM_NAME << " learn -b reads.bam -p peak.bed -o outprefix [OPTIONS] " << endl << endl;
   cerr << "[Required arguments]: " << "\n";
-  cerr << "         -b <reads.bam>: BAM file with ChIP reads (.bai index required)" << "\n";
-  cerr << "         -p <peaks.bed>: BED file with peak regions (Homer format)" << "\n";
+  cerr << "         -b <reads.bam>:     BAM file with ChIP reads (.bai index required)" << "\n";
+  cerr << "         -p <peaks.bed>:     BED file with peak regions (Homer format)" << "\n";
   cerr << "         -t <peakfile_type>: File type of the input peak file" << "\n";
-  cerr << "         -o <outprefix>: Prefix for output files" << "\n";
+  cerr << "         -o <outprefix>:     Prefix for output files" << "\n";
+  cerr << "         -c <int>:           The index of the BED file column used to score each peak (index starting from 1)" << "\n";
+  cerr << "[Optional arguments]: " << "\n";
+  cerr << "         -r <float>:         Ratio of high score peaks to ignore\n"
+       << "                             Default: " <<options.remove_pct<< "\n";
+  cerr << "         --est <int>:        Estimated fragment length\n"
+       << "                             Default: " <<options.estimate_frag_length<< "\n";
+  cerr << "[BAM-file arguments]: " << "\n";
+  cerr << "         --paired:           Loading paired-end reads\n"
+       << "                             Default: false\n";
+  cerr << "         --thres <float>:    Threshold for peak scores in single-end read length estimation\n"
+       << "                             Default: " <<options.intensity_threshold<< "\n";
+
   cerr << "\n";
   exit(1);
 }
