@@ -25,10 +25,12 @@ Options::Options() {
   n_threads = 1;
 
   // Simulation model parameters
-  gamma_alpha = 15.67;
-  gamma_beta = 15.49;
+  gamma_k = 15.67;
+  gamma_theta = 15.49;
   ratio_s = 0.17594;
   ratio_f = 0.03713;
+  pcr_rate = 1.0;
+  model_file = "";
 
   // Additional simulation parameters
   region = "";
@@ -40,9 +42,6 @@ Options::Options() {
   sub_rate = 0;
   ins_rate = 0;
   del_rate = 0;
-
-  // pcr
-  pcr_rate = 1.0;
 }
 
 Options::~Options() {}

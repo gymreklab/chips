@@ -20,7 +20,7 @@ class Pulldown {
   std::int32_t start;
   std::int32_t end;
   int numcopies;
-  float gamma_alpha, gamma_beta;
+  float gamma_k, gamma_theta;
   float ratio_beta;
   bool debug_pulldown;
   float pcr_rate;

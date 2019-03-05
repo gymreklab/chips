@@ -11,6 +11,7 @@
 
 #include "src/bam_io.h"
 #include "src/common.h"
+#include "src/model.h"
 #include "src/options.h"
 #include "src/peak_loader.h"
 #include "src/fragment.h"
@@ -297,18 +298,18 @@ int learn_main(int argc, char* argv[]) {
       }
     } else if (PARAMETER_CHECK("-t", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.peakfiletype = argv[i+1];
+    	options.peakfiletype = argv[i+1];
 	i++;
       }
     } else if (PARAMETER_CHECK("-c", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.countindex = std::atoi(argv[i+1]);
+    	options.countindex = std::atoi(argv[i+1]);
 	i++;
       }
     } else if (PARAMETER_CHECK("-r", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.remove_pct = std::atof(argv[i+1]);
-    i++;
+    	options.remove_pct = std::atof(argv[i+1]);
+    	i++;
       }
     } else if (PARAMETER_CHECK("--skip-frag", 11, parameterLength)){
       if ((i) < argc) {
@@ -338,43 +339,37 @@ int learn_main(int argc, char* argv[]) {
 
   if (!showHelp) {
     /***************** Main implementation ***************/
+    ChIPModel model;
 
     /*** Learn fragment size disbribution parameters ***/
-    float frag_param_a;
-    float frag_param_b;
+    float frag_param_a = -1;
+    float frag_param_b = -1;
     if (!learn_frag(options.chipbam, &frag_param_a, &frag_param_b, options.skip_frag)) {
       PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
     }
+    model.SetFrag(frag_param_a, frag_param_b);
 
     /*** Learn pulldown ratio parameters ***/
     float ab_ratio;
-    float s;
-    float f;
+    float s = -1;
+    float f = -1;
     if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
         &ab_ratio, &s, &f)){
       PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
     }
+    model.SetF(f);
+    model.SetS(s);
 
     /*** Learn PCR geometric distribution parameter **/
-    float geo_rate;
+    float geo_rate = -1;
     if (!learn_pcr(options.chipbam, &geo_rate)){
       PrintMessageDieOnError("Error learning PCR rate", M_ERROR);
     }
+    model.SetPCR(geo_rate);
 
-    // remove previous existing file
-    string params = options.outprefix + ".txt";
-    remove(params.c_str());
-
-    /*** Write params to file ***/
-    ofstream outfile;
-    outfile.open(params, ios_base::app);
-    outfile << "alpha: " << frag_param_a << " beta: " << frag_param_b << endl;
-    outfile << "ab_ratio: " << ab_ratio << endl;
-    outfile << "f: " << f << endl;
-    outfile << "s: " << s << endl;
-    outfile << "pcr rate: " << geo_rate << endl;
-    outfile.close();
-
+    /*** Output learned model **/
+    model.WriteModel(options.outprefix + ".json");
+    model.PrintModel();
     return 0;
   } else {
     learn_help();
