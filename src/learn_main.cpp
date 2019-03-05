@@ -310,8 +310,8 @@ int learn_main(int argc, char* argv[]) {
     options.remove_pct = std::atof(argv[i+1]);
     i++;
       }
-    } else if (PARAMETER_CHECK("--skip-frag", 2, parameterLength)){
-      if ((i+1) < argc) {
+    } else if (PARAMETER_CHECK("--skip-frag", 11, parameterLength)){
+      if ((i) < argc) {
     options.skip_frag = true;
     i++;
       }
@@ -382,7 +382,7 @@ int learn_main(int argc, char* argv[]) {
   }
 }
 
-//TODO add in -r argument not required
+
 void learn_help(void) {
   cerr << "\nTool:    chipmunk learn" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    

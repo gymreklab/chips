@@ -12,6 +12,7 @@ configure
 depcomp
 install-sh
 missing
+power-analysis/
 src/.deps/
 src/.libs/
 src/.*
