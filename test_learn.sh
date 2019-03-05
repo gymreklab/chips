@@ -19,4 +19,5 @@ COLUMN=7
     -t ${TYPE} \
     -o ${OUTDIR}\
     -c ${COLUMN}\
-    --thres ${THRES}
+    --thres ${THRES}\
+    --paired

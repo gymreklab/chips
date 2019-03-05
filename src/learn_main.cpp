@@ -26,7 +26,7 @@ void learn_help(void);
 bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
                     const std::string& peakfileType, const std::int32_t count_colidx,
                     const float remove_pct, float* ab_ratio_ptr, 
-                    float *s_ptr, float* f_ptr);
+                    float *s_ptr, float* f_ptr, bool skip_frag);
 bool compare_location(Fragment a, Fragment b);
 bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
 bool learn_pcr(const std::string& bamfile, float* geo_rate);
@@ -154,7 +154,7 @@ bool learn_frag_single(const std::string& bamfile,
                         const std::string& peakfile, const std::string peakfileType,
                         const std::int32_t count_colidx, const int intensity_threshold,
                         const int estimate_frag_length,
-                        float* alpha, float* beta) {
+                        float* alpha, float* beta, bool skip_frag) {
   /*
     Predict fragment length distribution from an input BAM file (single-end reads)
     Fragment lengths follow a gamma distribution.
@@ -165,6 +165,9 @@ bool learn_frag_single(const std::string& bamfile,
     - alpha (float): parameter of gamma distribution
     - beta  (float): parameter of gamma distribution
    */
+
+  /* Learning process should be skipped */
+  if (skip_frag){return true;}
 
   /* First read peaks and restrict reads origins */
   // peak intensity is only used for filtering out unreliable reads
@@ -616,7 +619,7 @@ int learn_main(int argc, char* argv[]) {
     }else{
       if (!learn_frag_single(options.chipbam, options.peaksbed, options.peakfiletype,
                   options.countindex, options.intensity_threshold, options.estimate_frag_length,
-                  &frag_param_a, &frag_param_b)) {
+                  &frag_param_a, &frag_param_b, options.skip_frag)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
     }
