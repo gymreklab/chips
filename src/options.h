@@ -44,8 +44,6 @@ class Options {
   std::string region;
   int binsize;
 
-  float pcr_rate; 
-
   int intensity_threshold;
   int estimate_frag_length;
 
