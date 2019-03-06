@@ -42,6 +42,13 @@ Options::Options() {
   sub_rate = 0;
   ins_rate = 0;
   del_rate = 0;
+
+  // pcr
+  pcr_rate = 1.0;
+
+  // learn only: intensity threshold
+  intensity_threshold = 100;
+  estimate_frag_length = 200;
 }
 
 Options::~Options() {}

@@ -44,6 +44,9 @@ class Options {
   std::string region;
   int binsize;
 
+  int intensity_threshold;
+  int estimate_frag_length;
+
   // Learn options
   bool skip_frag;
   virtual ~Options();
