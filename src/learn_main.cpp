@@ -569,9 +569,9 @@ int learn_main(int argc, char* argv[]) {
     	i++;
       }
     } else if (PARAMETER_CHECK("--skip-frag", 11, parameterLength)){
-      if ((i+1) < argc) {
-    	options.skip_frag = true;
-    	i++;
+      if ((i) < argc) {
+    options.skip_frag = true;
+    i++;
       }
     } else if (PARAMETER_CHECK("--thres", 7, parameterLength)){
       if ((i+1) < argc){
@@ -653,7 +653,7 @@ int learn_main(int argc, char* argv[]) {
   }
 }
 
-//TODO add in -r argument not required
+
 void learn_help(void) {
   Options options;
   cerr << "\nTool:    chipmunk learn" << endl;
