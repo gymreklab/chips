@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir) $(HTSLIB_CFLAGS)
 AM_LDFLAGS = $(HTSLIB_LIBS)
 
 bin_PROGRAMS = chipmunk
