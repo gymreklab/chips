@@ -44,31 +44,32 @@ ChIPmunk models the shearing, pulldown, PCR, and sequencing steps of ChIP-seq an
 
 Paired end
 
-Paired end sequencing is the process of generating reads by sequencing both ends of the sequence fragment and thus allowing us to know the length of these fragments. Using this concept, we can take paired end ChIP sequencing data and read in fragment lengths at random points in the genome in order to find the gamma distribution that best models these lengths. In particular, the learn module reads in 10000 randomly selected fragment lengths from the inputted paired end bam file. These are filtered to remove error fragments that exceed the length $3 * \text{median}$. Using the fragment lengths can generate their mean, $\mu = \dfrac{\Sum_{i=1}^{n}X_i}{n}$. Now, using the method of moments: 
+Paired end sequencing is the process of generating reads by sequencing both ends of the sequence fragment and thus allowing us to know the length of these fragments. Using this concept, we can take paired end ChIP sequencing data and read in fragment lengths at random points in the genome in order to find the gamma distribution that best models these lengths. In particular, the learn module reads in 10000 randomly selected fragment lengths from the inputted paired end bam file. These are filtered to remove error fragments that exceed the length $3 * \text{median}$. Using the fragment lengths can generate their mean, $\mu = \dfrac{\sum_{i=1}^{n}X_i}{n}$. Now, using the method of moments for the gamma distribution with the shape parameter, $k$, and scale parameter, $\theta$: 
 $$k\theta = \mu$$
-$$k{\theta}^2 = \dfrac{1}{n}\Sum_{i=1}^n(X_i - \mu)^2$$  
-Using these we can solve for $k$ and $\theta$ as $k = \dfrac{\mu}{\theta}$ and $\theta = \dfrac{1}{n\mu}\Sum_{i=1}^{n}(X_i - \mu)^2$
+$$k{\theta}^2 = \dfrac{1}{n}\sum_{i=1}^n(X_i - \mu)^2$$  
+we can solve for $k$ and $\theta$ as $k = \dfrac{\mu}{\theta}$ and $\theta = \dfrac{1}{n\mu}\sum_{i=1}^{n}(X_i - \mu)^2$
 We can recreate the gamma distribution based off of these parameters learned and generate random fragment lengths that closely follow this distribution to use in simulator.
 
-Questions: How did we figure out the fragements distribution aligns closest with the gamma dist?
 
 Single end
 
 
 \subsubsection*{Pulldown}
 
-**Go into math behind how we setup pulldown**
+The pulldown step of the simulator represents purifying the precipitated DNA by washing away the sheared fragments that were not bound by the target protein or histone modification. These filtered fragments are then marked to be sequenced. The filtering process is not perfect and therefore some fragments not bound will also be pulled down to be sequenced which we label as noise. In order to model this process we start at a given position in the genome based on the region specified by the user. The random fragment is generated from the gamma distribution learned through the shearing process and based on the fragment's location we can generate its peak score. The peak score is a metric based on the peak intensity read from the bed file that the user inputted. The higher the intensity the higher the probability that a fragment will be mapped to that location. However, this isn't the only factor to determine if the fragment will be bound. Let $P_b$ be the probability of a fragment being bound by a protein or histone modification and $P_{kept}$ be the probability the fragment is kept. 
+$$P_b = \text{peak score} * P_{kept} \text{ where } P_{kept} = \dfrac{numreads * rate_{PCR}}{numfrags_{run} * numcopies}$$
+In $P_{kept}$ we have four variables that is is reliant on, $numreads$, $rate_{PCR}$, $numfrags_{run}$, and $numcopies$. $numreads$ and $numcopies$ are parameters inputted by the user that indicate the approximate total amount of reads that should be outputted to the fastq file or files and the total number of cells in our experiment, thus giving us that many copies of the genome to sequence. $rate_{PCR}$ is also a user defined parameter, however it can be generated from our learn function by analyzing the duplicated fragments in the inputted bam file. Lastly, $numfrags_{run}$ is representative of the total amount of fragments we expect to be pulled down per run, where a run is iterating over the entire region of the genome specified one time. Thus, when you have the quantity: $numfrags_{run}*numcopies$ it represents the total amount of fragments we expect throughout the whole process. The quantity: $numreads*rate_{PCR}$ represents the total amount of unique reads that will be generated from this process. Thus $P_{kept}$ is the ratio of the total unique reads to total amount of fragments expected which is a necessity to ensure the proper amount of reads will be generated and outputted. 
 
-The pulldown step of the simulator represents purifying the precipitated DNA by washing away the sheared fragments that were not bound by the target protein or histone modification. These filtered fragments are then marked to be sequenced. The filtering process is not perfect and therefore some fragments not bound will also be pulled down to be sequenced which we label as noise. In order to model this process we start at a given position in the genome based on the region specified by the user. The random fragment is generated and based on its location we can generate its peak score. The peak score is a metric based on the peak intensity read from the bed file that the user inputted. The higher the intensity the higher the probability that a fragment will be mapped to that location. This isn't the only factor to determine if the fragment will be bound. Let $P_b$ be the probability of being bound. 
-$P_b = \text{peak score} * P_{kept}$ where $P_{kept} = \dfrac{numreads * pcr_rate}{numfrags_per_run * numcopies}$
+Now that we have the probability of a fragment being bound, there are two outcomes. The fragment is bound and will be used for PCR and sequencing or the fragment is not bound and we now need to determine whether it should be pulled down as noise or filtered out. This is determined through $P_{kept}$, 
+(Need to talk about probability pulled down given unbound with Bayes)
 
 \subsubsection*{PCR}
+(Need to fill in with stuff in pulldown)
 
 \subsubsection*{Sequencing}
 
-After all the fragments have been pulled down, it is time to generate the fastq reads through the sequencing process. At the start of this process we go through each fragment that was successfully pulled down and use its chromsome, start, and end positions to grab the sequence from the reference genome. If the sequencing method is paired end we take the first $n$ nucleotides, where $n$ is decided by the user input parameter readlen, and write out this read to the first fastq file. Then we take the reverse complement of the last $n$ nucleotides and output this to the second fastq file matching the index of the first. (Make sure to include read quality score)Otherwise if single end was specified, only the first $n$ nucleotides are outputted to a single a fastq. 
+After all the fragments have been pulled down, it is time to generate the fastq reads through the sequencing process. At the start of this process we go through each fragment that was successfully pulled down and use its chromosome, start, and end positions to grab the sequence from the reference genome. If the sequencing method is paired end we take the first $n$ nucleotides, where $n$ is decided by the user input parameter readlen, and write out this read to the first fastq file. Then we take the reverse complement of the last $n$ nucleotides and output this to the second fastq file matching the index of the first. (Make sure to include read quality score) Otherwise if single end was specified, only the first $n$ nucleotides are outputted to a single a fastq. 
 
-Do I need to specify the full output to the fastq files?
 
 \subsection*{ChIPmunk implementation}
 
@@ -83,3 +84,4 @@ C++, any special libraries we use, open source
 
 
 \end{document}
+
