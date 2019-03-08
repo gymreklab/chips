@@ -14,7 +14,9 @@
 #include <sys/stat.h>
 
 #include "htslib/bgzf.h"
-//#include "htslib/cram.h"
+#include "htslib/cram.h"
+#include "htslib/hts.h"
+
 #define bam_ins_size(b)  (b)->core.isize;
 #include "htslib/sam.h"
 
@@ -456,22 +458,26 @@ class BamCramReader {
     in_ = sam_open(path.c_str(), "r");
     if (in_ == NULL)
       PrintMessageDieOnError("Failed to open file " + path, M_ERROR);
-
-    if (in_->is_cram){
-      PrintMessageDieOnError("No support for CRAM files yet", M_ERROR);
-      /*
-      if (fasta_path.empty())
+    
+    if (in_->is_cram) {
+      if (fasta_path.empty()) {
 	PrintMessageDieOnError("Must specify a FASTA reference file path for CRAM file " + path, M_ERROR);
-      
-      // Open the FASTA reference file for the CRAM
-      char* fasta = new char[fasta_path.size()+1];
-      for (size_t i = 0; i < fasta_path.size(); ++i)
-	fasta[i] = fasta_path[i];
-      fasta[fasta_path.size()] = '\0';
-      if (cram_load_reference(in_->fp.cram, fasta) < 0)
+      }
+      if (!file_exists(fasta_path+".fai")) {
+	PrintMessageDieOnError("File " + fasta_path + ".fai doest not exist", M_ERROR);
+      }
+      // Open fasta fai file for CRAM
+      std::string fai_path = fasta_path+".fai";
+      char* fai = new char[fai_path.size()+1];
+      for (size_t i = 0; i<fai_path.size(); ++i) {
+	fai[i] = fai_path[i];
+      }
+      fai[fai_path.size()] = '\0';
+
+      if (hts_set_fai_filename(in_, fai) <0 ) {
 	PrintMessageDieOnError("Failed to open FASTA reference file for CRAM file", M_ERROR);
-      delete [] fasta;
-      */
+      }
+      delete [] fai;
     }
 
     // Read the header
