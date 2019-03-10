@@ -44,7 +44,7 @@ Options::Options() {
   del_rate = 0;
 
   // pcr
-  pcr_rate = 1.0;
+  pcr_rate = 0.85;
 
   // learn only: intensity threshold
   intensity_threshold = 100;
