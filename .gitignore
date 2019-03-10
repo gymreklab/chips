@@ -17,6 +17,7 @@ src/.deps/
 src/.libs/
 src/.*
 src/asimon
+src/chipmunk
 *.o
 *.a
 src/*.a
