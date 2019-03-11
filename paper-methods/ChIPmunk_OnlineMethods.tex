@@ -127,7 +127,9 @@ This ultimately leads us back to $P_{noise} = P_{kept}*P_{avg}(Pd|UB)$ which we 
 
 \subsubsection*{PCR}
 
-PCR (Polymerase Chain Reaction) is the process of replicating currently existing sequence fragments that have been pulled down. In our model this is determined through a user defined parameter, $PCR_{rate}$, that can be generated from our learn module. (Unfinished)
+PCR (Polymerase Chain Reaction) is the process of replicating currently existing sequence fragments that have been pulled down. In our model this is determined through a user defined parameter, $PCR_{rate}$, that can be generated from our learn module. We assumed the number of copies followed a geometric distribution with its mean value as $\mu$, and estimated $\mu$ using equation (1) in which $n_i$ represents the number of reads with i PCR copies (including the original one). The $PCR_{rate}$ was calculated with equation (2).
+$$\mu = \frac{\sum_{i=1}^\infty (i * n_i)}{\sum_{i=1}^\infty n_i} \;\;\;(1)$$
+$$PCR_{rate} = \frac{1}{\mu}\;\;\;(2)$$
 
 \subsubsection*{Sequencing}
 
