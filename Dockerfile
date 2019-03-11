@@ -24,7 +24,7 @@ RUN ./configure --prefix=/usr/local --disable-lzma --disable-bz2 && make && make
 
 # Install ChIPmunk
 WORKDIR /dependencies
-RUN git clone https://github.com/gymreklab/ChIPmunk
-WORKDIR ChIPmunk
-RUN ./reconf && ./configure --prefix=/usr/local && make && make install
-RUN ldconfig
+RUN wget https://github.com/gymreklab/ChIPmunk/releases/download/v1.6/chipmunk-1.6.tar.gz
+RUN tar -xzvf chipmunk-1.6.tar.gz
+WORKDIR chipmunk-1.6
+RUN ./configure && make && make install
