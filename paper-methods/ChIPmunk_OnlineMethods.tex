@@ -35,53 +35,102 @@
 
 \begin{document}
 
+%%% Notes %%%%
+% * Put one sentence per line to make github track changes easier
+% * Do not hard code references to figures, equations in this doc. use \ref{label} instead
 \section*{Online Methods}
 
 \subsection*{ChIPmunk model}
 
-ChIPmunk models the shearing, pulldown, PCR, and sequencing steps of ChIP-seq and learns the parameters for each of these steps described in Table 1. 
+ChIPmunk models each major step (shearing, pulldown, PCR, and sequencing) of the ChIP-seq protocol (\textbf{Figure 1A, steps 1-4}) as a distinct module. It assumes binding sites for the target epitome are known, unlike other tools [refs] which focus on simulating binding sites themselves. Model parameters are summarized in \textbf{Table 1}.
 
-\subsubsection*{Shearing}
+\subsubsection*{1. Shearing}
 
-Shearing is the process of randomly splitting DNA into smaller pieces called fragments. This is needed to sequence the DNA, otherwise Next-Gen Sequencers are unable to make accurate reads. There are currently two different methodologies to generating these types of reads one of which you can directly ascertain the fragment lengths, paired end, and the other you cannot, single end.
+In step 1, cross-linked DNA is sheared to a target fragment length, typically by sonication.
+ChIPmunk models the length distribution of fragments.
+We model fragment lengths using a gamma distribution (\textbf{Figure 1B}) based on empirical observation of fragment distributions which have long right tails (\textbf{Supplementary Figure 2}).
+In the case of paired-end reads, fragment lengths can be determined trivially from the mapping locations of paired reads.
+For single-end reads, individual fragment lengths are not directly observed. We outline a novel method for inferring summary statistics for the length distribution using single-end reads.
 
-Paired end
+\paragraph{Inferring fragment lengths from paired-end reads}
+The observed fragment length ($X_i$) for each read pair $i$ can be computed based on the mapping coordinates of the two reads.
+The learn module randomly selects 10,000 read pairs from the input BAM for fitting a gamma distribution.
+Read pairs are filtered to remove fragments marked as duplicates or secondary alignments. % TODO what about if not proper pair? and not mapping to same chrom?
+Read pairs are further filtered to remove fragments with length greater than 3 times the median length of selected fragments.
 
-Paired end sequencing is the process of generating reads by sequencing both ends of a sheared fragment which allows the full length of the fragment sequenced to be known from the BAM file alone. By best fitting a set of these fragments, we learned that their lengths closely follow the gamma distribution. Using this concept, we can take paired end ChIP sequencing data and read in fragment lengths at random points in the genome in order to find the parameters of a gamma distribution that best models these lengths. In particular, the learn module reads in 10,000 randomly selected fragment lengths from the inputted paired end BAM file. These are filtered to remove error fragments that exceed the length $3 * \text{median}$. Using the fragment lengths can generate their mean, $\mu = \dfrac{\sum_{i=1}^{n}X_i}{n}$. And we can generate the parameters of the gamma distribution using the method of moments with the shape parameter, $k$, and scale parameter, $\theta$: 
-$$k\theta = \mu$$
-$$k{\theta}^2 = \dfrac{1}{n}\sum_{i=1}^n(X_i - \mu)^2$$  
-we can solve for $k$ and $\theta$ as $k = \dfrac{\mu}{\theta}$ and $\theta = \dfrac{1}{n\mu}\sum_{i=1}^{n}(X_i - \mu)^2$
-Using these new found parameters we can generate fragments of appropriate sizes to be used in the pulldown phase of this simulator.
+The mean fragment length is easily computed as $\mu = \dfrac{\sum_{i=1}^{n}X_i}{n}$, where $n$ is the number of fragments remaining after filtering. We then use the method of moments to find maximum likelihood estimates of the gamma distribution shape ($k$) and scale parameters ($\theta$):
 
-Single end
+\begin{equation}
+  k =  \dfrac{\mu}{\theta}
+\end{equation}
+\begin{equation}
+  \theta = \dfrac{1}{n\mu}\sum_{i=1}^{n}(X_i - \mu)^2
+\end{equation}
 
-To estimate the fragment length distribution from single-end reads, we assumed the length distribution followed gamma distribution with the mean value as $\mu$ and variance as $v$, and used reads located inside ChIP-seq peaks to estimate $\mu$ and $v$.
+\paragraph{Inferring fragment lengths from single-end reads}
+To estimate the fragment length distribution from single-end reads, we assume the length distribution follows gamma distribution with the mean $\mu$ and variance $v$, and use reads located inside ChIP-seq peaks (provided as input) to estimate $\mu$ and $v$ which are used to compute $k$ and $\theta$.
 
-We processed a ChIP-seq peak at a time. For each read in a $peak_i$, we added its leftmost position into a list $\{start\}_{peak_i}$ if the read is on the forward strand, or its rightmost position into a list $\{end\}_{peak_i}$ if the read is on the reverse strand. The center point of this peak was calculated by equation (1)
+For each peak $peak_i$, we keep track of two lists, $\{start\}_{peak_i}$ and $\{end\}_{peak_i}$.
+For each read overlapping $peak_i$, if the read is on the forward strand we add its start coordinate $\{start\}_{peak_i}$.
+If the read is on the reverse strand we add its start coordinate to $\{end\}_{peak_i}$.
+The center point of this peak is calculated as:
 
-$$center_{peak_i} = \frac{mean(\{start\}_{peak_i}) + mean(\{end\}_{peak_i})}{2}\;\;\;(1)$$
+\begin{equation} \label{eq:center}
+  center_{peak_i} = \frac{mean(\{start\}_{peak_i}) + mean(\{end\}_{peak_i})}{2}
+\end{equation}
+  
+For every $peak_i$ we offset the coordinates in $\{start\}_{peak_i}$ and $\{end\}_{peak_i}$ by $center_{peak_i}$t, so that the coordinates of start points and end points are normalized and symmetric around zero.
+We then concatenate lists from each peak to form $\{start\}$ and $\{end\}$:
 
-As is shown in equation (2) and (3), for every $peak_i$ we offset the coordinates in $\{start\}_{peak_i}$ and $\{end\}_{peak_i}$ by its center point, so that the coordinates of start points and end points were normalized and symmetric to zero. Then we concatenated the lists of all ChIP-seq peaks together to form $\{start\}$ and $\{end\}$. The mean value of fragment length mu can be estimated by formulation (4).
+\begin{equation} \label{eq:concat}
+  \begin{array}{c}
+  \{start\} = \oplus_{i=0}^{n} (\{start\}_{peak_i} - center_{peak_i})\\
+  \{end\} = \oplus_{i=0}^{n} (\{end\}_{peak_i} - center_{peak_i})
+  \end{array}
+\end{equation}
 
-$$\{start\} = \oplus_{i=0}^{n} (\{start\}_{peak_i} - center_{peak_i})\;\;\;(2)$$
-$$\{end\} = \oplus_{i=0}^{n} (\{end\}_{peak_i} - center_{peak_i})\;\;\;(3)$$
-$$\mu = mean(\{end\}) - mean(\{start\})\;\;\;(4)$$
+The mean value of fragment length mu can be estimated as:
+\begin{equation}
+  \mu = mean(\{end\}) - mean(\{start\})
+\end{equation}
 
-For both \{start\} and \{end\}, we calculated their probability density functions, cumulative density functions and expected density functions. Here, the expected density function $EDF(x)$ is defined as the expected deviation of a random element in the list to x, as is shown in (5) and (6) in which S is a random element in \{start\} and E is a random element in \{end\}
-$$EDF_{start}(x) = E(|S - x|)\;\;\;(5)$$
-$$EDF_{end}(x) = E(|E - x|)\;\;\;(6)$$
+We calculate the probability density functions, cumulative density functions and expected density functions for both $\{start\}$ and $\{end\}$.
+The expected density function $EDF(x)$ is defined as the expected deviation of a random element in the list to $x$:
+\begin{equation} \label{eq:EDF}
+  \begin{array}{c} 
+    EDF_{start}(x) = E(|S - x|) \\
+    EDF_{end}(x) = E(|E - x|)
+    \end{array}
+\end{equation}
+where $S$ is a random element in $\{start\}$ and $E$ is a random element in $\{end\}$.
 
-Since we have calculated $\mu$, we can reduce the density function of the fragment length distribution into $p_v(x)$. We constructed a score function for $v$ shown as equation (7)- (11). Intuitively, if we can have a correct guess of $v$, $F(v)$ should equals to zero. Thus, we conducted a binary search for $v$ between 1000 and 10000, and searched for the best $v$ that can minimize $|F(v)|$.
+Since we can compute $\mu$, we can reduce the density function of the fragment length distribution to $p_v(x)$. % TODO we don't really define this? how relates to F(v)?
+We construct a score function $F(v)$ as shown below.
+Intuitively, if we have a correct guess of $v$, $F(v)$ should be equal to zero.
 
-$$F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2}|) + E(|E- \frac{\mu}{2}|)\;\;\;(7)$$
-$$E_v(|S + L/2|) = \sum_{x=0}^\infty p_v(x) * EDF_{start}(-\frac{x}{2})\;\;\;(8)$$
-$$E_v(|E - L/2|) = \sum_{x=0}^\infty p_v(x) * EDF_{end}(\frac{x}{2})\;\;\;(9)$$
-$$E(|S + \frac{\mu}{2}|)=EDF_{start}(x)\;\;\;(10)$$
-$$E(|E - \frac{\mu}{2}|)=EDF_{end}(x)\;\;\;(11)$$
+\begin{equation}
+  \begin{array}{c} \label{eq:Fv}
+F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2}|) + E(|E- \frac{\mu}{2}|) \\
+E_v(|S + L/2|) = \sum_{x=0}^\infty p_v(x) * EDF_{start}(-\frac{x}{2}) \\
+E_v(|E - L/2|) = \sum_{x=0}^\infty p_v(x) * EDF_{end}(\frac{x}{2}) \\
+E(|S + \frac{\mu}{2}|)=EDF_{start}(x) \\
+E(|E - \frac{\mu}{2}|)=EDF_{end}(x) \\
+\end{array}
+\end{equation}
 
-In practice, we slightly offlist the last two items in (7) and changed it into (12), which provided us more accurate estimation for the variance of the fragment length distribution.
-$$F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2} - \frac{E- \frac{\mu}{2}}{4}|) - E(|E- \frac{\mu}{2} - \frac{S + \frac{\mu}{2}}{4}|)\;\;\;(12)$$
+To find an optimal $v$ that minimizes $|F(v)|$, we conduct a binary search between 1000 and 10,000.
 
+In practice, we slightly offset the last two items in the score function in \textbf{Equation~\ref{eq:Fv}} to get the score below, which gave slightly more accurate estimation of $v$ on real data. This may be due to the fact that fragment length distributions are truncated on the left end, with little or no fragments with lengths less than 100bp observed, and thus do not follow a true gamma distribution.
+
+\begin{equation}
+F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2} - \frac{E- \frac{\mu}{2}}{4}|) - E(|E- \frac{\mu}{2} - \frac{S + \frac{\mu}{2}}{4}|)
+\end{equation}
+
+\paragraph{Generating fragments}
+% TODO generate fragments from gamma distribution by chopping up chromosomes
+% TODO mention num copies issue here
+
+% Using these new found parameters we can generate fragments of appropriate sizes to be used in the pulldown phase of this simulator.
 
 \subsubsection*{Pulldown}
 
