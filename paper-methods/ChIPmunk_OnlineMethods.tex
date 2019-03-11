@@ -55,6 +55,33 @@ Using these new found parameters we can generate fragments of appropriate sizes 
 
 Single end
 
+To estimate the fragment length distribution from single-end reads, we assumed the length distribution followed gamma distribution with the mean value as $\mu$ and variance as $v$, and used reads located inside ChIP-seq peaks to estimate $\mu$ and $v$.
+
+We processed a ChIP-seq peak at a time. For each read in a $peak_i$, we added its leftmost position into a list $\{start\}_{peak_i}$ if the read is on the forward strand, or its rightmost position into a list $\{end\}_{peak_i}$ if the read is on the reverse strand. The center point of this peak was calculated by equation (1)
+
+$$center_{peak_i} = \frac{mean(\{start\}_{peak_i}) + mean(\{end\}_{peak_i})}{2}\;\;\;(1)$$
+
+As is shown in equation (2) and (3), for every $peak_i$ we offset the coordinates in $\{start\}_{peak_i}$ and $\{end\}_{peak_i}$ by its center point, so that the coordinates of start points and end points were normalized and symmetric to zero. Then we concatenated the lists of all ChIP-seq peaks together to form $\{start\}$ and $\{end\}$. The mean value of fragment length mu can be estimated by formulation (4).
+
+$$\{start\} = \oplus_{i=0}^{n} (\{start\}_{peak_i} - center_{peak_i})\;\;\;(2)$$
+$$\{end\} = \oplus_{i=0}^{n} (\{end\}_{peak_i} - center_{peak_i})\;\;\;(3)$$
+$$\mu = mean(\{end\}) - mean(\{start\})\;\;\;(4)$$
+
+For both \{start\} and \{end\}, we calculated their probability density functions, cumulative density functions and expected density functions. Here, the expected density function $EDF(x)$ is defined as the expected deviation of a random element in the list to x, as is shown in (5) and (6) in which S is a random element in \{start\} and E is a random element in \{end\}
+$$EDF_{start}(x) = E(|S - x|)\;\;\;(5)$$
+$$EDF_{end}(x) = E(|E - x|)\;\;\;(6)$$
+
+Since we have calculated $\mu$, we can reduce the density function of the fragment length distribution into $p_v(x)$. We constructed a score function for $v$ shown as equation (7)- (11). Intuitively, if we can have a correct guess of $v$, $F(v)$ should equals to zero. Thus, we conducted a binary search for $v$ between 1000 and 10000, and searched for the best $v$ that can minimize $|F(v)|$.
+
+$$F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2}|) + E(|E- \frac{\mu}{2}|)\;\;\;(7)$$
+$$E_v(|S + L/2|) = \sum_{x=0}^\infty p_v(x) * EDF_{start}(-\frac{x}{2})\;\;\;(8)$$
+$$E_v(|E - L/2|) = \sum_{x=0}^\infty p_v(x) * EDF_{end}(\frac{x}{2})\;\;\;(9)$$
+$$E(|S + \frac{\mu}{2}|)=EDF_{start}(x)\;\;\;(10)$$
+$$E(|E - \frac{\mu}{2}|)=EDF_{end}(x)\;\;\;(11)$$
+
+In practice, we slightly offlist the last two items in (7) and changed it into (12), which provided us more accurate estimation for the variance of the fragment length distribution.
+$$F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2} - \frac{E- \frac{\mu}{2}}{4}|) - E(|E- \frac{\mu}{2} - \frac{S + \frac{\mu}{2}}{4}|)\;\;\;(12)$$
+
 
 \subsubsection*{Pulldown}
 
@@ -100,7 +127,9 @@ This ultimately leads us back to $P_{noise} = P_{kept}*P_{avg}(Pd|UB)$ which we 
 
 \subsubsection*{PCR}
 
-PCR (Polymerase Chain Reaction) is the process of replicating currently existing sequence fragments that have been pulled down. In our model this is determined through a user defined parameter, $PCR_{rate}$, that can be generated from our learn module. (Unfinished)
+PCR (Polymerase Chain Reaction) is the process of replicating currently existing sequence fragments that have been pulled down. In our model this is determined through a user defined parameter, $PCR_{rate}$, that can be generated from our learn module. We assumed the number of copies followed a geometric distribution with its mean value as $\mu$, and estimated $\mu$ using equation (1) in which $n_i$ represents the number of reads with i PCR copies (including the original one). The $PCR_{rate}$ was calculated with equation (2).
+$$\mu = \frac{\sum_{i=1}^\infty (i * n_i)}{\sum_{i=1}^\infty n_i} \;\;\;(1)$$
+$$PCR_{rate} = \frac{1}{\mu}\;\;\;(2)$$
 
 \subsubsection*{Sequencing}
 
