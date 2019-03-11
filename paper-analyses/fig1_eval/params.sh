@@ -1,3 +1,4 @@
+CHIPMUNK=chipmunk-1.5
 OUTDIR=/storage/mgymrek/chipmunk/fig1_eval
 REFFA=/storage/resources/dbase/human/hg19/hg19.fa
 NREADS=2000000

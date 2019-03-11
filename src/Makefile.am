@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir) $(HTSLIB_CFLAGS)
 AM_LDFLAGS = $(HTSLIB_LIBS)
 
 bin_PROGRAMS = chipmunk
@@ -6,7 +7,7 @@ noinst_LIBRARIES = libchipmunk.a
 
 libchipmunk_a_CPPFLAGS = $(AM_CPPFLAGS) $(HTSLIB_CFLAGS)
 libchipmunk_a_SOURCES = simulate_reads_main.cpp learn_main.cpp \
-	multithread.h multithread.cpp\
+	multithread.h multithread.cpp \
 	fragment.h fragment.cpp \
 	library_constructor.h library_constructor.cpp \
 	options.h options.cpp \

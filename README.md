@@ -19,8 +19,8 @@ ChIPmunk requires the third party package [htslib](http://www.htslib.org/).
 If you are installing from the tarball, type the following commands.
 
 ```
-tar -xzvf ChIPmunk-X.X.tar.gz
-cd ChIPmunk-X.X
+tar -xzvf chipmunk-X.X.tar.gz
+cd chipmunk-X.X
 ./configure [--prefix=$PREFIX]
 make
 make install

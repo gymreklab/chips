@@ -8,18 +8,24 @@ nc=$2
 BAM=$(ls /storage/mlamkin/projects/encode_data_learn/${factor}/*.bam)
 BED=$(ls /storage/mlamkin/projects/encode_data_learn/${factor}/*.bed)
 
+# Learn
+$CHIPMUNK learn \
+    -p ${BED} \
+    -t bed \
+    -b ${BAM} \
+    -o ${OUTDIR}/${factor}.${nc} \
+    --paired
+
 # Simulate reads
-~/workspace/asimon-chip-sim/src/asimon simreads \
+time $CHIPMUNK simreads \
     -p ${BED} \
     -t bed -c 6 \
     -f ${REFFA} \
     -o ${OUTDIR}/${factor}.${nc} \
+    --model ${OUTDIR}/${factor}.${nc}.json \
     --numcopies ${nc} \
-    --gamma-frag 15.9201,14.9829 \
-    --spot 0.201711 --frac 0.0425032 \
     --numreads ${NREADS} \
     --readlen ${READLEN} \
-    --thread 1 \
     --region chr19:1-59128983 \
     --paired
 

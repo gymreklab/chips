@@ -17,6 +17,7 @@ src/.deps/
 src/.libs/
 src/.*
 src/asimon
+src/chipmunk
 *.o
 *.a
 src/*.a
@@ -27,7 +28,6 @@ ltmain.sh
 libtool
 config/compile
 config/config.*
-m4/*.m4
 m4/Makefile
 m4/Makefile.in
 igv.log

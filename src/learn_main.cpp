@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <vector>
 #include <sstream>
-#include <math.h>
+#include <cmath>
+#include <numeric>
 #include <time.h>
 #include <algorithm>
 #include <chrono>
