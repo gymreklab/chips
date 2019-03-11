@@ -35,7 +35,10 @@ Options::Options() {
   // Additional simulation parameters
   region = "";
   binsize = 100000;
+
+  // Additional learn parameters
   skip_frag = false;
+  output_frag_lens;
 
   // sequencer
   sequencer_type = "";
