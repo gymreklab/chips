@@ -205,7 +205,7 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
         BamAlignment aln;
         while (bamreader.GetNextAlignment(aln)){
           if (aln.IsDuplicate()) {continue;} // skip the duplicated ones
-          if ( (!aln.IsMapped()) || aln.IsSecondary()){continue;}
+          if ((!aln.IsMapped()) || aln.IsFailedQC() || aln.IsSecondary() || aln.IsSupplementary()){continue;}
           Fragment read_location(seq_names[seq_index], aln.Position(), aln.Length(), 0);
           reads.push_back(read_location);
         }

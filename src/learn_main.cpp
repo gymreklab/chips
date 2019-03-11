@@ -93,7 +93,8 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
 
       if (!bamreader.GetNextAlignment(aln)) {continue;}
       if (aln.IsDuplicate()) {continue;}
-      if ( (!aln.IsMapped()) || aln.IsSecondary()){continue;}
+      if ( (!aln.IsMapped()) || (!aln.IsMateMapped()) || (!aln.IsPaired()) || (!aln.IsProperPair())
+            || aln.IsFailedQC() || aln.IsSecondary() || aln.IsSupplementary()){continue;}
       tlen = aln.TemplateLength();
       if (tlen > 0) {
         fraglengths.push_back(abs(tlen));
@@ -190,7 +191,7 @@ bool learn_frag_single(const std::string& bamfile,
     std::vector<float> ends_in_peak;
     while (bamreader.GetNextAlignment(aln)){
       if (aln.IsDuplicate()) {continue;}
-      if ( (!aln.IsMapped()) || aln.IsSecondary()){continue;}
+      if ((!aln.IsMapped()) || aln.IsFailedQC() || aln.IsSecondary() || aln.IsSupplementary()){continue;}
       float aln_start = aln.Position();
       float aln_end = aln.GetEndPosition();
 
