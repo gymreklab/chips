@@ -3,10 +3,7 @@ AM_LDFLAGS = $(HTSLIB_LIBS)
 
 bin_PROGRAMS = chipmunk
 
-noinst_LIBRARIES = libchipmunk.a
-
-libchipmunk_a_CPPFLAGS = $(AM_CPPFLAGS) $(HTSLIB_CFLAGS)
-libchipmunk_a_SOURCES = simulate_reads_main.cpp learn_main.cpp \
+chipmunk_SOURCES = main.cpp simulate_reads_main.cpp learn_main.cpp \
 	multithread.h multithread.cpp \
 	fragment.h fragment.cpp \
 	library_constructor.h library_constructor.cpp \
@@ -23,10 +20,8 @@ libchipmunk_a_SOURCES = simulate_reads_main.cpp learn_main.cpp \
 	ref_genome.h ref_genome.cpp \
 	model.h model.cpp json.hpp
 
-chipmunk_SOURCES = main.cpp
-
-chipmunk_LDFLAGS = $(AM_LDFLAGS)
-chipmunk_CPPFLAGS = $(AM_CPPFLAGS)
-chipmunk_CFLAGS = $(AM_CFLAGS)
-chipmunk_CXXFLAGS = $(AM_CSSFLAGS)
-chipmunk_LDADD = libchipmunk.a
+chipmunk_CPPFLAGS = $(AM_CPPFLAGS) $(AM_PROG_CC_C_O)
+chipmunk_CFLAGS = $(CFLAGS)	# Change to AM_CXXFLAGS For -o0 (Valgrind)
+chipmunk_CXXFLAGS = $(CXXFLAGS) 	# Change to AM_CXXFLAGS For -o0 (Valgrind)
+chipmunk_LDFLAGS = $(AM_LDFLAGS) $(LT_LDFLAGS)
+chipmunk_LDADD = $(AM_LDFLAGS) $(LT_LDFLAGS)
