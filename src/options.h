@@ -49,6 +49,7 @@ class Options {
 
   // Learn options
   bool skip_frag;
+  bool output_frag_lens;
   virtual ~Options();
 };
 
