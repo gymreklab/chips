@@ -20,7 +20,7 @@ using namespace std;
 
 // define our parameter checking macro
 #define PARAMETER_CHECK(param, paramLen, actualLen) (strncmp(argv[i], param, min(actualLen, paramLen))== 0) && (actualLen == paramLen)
-const bool DEBUG = true;
+const bool DEBUG = false;
 
 // Function declarations
 void learn_help(void);
@@ -48,10 +48,11 @@ float calculate_eexpl(const float k, const float theta, const std::int32_t lower
 float calculate_edf(const float x, const std::int32_t lower_bound, const std::int32_t upper_bound,
     const std::vector<float> cdf, const std::vector<float> edf, const float mu);
 float calculate_gamma_pdf(const float x, const float k, const float theta);
-bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta);
+bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, const std::string& outfile, bool output_frags);
 
 
-bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag) {
+bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag,
+		       const std::string& outfile, bool output_frags) {
   /*
     Learn fragment length distribution from an input BAM file
     Fragment lengths follow a gamma distribution.
@@ -59,6 +60,8 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
     Inputs:
     - bamfile (std::string): path to the BAM file
     - skip_frag (bool): Skip fragment parameter learning process
+    - outfile (std::string): path to write list of fragment lengths (if output_frags=true)
+    - output_frags (bool): Indicate whether to write fragment lengths to output file
     Outputs:
     - alpha (float): parameter of gamma distribution
     - beta  (float): parameter of gamma distribution
@@ -121,6 +124,17 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
     }
   } else {
     return false;
+  }
+
+  // Write frag lengths to output file
+  if (output_frags) {
+    remove(outfile.c_str());
+    ofstream of;
+    of.open(outfile, ios_base::app);
+    for (int frag=0; frag<fraglengths.size(); frag++) {
+      of << fraglengths[frag] << "\n";
+    }
+    of.close();
   }
 
   float total_frag_len = 0;     // sum of all the frag lengths
@@ -555,17 +569,17 @@ int learn_main(int argc, char* argv[]) {
 	options.outprefix = argv[i+1];
 	i++;
       }
-    } else if (PARAMETER_CHECK("-t", 2, parameterLength)){
+    } else if (PARAMETER_CHECK("-t", 2, parameterLength)) {
       if ((i+1) < argc) {
     	options.peakfiletype = argv[i+1];
 	i++;
       }
-    } else if (PARAMETER_CHECK("-c", 2, parameterLength)){
+    } else if (PARAMETER_CHECK("-c", 2, parameterLength)) {
       if ((i+1) < argc) {
     	options.countindex = std::atoi(argv[i+1]);
 	i++;
       }
-    } else if (PARAMETER_CHECK("-r", 2, parameterLength)){
+    } else if (PARAMETER_CHECK("-r", 2, parameterLength)) {
       if ((i+1) < argc) {
     	options.remove_pct = std::atof(argv[i+1]);
     	i++;
@@ -575,17 +589,19 @@ int learn_main(int argc, char* argv[]) {
     options.skip_frag = true;
     i++;
       }
-    } else if (PARAMETER_CHECK("--thres", 7, parameterLength)){
+    } else if (PARAMETER_CHECK("--thres", 7, parameterLength)) {
       if ((i+1) < argc){
-    options.intensity_threshold = std::atoi(argv[i+1]);
-    i++;
+	options.intensity_threshold = std::atoi(argv[i+1]);
+	i++;
       }
-    } else if (PARAMETER_CHECK("--paired", 8, parameterLength)){
+    } else if (PARAMETER_CHECK("--paired", 8, parameterLength)) {
       options.paired = true;
+    } else if (PARAMETER_CHECK("--output-frag-lens", 18, parameterLength)) {
+      options.output_frag_lens = true;
     } else if (PARAMETER_CHECK("--est", 5, parameterLength)){
       if ((i+1) < argc){
-    options.estimate_frag_length = std::atoi(argv[i+1]);
-    i++;
+	options.estimate_frag_length = std::atoi(argv[i+1]);
+	i++;
       }
     } else {
       cerr << endl << "******ERROR: Unrecognized parameter: " << argv[i] << " ******" << endl << endl;
@@ -612,10 +628,12 @@ int learn_main(int argc, char* argv[]) {
     ChIPModel model;
 
     /*** Learn fragment size disbribution parameters ***/
+    PrintMessageDieOnError("Learning fragment size distribution", M_PROGRESS);
     float frag_param_a = -1;
     float frag_param_b = -1;
     if (options.paired){
-      if (!learn_frag_paired(options.chipbam, &frag_param_a, &frag_param_b, options.skip_frag)) {
+      if (!learn_frag_paired(options.chipbam, &frag_param_a, &frag_param_b, options.skip_frag,
+			     options.outprefix+".frags.txt", options.output_frag_lens)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
     }else{
@@ -628,6 +646,7 @@ int learn_main(int argc, char* argv[]) {
     model.SetFrag(frag_param_a, frag_param_b);
 
     /*** Learn pulldown ratio parameters ***/
+    PrintMessageDieOnError("Learning pulldown parameters", M_PROGRESS);
     float ab_ratio;
     float s = -1;
     float f = -1;
@@ -639,6 +658,7 @@ int learn_main(int argc, char* argv[]) {
     model.SetS(s);
 
     /*** Learn PCR geometric distribution parameter **/
+    PrintMessageDieOnError("Learning PCR parameters", M_PROGRESS);
     float geo_rate = -1;
     if (!learn_pcr(options.chipbam, &geo_rate)){
       PrintMessageDieOnError("Error learning PCR rate", M_ERROR);
@@ -646,6 +666,7 @@ int learn_main(int argc, char* argv[]) {
     model.SetPCR(geo_rate);
 
     /*** Output learned model **/
+    PrintMessageDieOnError("Output model", M_PROGRESS);
     model.WriteModel(options.outprefix + ".json");
     model.PrintModel();
     return 0;

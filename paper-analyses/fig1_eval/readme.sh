@@ -1,11 +1,12 @@
 #!/bin/bash
-
-# TODO
-# make run_factor use the learned params automatically
+# /storage/mlamkin/projects/encode_data_learn/datasets/learn_files/analyzed_encode_data.csv has paths
 
 ######### Sim examples #########
 # Setup windows
 #./make_windows.sh 
+
+# Learn (single/paired/frags)
+./learn_factor.sh
 
 # Simulate TF example
 #factor=K562+SP1
