@@ -571,7 +571,7 @@ int learn_main(int argc, char* argv[]) {
     	i++;
       }
     } else if (PARAMETER_CHECK("--skip-frag", 11, parameterLength)){
-      if ((i) < argc) {
+      if ((i+1) < argc) {
     options.skip_frag = true;
     i++;
       }
