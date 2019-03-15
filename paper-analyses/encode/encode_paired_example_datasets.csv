@@ -1,1 +1,12 @@
 GM12878,RELB,Paired,https://www.encodeproject.org/files/ENCFF708KIW/@@download/ENCFF708KIW.bam,https://www.encodeproject.org/files/ENCFF355VTC/@@download/ENCFF355VTC.bed.gz
+GM12878,IKZF1,Paired,https://www.encodeproject.org/files/ENCFF216YZE/@@download/ENCFF216YZE.bam,https://www.encodeproject.org/files/ENCFF795PEX/@@download/ENCFF795PEX.bed.gz
+GM12878,TARDBP,Paired,https://www.encodeproject.org/files/ENCFF673WUM/@@download/ENCFF673WUM.bam,https://www.encodeproject.org/files/ENCFF016QUV/@@download/ENCFF016QUV.bed.gz
+GM12878,ZNF24,Paired,https://www.encodeproject.org/files/ENCFF699QHD/@@download/ENCFF699QHD.bam,https://www.encodeproject.org/files/ENCFF882PND/@@download/ENCFF882PND.bed.gz
+GM12878,SRF,Paired,https://www.encodeproject.org/files/ENCFF387RFR/@@download/ENCFF387RFR.bam,https://www.encodeproject.org/files/ENCFF500GHH/@@download/ENCFF500GHH.bed.gz
+GM12878,BACH1,Paired,https://www.encodeproject.org/files/ENCFF518TTP/@@download/ENCFF518TTP.bam,https://www.encodeproject.org/files/ENCFF866OLZ/@@download/ENCFF866OLZ.bed.gz
+K562,ZBTB2,Paired,https://www.encodeproject.org/files/ENCFF294LPO/@@download/ENCFF294LPO.bam,https://www.encodeproject.org/files/ENCFF551YGS/@@download/ENCFF551YGS.bed.gz
+K562,POLR2B,Paired,https://www.encodeproject.org/files/ENCFF454PCU/@@download/ENCFF454PCU.bam,https://www.encodeproject.org/files/ENCFF729LTY/@@download/ENCFF729LTY.bed.gz
+K562,PYGO2,Paired,https://www.encodeproject.org/files/ENCFF288JVH/@@download/ENCFF288JVH.bam,https://www.encodeproject.org/files/ENCFF078LXS/@@download/ENCFF078LXS.bed.gz
+K562,CC2D1A,Paired,https://www.encodeproject.org/files/ENCFF054TBR/@@download/ENCFF054TBR.bam,https://www.encodeproject.org/files/ENCFF051PEB/@@download/ENCFF051PEB.bed.gz
+K562,GMEB1,Paired,https://www.encodeproject.org/files/ENCFF809QWF/@@download/ENCFF809QWF.bam,https://www.encodeproject.org/files/ENCFF154QJU/@@download/ENCFF154QJU.bed.gz
+K562,DNMT1,Paired,https://www.encodeproject.org/files/ENCFF987HMB/@@download/ENCFF987HMB.bam,https://www.encodeproject.org/files/ENCFF958LLL/@@download/ENCFF958LLL.bed.gz
