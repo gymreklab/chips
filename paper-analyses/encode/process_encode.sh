@@ -10,7 +10,6 @@ OUTDIR=$3
 FACTOR=$4
 RTYPE=$5
 
-PICPATH=/storage/resources/source/
 CHIPMUNK=chipmunk
 
 die()
@@ -34,9 +33,9 @@ gunzip -f ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz || die "Could not unzip BED"
 samtools index ${OUTDIR}/${FACTOR}/${FACTOR}.bam || die "Could not index BAM file"
 
 # Flag the BAM file
+# Need $PICARD env var set
 echo "MarkDuplicates"
-java -jar -Xmx10G -Djava.io.tmpdir=${TMPDIR} \
-    ${PICPATH}/picard.jar \
+java -jar -Xmx10G -Djava.io.tmpdir=${TMPDIR} $PICARD \
     MarkDuplicates VALIDATION_STRINGENCY=SILENT \
     I=${OUTDIR}/${FACTOR}/${FACTOR}.bam \
     O=${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam \

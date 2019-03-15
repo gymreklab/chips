@@ -1,0 +1,8 @@
+{
+    "image": "gymreklab/chipmunk-1.7-run:latest",
+    "vcpus": 1,
+    "memory": 14000,
+    "command": [],
+    "jobRoleArn": "arn:aws:iam::369425333806:role/batchJobRole",
+    "user": "root"
+}
