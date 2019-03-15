@@ -62,7 +62,7 @@ die()
 
 # Parse options
 OPTIND=1
-while getopts "t:s:p:q:fr:o:xh?v" opt; do
+while getopts "t:s:p:q:f:r:o:xh?v" opt; do
     case "$opt" in
 	h|\?)
             show_help
@@ -130,6 +130,7 @@ if [ "${skip_ref}" = 0 ]; then
     log "Making merged FASTA reference"
     cat ${target_fasta} | sed 's/^>/>TARGET-/' > ${output_prefix}.fa
     cat ${spikein_fasta} | sed 's/^>/>SPIKEIN-/' >> ${output_prefix}.fa
+    samtools faidx ${output_prefix}.fa
     log "Output merged reference to ${output_prefix}.fa"
 else
     log "Skipping FASTA merging"
