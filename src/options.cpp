@@ -38,7 +38,7 @@ Options::Options() {
 
   // Additional learn parameters
   skip_frag = false;
-  output_frag_lens;
+  output_frag_lens = false;
 
   // sequencer
   sequencer_type = "";
