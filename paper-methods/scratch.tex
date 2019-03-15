@@ -1,0 +1,41 @@
+ Let $P_b$ be the probability of a fragment being bound by a protein or histone modification and $P_{kept}$ be a modifier that affects the probability that a fragment will be kept. 
+$$P_b = \text{peak score} * P_{kept} \text{ where } P_{kept} = \dfrac{numreads * rate_{PCR}}{numfrags_{run} * numcopies}$$
+ $P_{kept}$ is reliant on four variables, $numreads$, $rate_{PCR}$, $numfrags_{run}$, and $numcopies$. $numreads$ and $numcopies$ are parameters inputted by the user that indicate the approximate total amount of reads that should be outputted to the fastq files and the total number of cells in our experiment respectively.
+ The total amount of cells indicates how many genomes we are sequencing and has a heavy influence on the coverage of each peak.
+ $rate_{PCR}$ is also a user defined parameter, however it can be generated from our learn function by analyzing the duplicated fragments in the inputted bam file. Lastly, $numfrags_{run}$ is representative of the total amount of fragments we expect to be pulled down per run, where a run is iterating over the entire region of the genome specified one time. Thus, when you have the quantity: $numfrags_{run}*numcopies$ it represents the total amount of fragments we expect throughout the pulldown process. The quantity $numreads*rate_{PCR}$ represents the total amount of unique reads that will be generated from the pulldown process. Thus $P_{kept}$ is the ratio of the total unique reads to total amount of fragments expected which is a necessity to ensure the proper amount of reads will be generated and outputted. 
+
+Now that we have the probability of a fragment being bound, there are two outcomes. The fragment is bound and will be used for PCR and sequencing or the fragment is not bound and we now need to determine whether it should be pulled down as noise or filtered out. The probability defined above is the initial test as to whether the fragment should be pulled down. If the fragment is ultimately not bound, we now need to find the net probability that noise will be pulled down which we define as $P_{noise}$. This quantity is determined as:
+$$P_{noise} = P_{kept}*P_{avg}(Pd|UB)$$
+where $P_{avg}(Pd|UB)$ is defined as the probability the fragment is pulled down given that it is unbound and $P_{kept}$ is the same as listed above. Using Bayes Theorem, we can define
+$$P_{avg}(Pd|UB) = \dfrac{P(UB|Pd)*P(Pd)}{P(UB)}$$
+$$P_{avg}(Pd|B) = \dfrac{P(B|Pd)*P(Pd)}{P(B)}$$
+and we can also find:
+$$Prob_{avg}(Pd|B) = average(P_x(Pd|B))$$
+where $P_x(Pd|B) = \dfrac{coverage(y)}{numcopies}$ is defined as the probability for a single given fragment $x$, which overlaps the peak $y$, that it is pulled down given that it is bound. $coverage(y)$ is defined as the total number of reads that span this peak and $numcopies$ is the same parameter as described above. However, we can not find $P(Pd)$, so we need to remove this probability in order to find $P_{avg}(Pd|UB)$.
+Thus if we take the ratio:
+$$\dfrac{P_{avg}(Pd|B)}{P_{avg}(Pd|UB)} = \dfrac{P(B|Pd)*P(UB)}{P(B)*P(UB|Pd)}$$
+
+we can solve for $P_{avg}(Pd|UB)$ with having the term $P(Pd)$:
+$$P_{avg}(Pd|UB) = \dfrac{average(P_x(Pd|B))*P(B)*P(UB|Pd)}{P(B|Pd)*P(UB)}$$
+Breaking this into components we can solve for $\dfrac{P(B|Pd)}{P(UB|Pd)}$ and $\dfrac{P(UB)}{P(B)}$
+$\dfrac{P(B|Pd)}{P(UB|Pd)} = \dfrac{tagcount(B|Pd)}{tagcount(UP|Pd)}$
+where: 
+$$tagcount(B|Pd) = tagcount(B, called|Pd) + tagcount(B, not called|Pd)$$
+$$tagcount(called|Pd) = tagcount(B, called|Pd) + tagcount(UB, called|Pd)$$
+All of these values can be determined through mapping reads from the BAM file to the ChIP-seq peaks in the bed file and calling all mapped to peak locations as bound and all others as unbound. However, to determine the values the amount of the bound fragments that were not used in the BAM we can estimate this as it should be proportional to the amount of noise in the file:
+$$tagcount(B, called|P) + tagcount(B, not called|P) \approx tagcount(B, called|P) + tagcount(UB, called|P)$$
+
+From ChIP-seq peaks, we can acquire: $length(B)$ and $length(UB)$ which by taking the ratio of the length of fragments bound we can determine the ratio of probabilities of unbound to bound.
+
+$$\dfrac{P(UB)}{P(B)} = \dfrac{length(UB)}{length(B)}$$
+
+In order to gather these lengths we need to look at all the fragments in the file and the lengths that they span when under and peak and not under a peak. $length(called)$ is defined as the total length of fragments that spans the genome. 
+$$length(B) = length(B, called) + length(B, not called)$$
+$$length(called) = length(B, called) + length(UB, called)$$
+and assume that:
+$$length(B, called) + length(B, not called) \approx length(B, called) + length(UB, called)$$
+
+Finally, we can solve for $P_{avg}(Pd|UB)$:
+$$P_{avg}(Pd|UB) = \dfrac{average(P_x(Pd|B))*length(B)*tagcount(UB|Pd)}{length(UB)*tagcount(B|Pd)}$$
+
+This ultimately leads us back to $P_{noise} = P_{kept}*P_{avg}(Pd|UB)$ which we can now calculate in order to understand whether a not this unbound fragment should be pulled down.
