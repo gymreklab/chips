@@ -17,4 +17,6 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	--job-definition chipmunk-encode:1 \
 	--container-overrides 'command=[\"${SCRIPTNAME}\",\"${bamurl}\",\"${bedurl}\",\"${factor}\",\"${rtype}\"],environment=[{name=\"BATCH_FILE_TYPE\",value=\"script\"},{name=\"BATCH_FILE_S3_URL\",value=\"s3://gymreklab-awsbatch/${SCRIPTNAME}\"}]'"
     echo "${cmd}"
-done < encode_paired_example_datasets.csv
+#    sh -c "${cmd}"
+#    exit 1 # exit when debugging
+done < encode_datasets_K562_GM12878_clean.csv

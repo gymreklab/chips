@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Note: r5.large has 2 CPU, 16GB memory, 8GB storage on /
-# TODO: remake chipmunk-run docker after fix seg fault
 
 # Set up compute queue
 aws batch create-compute-environment \

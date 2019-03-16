@@ -25,8 +25,8 @@ TMPDIR=${OUTDIR}/${FACTOR}/tmp
 
 # Download ENCODE data
 echo "Downloading ENCODE data"
-wget -O ${OUTDIR}/${FACTOR}/${FACTOR}.bam ${BAMURL} || die "Could not download BAM"
-wget -O ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz ${BEDURL} || die "Could not download BED"
+wget -q -O ${OUTDIR}/${FACTOR}/${FACTOR}.bam ${BAMURL} || die "Could not download BAM"
+wget -q -O ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz ${BEDURL} || die "Could not download BED"
 
 echo "Unzipping and indexing"
 gunzip -f ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz || die "Could not unzip BED"
