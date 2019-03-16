@@ -50,4 +50,4 @@ docker run \
 ./run_aws_jobs.sh
 
 # Compile all params from AWS for supp table 2
-./compile_aws_params.sh
+./compile_aws_params.sh > ChIPMunk_SuppTable2.csv

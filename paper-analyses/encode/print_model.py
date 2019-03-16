@@ -24,4 +24,4 @@ fact = meta[1]
 encbam = meta[2]
 encbed = meta[3]
 
-sys.stdout.write("\t".join([celltype, fact, encbam, encbed, k, th, frac, spot, pcr, "s3://chipmunk-encode-models/%s"%os.path.basename(mfile)])+"\n")
+sys.stdout.write(",".join([celltype, fact, encbam, encbed, k, th, frac, spot, pcr, "s3://chipmunk-encode-models/%s"%os.path.basename(mfile)])+"\n")
