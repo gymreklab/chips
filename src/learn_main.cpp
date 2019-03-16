@@ -434,7 +434,6 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
   PeakLoader peakloader(peakfile, peakfileType, bamfile, count_colidx);
   peakloader.Load(peaks);
 
-  std::cout <<"finish loading" <<std::endl;
   // Remove top remove_pct% of peaks default is do not remove
   if (remove_pct > 0)
   {
@@ -448,7 +447,6 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
   for(int peak_index = 0; peak_index < peaks.size(); peak_index++){
     plen += peaks[peak_index].length;
   }
-  std::cout <<"finish peak length calculation" <<std::endl;
 
   // calculate f and s, and then ab_ratio
   float f = (float)plen / (float) (peakloader.total_genome_length);
