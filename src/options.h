@@ -51,6 +51,9 @@ class Options {
   bool skip_frag;
   bool output_frag_lens;
   virtual ~Options();
+
+  // Other options
+  bool verbose;
 };
 
 #endif  // SRC_OPTIONS_H__

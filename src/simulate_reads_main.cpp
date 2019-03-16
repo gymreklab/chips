@@ -66,6 +66,8 @@ int simulate_reads_main(int argc, char* argv[]) {
 	options.outprefix = argv[i+1];
 	i++;
       }
+    } else if (PARAMETER_CHECK("-v", 2, parameterLength)) {
+      options.verbose = true;
     } else if (PARAMETER_CHECK("--numcopies", 11, parameterLength)) {
       if ((i+1) < argc) {
 	options.numcopies = atoi(argv[i+1]);
@@ -292,6 +294,11 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, in
     std::string prev_chrom = "";
     BinGenerator bingenerator(options);
     while (bingenerator.GotoNextBin()){
+      if (options.verbose) {
+	stringstream ss;
+	ss << "Processing bin " << bingenerator.GetCurrentBinStr() << " " << copy_index;
+	PrintMessageDieOnError(ss.str(), M_PROGRESS);
+      }
       // set up
       vector <Fragment> pulldown_fragments, lib_fragments;
 

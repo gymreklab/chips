@@ -12,5 +12,5 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     bedacc=$(echo $bedurl | cut -d'/' -f 5)
     factor=${ct}_${f}_${bamacc}_${bedacc}
     echo ./process_encode.sh ${bamurl} ${bedurl} ${OUTDIR} ${factor} Both
-done < encode_paired_example_datasets.csv | xargs -n1 -I% -P4 sh -c "%"
+done < encode_paired_example_datasets.csv #| xargs -n1 -I% -P4 sh -c "%"
 

@@ -52,6 +52,9 @@ Options::Options() {
   // learn only: intensity threshold
   intensity_threshold = 100;
   estimate_frag_length = 200;
+
+  // Other options
+  verbose = false;
 }
 
 Options::~Options() {}

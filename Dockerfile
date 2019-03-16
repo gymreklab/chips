@@ -28,3 +28,7 @@ RUN wget https://github.com/gymreklab/ChIPmunk/releases/download/v1.6/chipmunk-1
 RUN tar -xzvf chipmunk-1.6.tar.gz
 WORKDIR chipmunk-1.6
 RUN ./configure && make && make install
+
+# Install Picard
+RUN wget -O /dependencies/picard.jar https://github.com/broadinstitute/picard/releases/download/2.18.27/picard.jar
+ENV PICARD=/dependencies/picard.jar

@@ -35,13 +35,12 @@ samtools index ${OUTDIR}/${FACTOR}/${FACTOR}.bam || die "Could not index BAM fil
 # Flag the BAM file
 # Need $PICARD env var set
 echo "MarkDuplicates"
-java -jar -Xmx10G -Djava.io.tmpdir=${TMPDIR} $PICARD \
+java -jar -Xmx12G -Djava.io.tmpdir=${TMPDIR} $PICARD \
     MarkDuplicates VALIDATION_STRINGENCY=SILENT \
     I=${OUTDIR}/${FACTOR}/${FACTOR}.bam \
     O=${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam \
     M=${OUTDIR}/${FACTOR}/${FACTOR}.metrics || die "Error running mark duplicates"
 samtools index ${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam || die "Error indexing dup file"
-
 
 if [ "${RTYPE}" = "Paired" ] || [ "${RTYPE}" = "Both" ]; then
     $CHIPMUNK learn \

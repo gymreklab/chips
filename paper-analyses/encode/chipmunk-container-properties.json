@@ -1,5 +1,5 @@
 {
-    "image": "gymreklab/chipmunk-1.7-run:latest",
+    "image": "gymreklab/chipmunk-run:latest",
     "vcpus": 1,
     "memory": 14000,
     "command": [],
