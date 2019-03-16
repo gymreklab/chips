@@ -1,5 +1,6 @@
 CHIPMUNK=chipmunk
 OUTDIR=/storage/mgymrek/chipmunk/fig1_eval
+ENCDIR=/storage/mgymrek/chipmunk/encode
 REFFA=/storage/resources/dbase/human/hg19/hg19.fa
 NREADS=2000000
 READLEN=100

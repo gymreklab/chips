@@ -3,6 +3,7 @@ FROM gymreklab/chipmunk-1.7
 RUN apt-get update
 
 RUN apt-get install -y \
+    curl \
     python3 \
     python3-pip \
     unzip
