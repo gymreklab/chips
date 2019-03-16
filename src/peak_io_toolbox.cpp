@@ -84,7 +84,6 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
           end = std::stol(element);
         }else if((count_colidx > 0) && (elem_idx == (count_colidx-1))){
           count = std::stof(element);
-          //std::cout<< count<<std::endl;
         }
         elem_idx++;
       }
@@ -137,7 +136,6 @@ bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks,
           end = std::stol(element);
         }else if((count_colidx > 0) && (elem_idx == count_colidx-1)){
           count = std::stof(element);
-          //std::cout<< count<<std::endl;
         }
         elem_idx++;
       }
@@ -183,11 +181,13 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
       if ((seq_names[seq_index].find("_") == std::string::npos) && (seq_names[seq_index] != "chrM")){
         bamreader.SetRegion(seq_names[seq_index], 0, seq_lengths[seq_index]);
         BamAlignment aln;
+        int count = 0;
         while (bamreader.GetNextAlignment(aln)){
           if (aln.IsDuplicate()) {continue;} // skip the duplicated ones
           if ( (!aln.IsMapped()) || aln.IsSecondary()){continue;}
-          Fragment read_location(seq_names[seq_index], aln.Position(), aln.Length(), 0);
+          Fragment read_location(seq_names[seq_index], aln.Position(), aln.Length(), count);
           reads.push_back(read_location);
+          count += 1;
         }
 
         total_genome_length += seq_lengths[seq_index];
@@ -203,11 +203,13 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
       if (seq_names[seq_index] == region_chrom){
         bamreader.SetRegion(seq_names[seq_index], region_start, region_end);
         BamAlignment aln;
+        int count = 0;
         while (bamreader.GetNextAlignment(aln)){
           if (aln.IsDuplicate()) {continue;} // skip the duplicated ones
           if ((!aln.IsMapped()) || aln.IsFailedQC() || aln.IsSecondary() || aln.IsSupplementary()){continue;}
-          Fragment read_location(seq_names[seq_index], aln.Position(), aln.Length(), 0);
+          Fragment read_location(seq_names[seq_index], aln.Position(), aln.Length(), count);
           reads.push_back(read_location);
+          count += 1;
         }
 
         total_genome_length += (region_end-region_start);
@@ -234,6 +236,9 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   std::sort(peaks.begin(), peaks.end(), compare_location);
   std::sort(reads.begin(), reads.end(), compare_location);
 
+  // reset read scores to zero
+  for (int read_index=0; read_index<reads.size(); read_index++) reads[read_index].score = 0;
+
   uint32_t read_index_start = 0;
   for(int peak_index=0; peak_index<peaks.size(); peak_index++){
     for (int read_index=read_index_start; read_index<reads.size(); read_index++){
@@ -245,8 +250,6 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
         if ((peak_start < read_end) && (peak_end > read_start)){
           reads[read_index].score = 1;
           peaks[peak_index].score += 1;
-          //n_reads_in_peak += 1;
-          //break;
         }else if(peak_start >= read_end){
           read_index_start = read_index + 1;
         }else if(peak_end <= read_start){
@@ -278,7 +281,7 @@ bool PeakReader::compare_location(Fragment a, Fragment b){
   }else if (a.length != b.length){
     return (a.length < b.length);
   }else{
-    return true;
+    return (a.score < b.score);
   }
 }
 
