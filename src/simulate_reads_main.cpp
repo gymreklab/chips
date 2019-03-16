@@ -203,14 +203,28 @@ int simulate_reads_main(int argc, char* argv[]) {
 
     // Remove previous existing fastqs
     if (options.paired){
+      // read - first pair
       std::string reads1 = options.outprefix+"_1.fastq";
-      std::string reads2 = options.outprefix+"_2.fastq";
       std::remove(reads1.c_str());
+      for (int thread_index=0; thread_index<options.n_threads; thread_index++){
+        reads1 = options.outprefix+"_"+std::to_string(thread_index)+"_1.fastq";
+        std::remove(reads1.c_str());
+      }
+      // read - second pair
+      std::string reads2 = options.outprefix+"_2.fastq";
       std::remove(reads2.c_str());
+      for (int thread_index=0; thread_index<options.n_threads; thread_index++){
+        reads2 = options.outprefix+"_"+std::to_string(thread_index)+"_2.fastq";
+        std::remove(reads2.c_str());
+      }
     }
     else{
       std::string reads = options.outprefix+".fastq";
       std::remove(reads.c_str());
+      for (int thread_index=0; thread_index<options.n_threads; thread_index++){
+        reads = options.outprefix+"_"+std::to_string(thread_index)+".fastq";
+        std::remove(reads.c_str());
+      }
     }
 
     /***************** Main implementation ***************/
@@ -307,9 +321,7 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, in
       /*** Step 4: Sequencing ***/
       Sequencer seq(options);
       seq.Sequence(lib_fragments, total_reads, thread_index, copy_index);
-      //std::cout << total_reads << "    " << thread_index << "    " << copy_index <<std::endl;
     }
-    //std::cout << thread_index << "    " << copy_index <<std::endl;
   }
 }
 
