@@ -25,9 +25,9 @@ echo "RTYPE: $RTYPE"
 
 # Upload results to s3
 if [ "${RTYPE}" = "Single" ] || [ "${RTYPE}" = "Both" ]; then
-    aws s3 cp /${FACTOR}/${FACTOR}.json s3://chipmunk-encode-models/${FACTOR}.json || die "Error writing results to s3"
+    aws s3 cp /data/${FACTOR}/${FACTOR}.json s3://chipmunk-encode-models/${FACTOR}.json || die "Error writing results to s3"
 fi
 
 if [ "${RTYPE}" = "Paired" ] || [ "${RTYPE}" = "Both" ]; then
-    aws s3 cp /${FACTOR}/${FACTOR}.paired.json s3://chipmunk-encode-models/${FACTOR}.paired.json || die "Error writing results to s3"
+    aws s3 cp /data/${FACTOR}/${FACTOR}.paired.json s3://chipmunk-encode-models/${FACTOR}.paired.json || die "Error writing results to s3"
 fi

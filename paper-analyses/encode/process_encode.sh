@@ -48,7 +48,7 @@ if [ "${RTYPE}" = "Paired" ] || [ "${RTYPE}" = "Both" ]; then
 	-p ${OUTDIR}/${FACTOR}/${FACTOR}.bed \
 	-o ${OUTDIR}/${FACTOR}/${FACTOR}.paired \
 	-t bed \
-	--paired --output-frag-lens
+	--paired 
 fi
 if [ "${RTYPE}" = "Single" ] || [ "${RTYPE}" = "Both" ]; then
     $CHIPMUNK learn \
