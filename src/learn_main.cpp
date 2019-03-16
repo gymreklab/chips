@@ -556,42 +556,40 @@ int learn_main(int argc, char* argv[]) {
     int parameterLength = (int)strlen(argv[i]);
     if (PARAMETER_CHECK("-b", 2, parameterLength)) {
       if ((i+1) < argc) {
-	options.chipbam = argv[i+1];
-	i++;
+	    options.chipbam = argv[i+1];
+	    i++;
       }
     } else if (PARAMETER_CHECK("-p", 2, parameterLength)) {
       if ((i+1) < argc) {
-	options.peaksbed = argv[i+1];
-	i++;
+	    options.peaksbed = argv[i+1];
+	    i++;
       }
     } else if (PARAMETER_CHECK("-o", 2, parameterLength)) {
       if ((i+1) < argc) {
-	options.outprefix = argv[i+1];
-	i++;
+	    options.outprefix = argv[i+1];
+	    i++;
       }
     } else if (PARAMETER_CHECK("-t", 2, parameterLength)) {
       if ((i+1) < argc) {
     	options.peakfiletype = argv[i+1];
-	i++;
+	    i++;
       }
     } else if (PARAMETER_CHECK("-c", 2, parameterLength)) {
       if ((i+1) < argc) {
-    	options.countindex = std::atoi(argv[i+1]);
-	i++;
+        options.countindex = std::atoi(argv[i+1]);
+        i++;
       }
     } else if (PARAMETER_CHECK("-r", 2, parameterLength)) {
       if ((i+1) < argc) {
-    	options.remove_pct = std::atof(argv[i+1]);
-    	i++;
+        options.remove_pct = std::atof(argv[i+1]);
+        i++;
       }
     } else if (PARAMETER_CHECK("--skip-frag", 11, parameterLength)){
-      if ((i+1) < argc) {
-	options.skip_frag = true;
-      }
+	  options.skip_frag = true;
     } else if (PARAMETER_CHECK("--thres", 7, parameterLength)) {
       if ((i+1) < argc){
-	options.intensity_threshold = std::atoi(argv[i+1]);
-	i++;
+        options.intensity_threshold = std::atoi(argv[i+1]);
+        i++;
       }
     } else if (PARAMETER_CHECK("--paired", 8, parameterLength)) {
       options.paired = true;
@@ -599,8 +597,8 @@ int learn_main(int argc, char* argv[]) {
       options.output_frag_lens = true;
     } else if (PARAMETER_CHECK("--est", 5, parameterLength)){
       if ((i+1) < argc){
-	options.estimate_frag_length = std::atoi(argv[i+1]);
-	i++;
+        options.estimate_frag_length = std::atoi(argv[i+1]);
+        i++;
       }
     } else {
       cerr << endl << "******ERROR: Unrecognized parameter: " << argv[i] << " ******" << endl << endl;
@@ -643,7 +641,7 @@ int learn_main(int argc, char* argv[]) {
       }
     }
     model.SetFrag(frag_param_a, frag_param_b);
-
+    
     /*** Learn pulldown ratio parameters ***/
     PrintMessageDieOnError("Learning pulldown parameters", M_PROGRESS);
     float ab_ratio;
