@@ -224,6 +224,12 @@ We model the per-base pair substitution rate, insertion rate, and deletion rate 
 \subsection*{Inferring parameters of ENCODE datasets}
 
 % Script to crawl ENCODE to get all relevant datasets
+Using the learn function of ChIPmunk, we generated a dataset of parameters from the data in ENCODE specifically from the cell type <insert what cell type we decided>.
+In order to carry out this process, we built a crawler script in python that utilized ENCODE's REST API which scours its database based on the URL provided.
+The URL used filtered for ChIP sequencing data, bam files, narrow peak bed files, hg19 assembly, and <insert cell type we used>.
+From the URL, we can grab a python dictionary version of the JSON and iterate through its files which hold the download URLs to the BAMs and BED files needed to be downloaded.
+These download URLs are stored and organized based on the cell type, Transcription Factor/Histone Modification, and isogenic replicate to be downloaded and parameters learned.
+
 % Download BAM+BED, run mark dup, index, run learn in single or paired end mode
 
 % TODO will add other methods sections based on the main text
