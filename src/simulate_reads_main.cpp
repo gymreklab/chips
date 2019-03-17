@@ -229,6 +229,7 @@ int simulate_reads_main(int argc, char* argv[]) {
 
     /***************** Main implementation ***************/
     // Perform in bins so we don't keep everything in memory at once
+    PrintMessageDieOnError("Loading the input ChIP-seq peak file (and BAM file if given)", M_PROGRESS);
     PeakIntervals* pintervals = \
                new PeakIntervals(options, options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
 
@@ -236,6 +237,7 @@ int simulate_reads_main(int argc, char* argv[]) {
     //fill_queue(bingenerator, bq);
 
     // Keeps track of number of reads for naming
+    PrintMessageDieOnError("Simulating reads based on the input profile", M_PROGRESS);
     std::vector<std::thread> consumers;
     for (int thread_index=0; thread_index<options.n_threads; thread_index++){
       std::thread cnsmr(std::bind(consume, std::ref(task_queue), options, pintervals, thread_index));
@@ -247,6 +249,7 @@ int simulate_reads_main(int argc, char* argv[]) {
       cnsmr.join();
     }
     
+    PrintMessageDieOnError("Writing reads into file", M_PROGRESS);
     for (int thread_index=0; thread_index<options.n_threads; thread_index++){
       if (options.paired){
         std::string ifilename_1 = options.outprefix+"_"+std::to_string(thread_index)+"_1.fastq";
@@ -267,6 +270,7 @@ int simulate_reads_main(int argc, char* argv[]) {
     }
 
     delete pintervals;
+    PrintMessageDieOnError("Done!", M_PROGRESS);
     return 0;
     /******************************************************/
   } else {
@@ -294,11 +298,14 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, in
     try{
       copy_index = q.pop();
     } catch (std::out_of_range e){
-      cerr << e.what() << endl;
+      //cerr << e.what() << endl;
       break;
     }
 
-    if (copy_index%100 == 0) {std::cout<<copy_index<<std::endl;}
+    if ((copy_index > 0) && (copy_index%100 == 0)) {
+        int job_percentage = (int) (100 * copy_index / (float) options.numcopies);
+        PrintMessageDieOnError("Simulated " + std::to_string(job_percentage) +"% reads.", M_PROGRESS);
+    }
 
     int total_reads = 0;
     int peakIndexStart = 0;
