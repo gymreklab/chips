@@ -87,7 +87,8 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
     srand(seed);
 
     int guard_count = 0; // prevent the dead loop
-    while(numreads<maxreads && guard_count<(100*maxreads)) {
+    while(numreads<maxreads && guard_count<(10*maxreads)) {
+      guard_count++;
       int chrom = rand() % seq_names.size();
       int start = rand() % seq_lengths[chrom];
       
@@ -103,9 +104,10 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
         fraglengths.push_back(abs(tlen));
         numreads++;
       }
-      guard_count++;
-      //    cerr << abs(tlen) << endl; // if you want to print out for debugging
     }
+
+    if (fraglengths.size() == 0)
+      PrintMessageDieOnError("No paired-end reads found in the input BAM file", M_ERROR);
 
     // find median to use to filter
     nth_element(fraglengths.begin(), fraglengths.begin() + fraglengths.size()/2, fraglengths.end());
@@ -192,6 +194,8 @@ bool learn_frag_single(const std::string& bamfile,
   if (!peakloader.Load(peaks)) PrintMessageDieOnError("Error loading peaks from " + peakfile, M_ERROR);
   for (int peak_idx=peaks.size()-1;peak_idx>=0;peak_idx--){
     if (peaks[peak_idx].score < intensity_threshold) peaks.erase(peaks.begin()+peak_idx);
+    if (peaks.size() == 0)
+      PrintMessageDieOnError("There is no peaks satisfying the user-defined threshold: " + std::to_string(intensity_threshold), M_ERROR);
   }
 
   /* Read reads from the BAM file */

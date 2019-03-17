@@ -14,7 +14,7 @@ SEQUENCER=HiSeq
 #for nc in 1000 10000 100000 1000000
 for nc in 1000
 do
-    ./src/asimon simreads \
+    ./src/chipmunk simreads \
 	-p ${PEAKS} \
 	-t ${TYPE} \
 	-f ${REFFA} \
