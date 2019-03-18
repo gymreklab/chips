@@ -10,6 +10,8 @@ PeakReader::PeakReader(const std::string& _peakfile){
 bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
         const std::int32_t count_colidx, const std::string region){
   std::ifstream infile(peakfile.c_str());
+  if(infile.fail()) PrintMessageDieOnError("Input path \"" + peakfile + "\" does not exist", M_ERROR);
+
   std::string line;
   while (std::getline(infile, line)){
     if (line.find('#') != 0){
@@ -63,6 +65,8 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
 bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
         const std::int32_t count_colidx, const std::string region){
   std::ifstream infile(peakfile.c_str());
+  if(infile.fail()) PrintMessageDieOnError("Input path \"" + peakfile + "\" does not exist", M_ERROR);
+
   std::string line;
   while (std::getline(infile, line)){
       std::string chr;
@@ -115,6 +119,8 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
 bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks,
         const std::int32_t count_colidx, const std::string region){
   std::ifstream infile(peakfile.c_str());
+  if(infile.fail()) PrintMessageDieOnError("Input path \"" + peakfile + "\" does not exist", M_ERROR);
+
   std::string line;
   while (std::getline(infile, line)){
       std::string chr;

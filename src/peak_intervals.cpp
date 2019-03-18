@@ -60,7 +60,7 @@ bool PeakIntervals::LoadPeaks(const Options& options,
 }
 
 void PeakIntervals::EstNumFrags(const Options& options, std::vector<Fragment> peaks){
-    int total_length = 0;
+    long total_length = 0;
     int length_b = 0;
     double numfrags_b = 0;
     double numfrags_ub = 0;
