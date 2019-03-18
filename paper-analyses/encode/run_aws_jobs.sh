@@ -11,10 +11,24 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     bedacc=$(echo $bedurl | cut -d'/' -f 5)
     factor=${ct}_${f}_${bamacc}_${bedacc}
     rtype=$(echo $line | cut -f 3 -d',')
+    # First check if output file exists
+    if [ "${rtype}" = "Paired" ]; then
+	outfile=${factor}.paired.json
+    elif [ "${rtype}" = "Single" ]; then
+	outfile=${factor}.json
+    fi
+    aws s3 ls s3://chipmunk-encode-models/${outfile}
+    if [[ $? -eq 0 ]]; then
+	echo "Found file... skipping ${factor}"
+	continue
+    fi
+
     cmd="aws batch submit-job \
 	--job-name chipmunk-encode-${factor} \
 	--job-queue chipmunk-encode \
-	--job-definition chipmunk-encode:1 \
+	--job-definition chipmunk-encode:2 \
+        --timeout 'attemptDurationSeconds=3600' \
 	--container-overrides 'command=[\"${SCRIPTNAME}\",\"${bamurl}\",\"${bedurl}\",\"${factor}\",\"${rtype}\"],environment=[{name=\"BATCH_FILE_TYPE\",value=\"script\"},{name=\"BATCH_FILE_S3_URL\",value=\"s3://gymreklab-awsbatch/${SCRIPTNAME}\"}]'"
+#    sh -c "${cmd}"
     echo "${cmd}"
-done < encode_paired_example_datasets.csv
+done < encode_datasets_K562_GM12878_clean.csv

@@ -5,3 +5,7 @@ Will probably have to have better way to keep track of fragments. Maybe:
 - keep in linked list (e.g. vector with each pos in genome linking to fragments starting there)
 
 In future can wrap shearing + pulldown into one step (e.g. don't keep fragments tha don't get pulled down)
+
+Building docker:
+docker build -t gymreklab/chipmunk-1.7 .
+docker push gymreklab/chipmunk-1.7

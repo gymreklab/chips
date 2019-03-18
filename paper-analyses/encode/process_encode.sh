@@ -9,6 +9,13 @@ BEDURL=$2
 OUTDIR=$3
 FACTOR=$4
 RTYPE=$5
+THRESH=$6
+
+MAXFILESIZE=4294967296 # 4GB. Skip large files so AWS doesn't run out of space
+
+if [[ -z $THRESH ]]; then
+    THRESH=100
+fi
 
 CHIPMUNK=chipmunk
 
@@ -25,8 +32,10 @@ TMPDIR=${OUTDIR}/${FACTOR}/tmp
 
 # Download ENCODE data
 echo "Downloading ENCODE data"
-wget -O ${OUTDIR}/${FACTOR}/${FACTOR}.bam ${BAMURL} || die "Could not download BAM"
-wget -O ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz ${BEDURL} || die "Could not download BED"
+curl -s -L --max-filesize ${MAXFILESIZE} -o ${OUTDIR}/${FACTOR}/${FACTOR}.bam ${BAMURL} || die "Could not download BAM"
+curl -s -L --max-filesize ${MAXFILESIZE} -o ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz ${BEDURL} || die "Could not download BED"
+#wget -q -O ${OUTDIR}/${FACTOR}/${FACTOR}.bam ${BAMURL} || die "Could not download BAM"
+#wget -q -O ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz ${BEDURL} || die "Could not download BED"
 
 echo "Unzipping and indexing"
 gunzip -f ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz || die "Could not unzip BED"
@@ -36,7 +45,7 @@ samtools index ${OUTDIR}/${FACTOR}/${FACTOR}.bam || die "Could not index BAM fil
 # Need $PICARD env var set
 echo "MarkDuplicates"
 java -jar -Xmx12G -Djava.io.tmpdir=${TMPDIR} $PICARD \
-    MarkDuplicates VALIDATION_STRINGENCY=SILENT \
+    MarkDuplicates VALIDATION_STRINGENCY=SILENT VERBOSITY=WARNING \
     I=${OUTDIR}/${FACTOR}/${FACTOR}.bam \
     O=${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam \
     M=${OUTDIR}/${FACTOR}/${FACTOR}.metrics || die "Error running mark duplicates"
@@ -55,5 +64,5 @@ if [ "${RTYPE}" = "Single" ] || [ "${RTYPE}" = "Both" ]; then
 	-b ${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam \
 	-p ${OUTDIR}/${FACTOR}/${FACTOR}.bed \
 	-t bed \
-	-o ${OUTDIR}/${FACTOR}/${FACTOR} -c 7 --thres 100
+	-o ${OUTDIR}/${FACTOR}/${FACTOR} -c 7 --thres $THRESH
 fi
