@@ -234,7 +234,8 @@ int simulate_reads_main(int argc, char* argv[]) {
     for (auto & cnsmr: consumers){
       cnsmr.join();
     }
-    
+
+
     for (int thread_index=0; thread_index<options.n_threads; thread_index++){
       if (options.paired){
         std::string ifilename_1 = options.outprefix+"_"+std::to_string(thread_index)+"_1.fastq";
