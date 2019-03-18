@@ -14,10 +14,12 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     # First check if output file exists
     if [ "${rtype}" = "Paired" ]; then
 	outfile=${factor}.paired.json
+	echo "Skipping paired end for now"
+	continue # process paired later... most too big and fail on AWS
     elif [ "${rtype}" = "Single" ]; then
 	outfile=${factor}.json
     fi
-    aws s3 ls s3://chipmunk-encode-models/${outfile}
+    aws s3 ls s3://chipmunk-encode-models/${outfile} > /dev/null
     if [[ $? -eq 0 ]]; then
 	echo "Found file... skipping ${factor}"
 	continue
@@ -29,6 +31,5 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	--job-definition chipmunk-encode:2 \
         --timeout 'attemptDurationSeconds=3600' \
 	--container-overrides 'command=[\"${SCRIPTNAME}\",\"${bamurl}\",\"${bedurl}\",\"${factor}\",\"${rtype}\"],environment=[{name=\"BATCH_FILE_TYPE\",value=\"script\"},{name=\"BATCH_FILE_S3_URL\",value=\"s3://gymreklab-awsbatch/${SCRIPTNAME}\"}]'"
-#    sh -c "${cmd}"
-    echo "${cmd}"
+    sh -c "${cmd}"
 done < encode_datasets_K562_GM12878_clean.csv
