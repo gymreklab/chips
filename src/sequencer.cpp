@@ -1,4 +1,5 @@
 #include "src/sequencer.h"
+#include "src/common.h"
 #include <iostream>
 #include <sstream>
 #include <random>
@@ -42,7 +43,9 @@ Sequencer::Sequencer(const Options& options) {
 }
 
 
-void Sequencer::Sequence(const std::vector<Fragment>& input_fragments, int& fastq_index, int thread_index, int copy_index) {
+void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
+			 const int& numreads,
+			 int& fastq_index, int thread_index, int copy_index) {
   std::string frag_seq;
   std::string read_seq;
   std::string read_seq_rc;
@@ -53,18 +56,35 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments, int& fast
   std::vector<std::string> ids;
   std::vector<int> starts_1;
   std::vector<int> starts_2;
-  for (int frag_index=0; frag_index<input_fragments.size(); frag_index++){
-    if(ref_genome->GetSequence(input_fragments[frag_index].chrom,
-            input_fragments[frag_index].start,
-            input_fragments[frag_index].start+input_fragments[frag_index].length,
-            &frag_seq)){
 
+  // Sample from fragments w/o replacement (by shuffling first)
+  // If needed, go through the fragments multiple times
+  int total_reads_sequenced = 0;
+  std::vector<size_t> frag_indices;
+  size_t frag_index;
+  for (size_t frag_index=0; frag_index<input_fragments.size(); frag_index++) {
+    frag_indices.push_back(frag_index);
+  }
+  std::stringstream ss;
+  ss << "Sequencing total reads " << numreads << " for copy " << copy_index;
+  PrintMessageDieOnError(ss.str(), M_PROGRESS);
+  while (true) {
+    std::random_shuffle(frag_indices.begin(), frag_indices.end());
+    for (size_t fg=0; fg<frag_indices.size(); fg++) {
+      frag_index = frag_indices[fg];
+      if(!ref_genome->GetSequence(input_fragments[frag_index].chrom,
+				 input_fragments[frag_index].start,
+				 input_fragments[frag_index].start+input_fragments[frag_index].length,
+				  &frag_seq)) {
+	continue;
+      }
+	
       // generate reads from both strands
       read_pair.clear();
       if (Fragment2Read(frag_seq, read_seq) &&
-            Fragment2Read(ReverseComplement(frag_seq), read_seq_rc)){
-        read_pair.push_back(read_seq);
-        read_pair.push_back(read_seq_rc);
+	  Fragment2Read(ReverseComplement(frag_seq), read_seq_rc)){
+	read_pair.push_back(read_seq);
+	read_pair.push_back(read_seq_rc);
 	std::stringstream ss;
 	ss << input_fragments[frag_index].chrom << ":"
 	   << input_fragments[frag_index].start << ":"
@@ -72,23 +92,32 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments, int& fast
 	ids.push_back(ss.str());
 	std::random_shuffle(read_pair.begin(), read_pair.end());
       }else{
-        continue;
+	continue;
       }
       chroms.push_back(input_fragments[frag_index].chrom);
       starts_1.push_back(input_fragments[frag_index].start);
       starts_2.push_back(input_fragments[frag_index].start+input_fragments[frag_index].length-readlen+1);
       reads_1.push_back(read_pair[0]);
       reads_2.push_back(read_pair[1]);
+      
+      // Update
+      total_reads_sequenced += 1;
+      if (total_reads_sequenced >= numreads) {
+	break;
+      }
+    }
+    if (total_reads_sequenced >= numreads) {
+      break;
     }
   }
-
+    
   // save into file
-  if (paired){
+  if (paired) {
     int temp = fastq_index;
     save_into_fastq(reads_1, ids, outprefix + "_"+std::to_string(thread_index)+"_1.fastq", temp, copy_index);
     save_into_fastq(reads_2, ids, outprefix + "_"+std::to_string(thread_index)+"_2.fastq", fastq_index, copy_index);
     //    save_into_sam(reads_1, reads_2, chroms, starts_1, starts_2, outprefix + "/reads_"+std::to_string(thread_index)+".sam");
-  }else{
+  } else{
     save_into_fastq(reads_1, ids, outprefix + "_"+std::to_string(thread_index)+".fastq", fastq_index, copy_index);
   }
 }
