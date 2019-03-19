@@ -30,19 +30,25 @@ bool PeakIntervals::LoadPeaks(const Options& options,
 
   if (dataLoaded){
     // calculate the maximum coverage
-    max_coverage = 0;
-    for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
-      if (peaks[peakIndex].score > max_coverage){
-        max_coverage = peaks[peakIndex].score;
+    if (options.noscale) {
+      max_coverage = 1; // Effectively no scaling
+    } else {
+      max_coverage = 0;
+      for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
+	if (peaks[peakIndex].score > max_coverage){
+	  max_coverage = peaks[peakIndex].score;
+	}
       }
     }
 
     // calculate Prob(pulled down|bound)
     double total_signals = 0;
     double total_signals_max = 0;
+    total_bound_length = 0;
     for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
       total_signals_max += (peaks[peakIndex].length * max_coverage);
       total_signals += (peaks[peakIndex].length * peaks[peakIndex].score);
+      total_bound_length += peaks[peakIndex].length;
     }
     if (total_signals_max == 0){
         prob_pd_given_b = 1.0;
@@ -218,3 +224,4 @@ float PeakIntervals::GetOverlap(const Fragment& frag, int& peakIndexStart) {
   float score = SearchList(frag, peakIndexStart);
   return score;
 }
+
