@@ -98,9 +98,7 @@ int64_t RefGenome::GetGenomeLength() {
   }
   int64_t gsize = 0;
   for (std::map<std::string, int>::iterator it = chromlens.begin(); it != chromlens.end(); it++) {
-    cerr << it->first << " " << it->second << endl;
     gsize += it->second;
-    cerr << "gsize " << gsize << endl;
   }
   return gsize;
 }
