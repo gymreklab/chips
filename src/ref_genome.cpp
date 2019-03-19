@@ -91,14 +91,16 @@ RefGenome::~RefGenome() {
   fai_destroy(refindex);
 }
 
-int32_t RefGenome::GetGenomeLength() {
+int64_t RefGenome::GetGenomeLength() {
   std::map<std::string, int> chromlens;
   if (!GetLengths(&chromlens)) {
     PrintMessageDieOnError("Error getting chrom lengths", M_ERROR);
   }
-  int32_t gsize = 0;
+  int64_t gsize = 0;
   for (std::map<std::string, int>::iterator it = chromlens.begin(); it != chromlens.end(); it++) {
+    cerr << it->first << " " << it->second << endl;
     gsize += it->second;
+    cerr << "gsize " << gsize << endl;
   }
   return gsize;
 }

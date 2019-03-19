@@ -249,6 +249,9 @@ int simulate_reads_main(int argc, char* argv[]) {
     if (options.recompute_f) {
       RefGenome ref_genome(options.reffa);
       float f = pintervals->total_bound_length/ref_genome.GetGenomeLength();
+      if (f<0) {
+	PrintMessageDieOnError("Error. Estimated --frac negative. Likely overflow error on genome size", M_ERROR);
+      }
       model.SetF(f);
       model.UpdateOptions(options);
       PrintMessageDieOnError("Recomputed --frac. New model:", M_PROGRESS);
