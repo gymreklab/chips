@@ -198,6 +198,7 @@ int simulate_reads_main(int argc, char* argv[]) {
 
   if (!showHelp) {
     // Print out parsed model
+    PrintMessageDieOnError("Running simulate with the following model", M_PROGRESS);
     model.PrintModel();
 
     TaskQueue<int> task_queue;
