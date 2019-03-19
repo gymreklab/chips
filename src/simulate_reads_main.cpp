@@ -334,6 +334,9 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, co
         PrintMessageDieOnError("Simulated " + std::to_string(job_percentage) +"% reads.", M_PROGRESS);
     }
 
+    if (reads_per_copy[copy_index] == 0) {
+      continue; // If we're not going to get any reads, don't bother simulating
+    }
     int total_reads = 0;
     int peakIndexStart = 0;
     int start_offset = 0;

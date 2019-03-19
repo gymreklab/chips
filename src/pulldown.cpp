@@ -68,7 +68,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
           output_fragments->push_back(frag);
           if (rand()/double(RAND_MAX) < pcr_rate) break;
         }
-    }else{
+    } else{
       if (rand()/double(RAND_MAX) <
 	  (ratio_beta * (pintervals->prob_pd_given_b) )) { // TODO check if we actually need prob_pd_given_b
         while (true){
