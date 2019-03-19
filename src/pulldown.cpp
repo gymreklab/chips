@@ -19,11 +19,6 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
   prev_chrom = _prev_chrom;
   peakIndexStart = _peakIndexStart;
   start_offset_ptr = & _start_offset;
-
-  debug_pulldown = false; // TODO remove
-  if (debug_pulldown) {
-    PrintMessageDieOnError("Loading peaks", M_DEBUG);
-  }
 }
 
 void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals) {
