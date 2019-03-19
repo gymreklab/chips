@@ -22,6 +22,7 @@ class PeakIntervals {
   //int peakIndexStart;
   double prob_pd_given_b;
   double prob_frag_kept;
+  double total_bound_length;
 
  private:
   // peakmap:  key: chromID,  data: fragments

@@ -106,6 +106,8 @@ int simulate_reads_main(int argc, char* argv[]) {
 	model.SetF(options.ratio_f);
 	i++;
       }
+    } else if (PARAMETER_CHECK("--recomputeF", 12, parameterLength)) {
+      options.recompute_f = true;
     } else if (PARAMETER_CHECK("--model", 7, parameterLength)) {
       if ((i+1) < argc) {
 	options.model_file = argv[i+1];
@@ -131,38 +133,40 @@ int simulate_reads_main(int argc, char* argv[]) {
       }
     } else if (PARAMETER_CHECK("-t", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.peakfiletype = argv[i+1];
-    i++;
+	options.peakfiletype = argv[i+1];
+	i++;
       }
     } else if (PARAMETER_CHECK("-c", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.countindex = std::atoi(argv[i+1]);
-    i++;
+	options.countindex = std::atoi(argv[i+1]);
+	i++;
       }
+    } else if (PARAMETER_CHECK("--noscale", 9, parameterLength)) {
+      options.noscale = true;
     } else if (PARAMETER_CHECK("--thread", 8, parameterLength)){
       if ((i+1) < argc) {
-    options.n_threads = std::atoi(argv[i+1]);
-    i++;
+	options.n_threads = std::atoi(argv[i+1]);
+	i++;
       }
     } else if (PARAMETER_CHECK("--sequencer", 11, parameterLength)){
       if ((i+1) < argc){
-    options.sequencer_type = argv[i+1];
-    i++;
+	options.sequencer_type = argv[i+1];
+	i++;
       }
     } else if (PARAMETER_CHECK("--sub", 5, parameterLength)){
       if ((i+1) < argc){
-    options.sub_rate = std::atof(argv[i+1]);
-    i++;
+	options.sub_rate = std::atof(argv[i+1]);
+	i++;
       }
     } else if (PARAMETER_CHECK("--ins", 5, parameterLength)){
       if ((i+1) < argc){
-    options.ins_rate = std::atof(argv[i+1]);
-    i++;
+	options.ins_rate = std::atof(argv[i+1]);
+	i++;
       }
     } else if (PARAMETER_CHECK("--del", 5, parameterLength)){
       if ((i+1) < argc){
-    options.del_rate = std::atof(argv[i+1]);
-    i++;
+	options.del_rate = std::atof(argv[i+1]);
+	i++;
       }
     } else if (PARAMETER_CHECK("--pcr_rate", 10, parameterLength)){
       if ((i+1) < argc){
@@ -242,6 +246,14 @@ int simulate_reads_main(int argc, char* argv[]) {
     PrintMessageDieOnError("Loading the input ChIP-seq peak file (and BAM file if given)", M_PROGRESS);
     PeakIntervals* pintervals = \
                new PeakIntervals(options, options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
+    if (options.recompute_f) {
+      RefGenome ref_genome(options.reffa);
+      float f = pintervals->total_bound_length/ref_genome.GetGenomeLength();
+      model.SetF(f);
+      model.UpdateOptions(options);
+      PrintMessageDieOnError("Recomputed --frac. New model:", M_PROGRESS);
+      model.PrintModel();
+    }
 
     // Create threads
     PrintMessageDieOnError("Simulating reads based on the input profile", M_PROGRESS);
@@ -408,13 +420,15 @@ void simulate_reads_help(void) {
        << "                                   Default: " << options.ratio_s << "\n";
   cerr << "     --frac <float>              : Fraction of the genome that is bound \n"
        << "                                   Default: " << options.ratio_f << "\n";
+  cerr << "     --recomputeF                : Recompute --frac param based on input peaks.\n";
   cerr << "     --pcr_rate <float>          : The rate of geometric distribution for PCR simulation\n"
        << "                                   Default: " << options.pcr_rate << "\n";
   cerr << "\n[Peak scoring: choose one]: " << "\n";
-  cerr << "     -b <reads.bam>:             : Read BAM file used to score each peak\n"
+  cerr << "     -b <reads.bam>              : Read BAM file used to score each peak\n"
        << "                                 : Default: None (use the scores from the peak file)\n";
-  cerr << "     -c <int>:                   : The index of the BED file column used to score each peak (index starting from 1). Required if -b not used.\n"
+  cerr << "     -c <int>                    : The index of the BED file column used to score each peak (index starting from 1). Required if -b not used.\n"
        << "                                 : Default: " << options.countindex << "\n";
+  cerr << "     --noscale                   : Don't scale peak scores by the max score.\n";                   
   cerr << "\n[Other options]: " << "\n";
   cerr << "     --region <str>              : Only simulate reads from this region chrom:start-end\n"
        << "                                   Default: genome-wide \n";
