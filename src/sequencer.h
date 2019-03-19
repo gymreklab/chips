@@ -14,7 +14,7 @@ class Sequencer {
   Sequencer(const Options& options);
   virtual ~Sequencer();
 
-  void Sequence(const std::vector<Fragment>& input_fragments, \
+  void Sequence(const std::vector<Fragment>& input_fragments, const int& numreads,  \
                     int& fastq_index, int thread_index, int copy_index);
  private:
   RefGenome* ref_genome;
