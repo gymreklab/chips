@@ -269,7 +269,6 @@ bool learn_frag_single(const std::string& bamfile,
     PrintMessageDieOnError("Error happened when calculating position distributions", M_ERROR);
   }
 
-  cerr << "get gs " << std::endl;
   float gs1 = calculate_gs(end_lower_bound, end_upper_bound, end_cdf, end_edf,
                             start_pdf, mean_frag_length,
                             (mean_frag_length + mean_frag_length/3.0)/2.0, start_lower_bound);
