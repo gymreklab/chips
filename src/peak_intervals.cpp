@@ -26,7 +26,8 @@ bool PeakIntervals::LoadPeaks(const Options& options,
   PeakLoader peakloader(peakfile, peakfileType, bamfile, count_colidx);
 
   std::vector<Fragment> peaks;
-  bool dataLoaded = peakloader.Load(peaks, options.region);
+  float frag_length = options.gamma_k * options.gamma_theta; 
+  bool dataLoaded = peakloader.Load(peaks, options.region, frag_length);
 
   if (dataLoaded){
     // calculate the maximum coverage
@@ -38,16 +39,16 @@ bool PeakIntervals::LoadPeaks(const Options& options,
     }
 
     // calculate Prob(pulled down|bound)
-    double total_signals = 0;
-    double total_signals_max = 0;
+    float total_signals = 0;
+    float signal_region_length = 0;
     for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
-      total_signals_max += (peaks[peakIndex].length * max_coverage);
+      signal_region_length += (peaks[peakIndex].length);
       total_signals += (peaks[peakIndex].length * peaks[peakIndex].score);
     }
-    if (total_signals_max == 0){
+    if (signal_region_length == 0){
         prob_pd_given_b = 1.0;
     }else{
-        prob_pd_given_b = total_signals/total_signals_max;
+        prob_pd_given_b = total_signals/signal_region_length;
     }
     // convert the vector into a map with keys as chromosome names
     for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
@@ -55,25 +56,26 @@ bool PeakIntervals::LoadPeaks(const Options& options,
     }
   }
 
-  EstNumFrags(options, peaks);
+  //EstNumFrags(options, peaks);
   return dataLoaded;
 }
 
+/*
 void PeakIntervals::EstNumFrags(const Options& options, std::vector<Fragment> peaks){
     int total_length = 0;
     int length_b = 0;
-    double numfrags_b = 0;
-    double numfrags_ub = 0;
-    double ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
-    double prob_pd_given_ub = ratio_beta * prob_pd_given_b;
-    double frag_length = options.gamma_k * options.gamma_theta;
+    float numfrags_b = 0;
+    float numfrags_ub = 0;
+    float ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
+    float prob_pd_given_ub = ratio_beta * prob_pd_given_b;
+    float frag_length = options.gamma_k * options.gamma_theta;
     //if(options.region.empty()){
 
     // estimate number of reads per run
     // bound regions
     for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
       length_b += peaks[peakIndex].length;
-      numfrags_b += ((double) peaks[peakIndex].length / frag_length) * (peaks[peakIndex].score/max_coverage);
+      numfrags_b += ((float) peaks[peakIndex].length) * (peaks[peakIndex].score);
     }
 
     // unbound regions
@@ -104,14 +106,13 @@ void PeakIntervals::EstNumFrags(const Options& options, std::vector<Fragment> pe
       int region_end = stoi(parts[1]);
       total_length = region_end - region_start;
     }
-    numfrags_ub = prob_pd_given_ub * (double) (total_length - length_b) / frag_length;
+    numfrags_ub = prob_pd_given_ub * (double) (total_length - length_b);
     // put together
     double numfrags_per_run = numfrags_ub + numfrags_b;
     prob_frag_kept = (double) (options.numreads * options.pcr_rate)
                         / (double) (numfrags_per_run * options.numcopies);
-    //std::cout<<numfrags_per_run<<"****"<<prob_frag_kept<<std::endl;
 }
-
+*/
 /*
 void PeakIntervals::resetSearchScope(const int index){
   peakIndexStart = index;
@@ -129,32 +130,6 @@ float PeakIntervals::SearchList(const Fragment& frag, int& peakIndexStart){
   std::vector<float> probBoundList;
   uint32_t frag_start, frag_end, peak_start, peak_end;
   float overlap;
-  /*
-  for(int peakIndex=0; peakIndex < peaks.size(); peakIndex++){
-    if (frag.chrom == peaks[peakIndex].chrom){
-      frag_start = frag.start;
-      frag_end = frag.start+frag.length;
-      peak_start = peaks[peakIndex].start;
-      peak_end = peaks[peakIndex].start+peaks[peakIndex].length;
-      if (peak_start < frag_start){
-        if (peak_end > frag_start){
-            if (peak_end > frag_end){
-              probBoundList.push_back(peaks[peakIndex].score/max_coverage);
-            }else{
-              overlap = (float)(peak_end-frag_start) / (float)(peak_end-peak_start);
-              probBoundList.push_back(overlap*peaks[peakIndex].score/max_coverage);
-            }
-        }else{
-            overlap = 0;
-        }
-      }else if (peak_start < frag_end){
-        overlap = (float)( std::min(peak_end,frag_end) - peak_start)/(float)(peak_end-peak_start);
-        probBoundList.push_back(overlap*peaks[peakIndex].score/max_coverage);
-      }else{
-        overlap = 0;
-      }
-    }
-  }*/
   std::vector<Fragment> & peaks = peak_map[frag.chrom];
   for(int peakIndex=peakIndexStart; peakIndex < peaks.size(); peakIndex++){
     if (frag.chrom == peaks[peakIndex].chrom){
@@ -162,26 +137,14 @@ float PeakIntervals::SearchList(const Fragment& frag, int& peakIndexStart){
       frag_end = frag.start+frag.length;
       peak_start = peaks[peakIndex].start;
       peak_end = peaks[peakIndex].start+peaks[peakIndex].length;
-      if (peak_start < frag_start){
-        if (peak_end > frag_start){
-            if (peak_end > frag_end){
-              probBoundList.push_back(peaks[peakIndex].score/max_coverage);
-            }else{
-              overlap = (float)(peak_end-frag_start) / (float)(frag_end-frag_start);
-              //overlap = 1;
-              probBoundList.push_back(overlap*peaks[peakIndex].score/max_coverage);
-            }
-        }else{
-            overlap = 0;
-            peakIndexStart += 1;
-        }
-      }else if (peak_start < frag_end){
-        overlap = (float)( std::min(peak_end,frag_end) - peak_start)/(float)(frag_end-frag_start);
-        //overlap = 1;
-        probBoundList.push_back(overlap*peaks[peakIndex].score/max_coverage);
+
+      if (frag_end <= peak_start){
+        break; // there remain no overlapped peaks
+      }else if(frag_start >= peak_end){
+        peakIndexStart += 1; // move to the next peak
       }else{
-        overlap = 0;
-        break;
+        overlap = (float) (std::min(peak_end,frag_end) - std::max(peak_start, frag_start)) / (float)(frag_end-frag_start);
+        probBoundList.push_back(overlap*peaks[peakIndex].score);
       }
     }else{
         std::cerr << "****** ERROR: Unexpected errors in PeakInterval/SearchList ******" << std::endl;

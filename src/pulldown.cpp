@@ -36,7 +36,9 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   int32_t fstart, fend;
   float fsize;
   bool bound;
+  bool pulled;
   float peak_score;
+  float max_fold = pintervals->max_coverage * gamma_k * gamma_theta * 3; // 3 is an arbitrary number
 
   // update the start index of peaks
   if (chrom != prev_chrom){
@@ -62,29 +64,28 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
     Fragment frag(chrom, current_pos, fsize);
     peak_score = pintervals->GetOverlap(frag, peakIndex);
 
-    bound = (rand()/double(RAND_MAX) < peak_score*(pintervals->prob_frag_kept));
+    // pull down process
+    bound = (peak_score > 0);
     if (bound) {
-        while (true){
-          output_fragments->push_back(frag);
-          if (rand()/double(RAND_MAX) < pcr_rate) break;
-        }
+      while (true){
+        pulled = (rand()/double(RAND_MAX) * max_fold < (peak_score*fsize));
+        //if (peak_score*fsize/max_fold > 0.1) std::cout << peak_score*fsize/max_fold <<std::endl;
+        if (pulled) output_fragments->push_back(frag);
+        if (rand()/double(RAND_MAX) < pcr_rate) break;
+      }
     }else{
-      //std::cout<<(ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )<<std::endl;
-      //std::cout<<fsize<<std::endl;
-      //std::cout<<(ratio_beta) << " " << (pintervals->prob_pd_given_b) << " "<<pintervals->prob_frag_kept <<std::endl;
-      if (rand()/double(RAND_MAX) <
-              (ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )) {
-        while (true){
+      while (true){
+        if (rand()/double(RAND_MAX) * max_fold <
+              (ratio_beta * (pintervals->prob_pd_given_b) *fsize)) {
+          //std::cout << ratio_beta * (pintervals->prob_pd_given_b) *fsize/max_fold <<std::endl;
           output_fragments->push_back(frag);
-          if (rand()/double(RAND_MAX) < pcr_rate) break;
         }
+        if (rand()/double(RAND_MAX) < pcr_rate) break;
       }
     }
-    
     current_pos += fsize;
   }
 
-  //peakIndexStart = pintervals->peakIndexStart;
   peakIndexStart = peakIndex;
 }
 

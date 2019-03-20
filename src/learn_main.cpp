@@ -27,7 +27,7 @@ void learn_help(void);
 bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
                     const std::string& peakfileType, const std::int32_t count_colidx,
                     const float remove_pct, float* ab_ratio_ptr, 
-                    float *s_ptr, float* f_ptr);
+                    float *s_ptr, float* f_ptr, const float frag_param_a, const float frag_param_b, bool skip_frag);
 bool compare_location(Fragment a, Fragment b);
 bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
 bool learn_pcr(const std::string& bamfile, float* geo_rate);
@@ -412,7 +412,8 @@ float calculate_gamma_pdf(const float x, const float k, const float theta){
 
 bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
         const std::string& peakfileType, const std::int32_t count_colidx, 
-        const float remove_pct, float* ab_ratio_ptr, float *s_ptr, float* f_ptr){
+        const float remove_pct, float* ab_ratio_ptr, float *s_ptr, float* f_ptr,
+        const float frag_param_a, const float frag_param_b, bool skip_frag){
   /*
     Learn the ratio of alpha to beta from an input BAM file,
     and its correspounding peak file.
@@ -432,11 +433,14 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
     - ab_ratio (float): the ratio of alpha to beta
    */
 
+  if (skip_frag){return true;}
+
   // Read peak locations from the ChIP-seq file,
   // and calculate the total length of peaks across the genomes
   std::vector<Fragment> peaks;
   PeakLoader peakloader(peakfile, peakfileType, bamfile, count_colidx);
-  peakloader.Load(peaks);
+  const float frag_length = frag_param_a * frag_param_b;
+  peakloader.Load(peaks, "", frag_length);
 
   // Remove top remove_pct% of peaks default is do not remove
   if (remove_pct > 0)
@@ -652,7 +656,7 @@ int learn_main(int argc, char* argv[]) {
     float s = -1;
     float f = -1;
     if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
-        &ab_ratio, &s, &f)){
+        &ab_ratio, &s, &f, frag_param_a, frag_param_b, options.skip_frag)){
       PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
     }
     model.SetF(f);
