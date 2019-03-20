@@ -8,19 +8,20 @@ source params.sh
 # Run simulation for various read lengths, paired/single
 BAMS=""
 TAGDIRS=""
-for rl in 36 51 100 150
+for rl in 36 #51 100 150
 do
     #nreadsS=$(echo "${NUMTOTAL}/${rl}" | bc -l | cut -f 1 -d'.')
     #nreadsP=$(echo "${nreadsS}/2" | bc -l | cut -f 1 -d'.')
     nreadsS=1000000
     nreadsP=1000000
-    ./run_repsim.sh ${rl} ${nreadsP} ${rl}.4.paired 4 " --paired --noscale"
-    ./run_repsim.sh ${rl} ${nreadsS} ${rl}.4.single 4 " --noscale" 
+#    ./run_repsim.sh ${rl} ${nreadsP} ${rl}.4.paired 4 " --paired --noscale"
+#    ./run_repsim.sh ${rl} ${nreadsS} ${rl}.4.single 4 " --noscale"
     ./run_repsim.sh ${rl} ${nreadsP} ${rl}.5.paired 5 " --paired"
-    ./run_repsim.sh ${rl} ${nreadsS} ${rl}.5.single 5 
-    BAMS="${BAMS} ${OUTDIR}/${rl}.4.single.sorted.bam ${OUTDIR}/${rl}.4.paired.sorted.bam ${OUTDIR}/${rl}.5.single.sorted.bam ${OUTDIR}/${rl}.5.paired.sorted.bam"
+    ./run_repsim.sh ${rl} ${nreadsS} ${rl}.5.single 5
+    BAMS="${BAMS} ${OUTDIR}/${rl}.4.single.sorted.bam ${OUTDIR}/${rl}.4.paired.sorted.bam ${OUTDIR}/${rl}.5.single.sorted.bam ${OUTDIR}/${rl}.5.paired.sorted.bam "
     TAGDIRS="${TAGDIRS} ${OUTDIR}/${rl}.4.single/ ${OUTDIR}/${rl}.4.paired/ ${OUTDIR}/${rl}.5.single/ ${OUTDIR}/${rl}.5.paired/"
-done #| xargs -I% -P3 -n1 sh -c "%"
+done
+
 
 # Get coverage per bin + repeat lengths
 multiBamCov -bams ${BAMS} -bed ${OUTDIR}/hg19.hipstr.chr${CHROM}.AAGG.bed | \

@@ -14,8 +14,6 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
   gamma_theta = options.gamma_theta;
   ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
 
-  pcr_rate = options.pcr_rate;
-
   prev_chrom = _prev_chrom;
   peakIndexStart = _peakIndexStart;
   start_offset_ptr = & _start_offset;
@@ -61,17 +59,10 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
 
     bound = (rand()/double(RAND_MAX) < peak_score);
     if (bound) {
-        while (true){
-          output_fragments->push_back(frag);
-          if (rand()/double(RAND_MAX) < pcr_rate) break;
-        }
+      output_fragments->push_back(frag);
     } else{
-      if (rand()/double(RAND_MAX) <
-	  (ratio_beta * (pintervals->prob_pd_given_b) )) { // TODO check if we actually need prob_pd_given_b
-        while (true){
+      if (rand()/double(RAND_MAX) < ratio_beta) {
           output_fragments->push_back(frag);
-        }
-        if (rand()/double(RAND_MAX) < pcr_rate) break;
       }
     }
     current_pos += fsize;
