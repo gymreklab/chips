@@ -248,7 +248,7 @@ int simulate_reads_main(int argc, char* argv[]) {
                new PeakIntervals(options, options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
     if (options.recompute_f) {
       RefGenome ref_genome(options.reffa);
-      float f = pintervals->total_bound_length/ref_genome.GetGenomeLength();
+      float f = pintervals->total_bound_length/ref_genome.GetGenomeLength(); // TODO recompute with new frag score
       if (f<0) {
 	PrintMessageDieOnError("Error. Estimated --frac negative. Likely overflow error on genome size", M_ERROR);
       }
