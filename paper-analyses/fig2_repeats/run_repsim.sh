@@ -3,14 +3,15 @@
 READLEN=$1
 NREADS=$2
 PREFIX=$3
-OPTARGS=$4
+SCORECOL=$4
+OPTARGS=$5
 
 source params.sh
 
 # Simulate reads
 ~/workspace/ChIPmunk/src/chipmunk simreads \
     -p ${OUTDIR}/hg19.hipstr.chr${CHROM}.AAGG.bed \
-    -t bed -c 4 --noscale --recomputeF \
+    -t bed -c ${SCORECOL} --recomputeF \
     -f ${CHROMFA} \
     -o ${OUTDIR}/${PREFIX} \
     --numcopies ${NC} \
@@ -38,7 +39,7 @@ samtools sort -o ${OUTDIR}/${PREFIX}.sorted.bam ${OUTDIR}/${PREFIX}.bam
 samtools index ${OUTDIR}/${PREFIX}.sorted.bam
 
 # Convert to TDF
-igvtools count -w 1 ${OUTDIR}/${PREFIX}.sorted.bam ${OUTDIR}/${PREFIX}.tdf ${REFFA}
+igvtools count -w 25 ${OUTDIR}/${PREFIX}.sorted.bam ${OUTDIR}/${PREFIX}.tdf ${REFFA}
 
 # Use Homer to make tag dir
 mkdir -p ${OUTDIR}/${PREFIX}

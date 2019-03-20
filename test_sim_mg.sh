@@ -12,7 +12,7 @@ SEQUENCER=HiSeq
 # frac: fraction of genome that is bound
 
 #for nc in 1000 10000 100000 1000000
-for nc in 1000
+for nc in 10000
 do
     ./src/chipmunk simreads \
 	-p ${PEAKS} \
@@ -21,7 +21,7 @@ do
 	-o ${OUTPREFIX} \
     -b ${BAM} \
 	--numcopies ${nc} \
-	--numreads 1000000 \
+	--numreads 100000 \
 	--readlen 100 \
 	--gamma-frag 5.663,44.08 \
 	--spot 0.110237 --frac 0.00416413 \
