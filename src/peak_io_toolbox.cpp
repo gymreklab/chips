@@ -58,7 +58,19 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
       }
     }
   }
+  // sort peaks
   std::sort(peaks.begin(), peaks.end(), compare_location);
+  // if peak scores have been loaded from the bed file,
+  // then normalize peak scores and rescale them to 0-1
+  if(count_colidx > 0){
+    float max_score = 0;
+    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+      if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
+    }
+    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+      peaks[peak_index].score /= max_score;
+    }
+  }
   return 0;
 }
 
@@ -112,7 +124,19 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
         }
       }
   }
+  // sort peaks
   std::sort(peaks.begin(), peaks.end(), compare_location);
+  // if peak scores have been loaded from the bed file,
+  // then normalize peak scores and rescale them to 0-1
+  if(count_colidx > 0){
+    float max_score = 0;
+    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+      if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
+    }
+    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+      peaks[peak_index].score /= max_score;
+    }
+  }
   return 0;
 }
 
@@ -166,7 +190,19 @@ bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks,
         }
       }
   }
+  // sort peaks
   std::sort(peaks.begin(), peaks.end(), compare_location);
+  // if peak scores have been loaded from the bed file,
+  // then normalize peak scores and rescale them to 0-1
+  if(count_colidx > 0){
+    float max_score = 0;
+    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+      if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
+    }
+    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+      peaks[peak_index].score /= max_score;
+    }
+  }
   return 0;
 }
 
@@ -261,6 +297,7 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   for (int peak_index=0; peak_index<peaks.size(); peak_index++) peaks[peak_index].score = 0;
 
   uint32_t frag_index_start = 0;
+  std::map<int, int> frag2peak;
   for(int peak_index=0; peak_index<peaks.size(); peak_index++){
     for (int frag_index=frag_index_start; frag_index<fragments.size(); frag_index++){
       if (peaks[peak_index].chrom == fragments[frag_index].chrom){
@@ -272,6 +309,7 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
           float overlap = (float) (std::min(peak_end,frag_end) - std::max(peak_start, frag_start)) / (float)(frag_end-frag_start);
           fragments[frag_index].score = overlap;
           peaks[peak_index].score += overlap;
+          frag2peak[frag_index] = peak_index;
         }else if(peak_start >= frag_end){
           frag_index_start = frag_index + 1;
         }else if(peak_end <= frag_start){
@@ -286,14 +324,20 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   }
 
   // normalize peak scores
+  float max_score = 0;
   for(int peak_index=0; peak_index<peaks.size(); peak_index++){
     peaks[peak_index].score /= ((float) peaks[peak_index].length);
+    if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
+  }
+  for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+    peaks[peak_index].score /= max_score;
   }
 
   // total num of fragments in peaks
   float n_frags_in_peak = 0;
   for (int frag_index=0; frag_index<fragments.size(); frag_index++){
-    n_frags_in_peak += (fragments[frag_index].score);
+    int peak_index = frag2peak[frag_index];
+    n_frags_in_peak += (fragments[frag_index].score * peaks[peak_index].score);
   }
 
   *ptr_tagcount_in_peaks = n_frags_in_peak;

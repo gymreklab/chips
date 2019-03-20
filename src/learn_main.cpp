@@ -453,7 +453,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
 
   int plen = 0;
   for(int peak_index = 0; peak_index < peaks.size(); peak_index++){
-    plen += peaks[peak_index].length;
+    plen += (peaks[peak_index].length * peaks[peak_index].score);
   }
 
   // calculate f and s, and then ab_ratio
