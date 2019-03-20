@@ -1,5 +1,7 @@
 # ChIPmunk
 
+** Under construction. Official release coming very soon! **
+
 ChIPmunk is a tool for simulating ChIP-sequencing experiments.
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
@@ -136,7 +138,7 @@ With `-t homer`, your peak file should be in the format output by the [Homer pea
 
 ### Model files
 
-Model files are in JSON syntax, and follow the example below:
+Model files are in JSON syntax, and follow the example below. Hundreds of model files trained on ENCODE ChIP-seq datasets for GM12878 are available for download on the [ChIPmunk wiki](https://github.com/gymreklab/ChIPmunk/wiki/ChIPmunk-model-files-for-GM12878-ENCODE-Datasets).
 
 ```
 {

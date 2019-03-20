@@ -1,51 +1,68 @@
 #!/bin/bash
-
+set -e
 source params.sh
 
 factor=$1
 nc=$2
+READLEN=$3
+NREADS=$4
+RTYPE=$5
 
-BAM=$(ls /storage/mlamkin/projects/encode_data_learn/${factor}/*.bam)
-BED=$(ls /storage/mlamkin/projects/encode_data_learn/${factor}/*.bed)
+BED=$(ls ${ENCDIR}/${factor}/*.bed | head -n 1)
+BAM=$(ls ${ENCDIR}/${factor}/*.flagged.bam | head -n 1)
+MODEL=$(ls ${ENCDIR}/${factor}/*.json | head -n 1)
 
-# Learn
-$CHIPMUNK learn \
-    -p ${BED} \
-    -t bed \
-    -b ${BAM} \
-    -o ${OUTDIR}/${factor}.${nc} \
-    --paired
+mkdir -p ${OUTDIR}/${factor}
+
+# Output params
+echo "Readlen $READLEN"
+echo "Nreads $NREADS"
+echo "Rtype $RTYPE"
 
 # Simulate reads
+OPTARGS=""
+if [ "$RTYPE" = "Paired" ]; then
+    echo "Adding paired option"
+    OPTARGS=" --paired"
+fi
 time $CHIPMUNK simreads \
-    -p ${BED} \
-    -t bed -c 6 \
+    -p ${BED} -b ${BAM} \
+    -t bed -c 7 \
     -f ${REFFA} \
-    -o ${OUTDIR}/${factor}.${nc} \
-    --model ${OUTDIR}/${factor}.${nc}.json \
+    -o ${OUTDIR}/${factor}/${factor}.${nc} \
+    --model ${MODEL} \
     --numcopies ${nc} \
     --numreads ${NREADS} \
     --readlen ${READLEN} \
-    --region chr19:1-59128983 \
-    --paired
+    --region chr19:1-59128983 ${OPTARGS}
 
 # Map reads
-bwa mem -t 10 ${REFFA} \
-    ${OUTDIR}/${factor}.${nc}_1.fastq \
-    ${OUTDIR}/${factor}.${nc}_2.fastq | \
-    samtools view -bS - > ${OUTDIR}/${factor}.${nc}.bam
+if [ "$RTYPE" = "Single" ]; then
+    echo "Running single end"
+    bwa mem -t 10 ${REFFA} \
+	${OUTDIR}/${factor}/${factor}.${nc}.fastq | \
+	samtools view -bS - > ${OUTDIR}/${factor}/${factor}.${nc}.bam
+fi
+if [ "$RTYPE" = "Paired" ]; then
+    echo "Running paired end"
+    bwa mem -t 10 ${REFFA} \
+	${OUTDIR}/${factor}/${factor}.${nc}_1.fastq \
+	${OUTDIR}/${factor}/${factor}.${nc}_2.fastq | \
+	samtools view -bS - > ${OUTDIR}/${factor}/${factor}.${nc}.bam
+fi
 
 # Sort and index
-samtools sort -o ${OUTDIR}/${factor}.${nc}.sorted.bam ${OUTDIR}/${factor}.${nc}.bam
-samtools index ${OUTDIR}/${factor}.${nc}.sorted.bam
+samtools sort -o ${OUTDIR}/${factor}/${factor}.${nc}.sorted.bam ${OUTDIR}/${factor}/${factor}.${nc}.bam
+samtools index ${OUTDIR}/${factor}/${factor}.${nc}.sorted.bam
+
+# Mark duplicates
+java -jar $PICARD MarkDuplicates \
+    I=${OUTDIR}/${factor}/${factor}.${nc}.sorted.bam \
+    O=${OUTDIR}/${factor}/${factor}.${nc}.flagged.bam \
+    M=${OUTDIR}/${factor}/${factor}.${nc}.metrics \
+    VALIDATION_STRINGENCY=SILENT VERBOSITY=WARNING
+samtools index ${OUTDIR}/${factor}/${factor}.${nc}.flagged.bam
 
 # Convert to TDF
-igvtools count ${OUTDIR}/${factor}.${nc}.sorted.bam ${OUTDIR}/${factor}.${nc}.tdf ${REFFA}
-igvtools count ${BAM} ${OUTDIR}/${factor}.ENCODE.tdf ${REFFA}
-
-# Get genomic bins for sim/real
-bedtools multicov -bams $BAM -bed ${OUTDIR}/windows/chr19_windows_1kb.bed > \
-    ${OUTDIR}/${factor}.ENCODE.cov.1kb.bed
-bedtools multicov -bams ${OUTDIR}/${factor}.${nc}.sorted.bam \
-    -bed ${OUTDIR}/windows/chr19_windows_1kb.bed > \
-    ${OUTDIR}/${factor}.${nc}.cov.1kb.bed
+igvtools count ${OUTDIR}/${factor}/${factor}.${nc}.flagged.bam \
+    ${OUTDIR}/${factor}/${factor}.${nc}.tdf ${REFFA}

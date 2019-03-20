@@ -24,6 +24,7 @@ class RefGenome {
 
   bool GetLengths(std::map<std::string, int>* chromLengths);
 
+  int64_t GetGenomeLength();
  private:
   bool file_exists(std::string path) const {
     return (access(path.c_str(), F_OK) != -1);

@@ -21,6 +21,8 @@ class PeakIntervals {
   void resetSearchScope(const int index);
   //int peakIndexStart;
   double prob_pd_given_b;
+  double prob_frag_kept;
+  double total_bound_length;
   //double prob_frag_kept;
   float max_coverage;
 

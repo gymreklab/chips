@@ -189,7 +189,9 @@ bool learn_frag_single(const std::string& bamfile,
 
   /* First read peaks and restrict reads origins */
   // peak intensity is only used for filtering out unreliable reads
+
   PeakLoader peakloader(peakfile, peakfileType, "", count_colidx);
+
   std::vector<Fragment> peaks;
   if (!peakloader.Load(peaks)) PrintMessageDieOnError("Error loading peaks from " + peakfile, M_ERROR);
   for (int peak_idx=peaks.size()-1;peak_idx>=0;peak_idx--){
@@ -238,10 +240,13 @@ bool learn_frag_single(const std::string& bamfile,
     for (int end_idx=0; end_idx<ends_in_peak.size(); end_idx++) ends.push_back(ends_in_peak[end_idx] - mid_pos);
   }
 
+  if (starts.size() == 0 || ends.size() == 0) {
+    PrintMessageDieOnError("No starts found. something went wrong in fragment length estimation", M_ERROR);
+  }
+
   /* mean value of fragment length*/
   float mean_frag_length = std::accumulate(ends.begin(), ends.end(), 0.0)/ (float) ends.size()
                         - std::accumulate(starts.begin(), starts.end(), 0.0)/ (float) starts.size();
-
   /* calculate CDF of starts and ends */
   /* start */
   std::int32_t start_lower_bound = std::floor(*std::min_element(starts.begin(), starts.end()));
@@ -250,7 +255,7 @@ bool learn_frag_single(const std::string& bamfile,
   vector<float> start_cdf(start_upper_bound-start_lower_bound+1, 0);
   vector<float> start_edf(start_upper_bound-start_lower_bound+1, 0);
   if (!calculate_distribution(starts, start_lower_bound, start_upper_bound,
-                        start_pdf, start_cdf, start_edf)){
+			      start_pdf, start_cdf, start_edf)){
     PrintMessageDieOnError("Error happened when calculating position distributions", M_ERROR);
   }
 

@@ -14,16 +14,9 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
   gamma_theta = options.gamma_theta;
   ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
 
-  pcr_rate = options.pcr_rate;
-
   prev_chrom = _prev_chrom;
   peakIndexStart = _peakIndexStart;
   start_offset_ptr = & _start_offset;
-
-  debug_pulldown = false; // TODO remove
-  if (debug_pulldown) {
-    PrintMessageDieOnError("Loading peaks", M_DEBUG);
-  }
 }
 
 void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals) {
@@ -64,23 +57,12 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
     Fragment frag(chrom, current_pos, fsize);
     peak_score = pintervals->GetOverlap(frag, peakIndex);
 
-    // pull down process
-    bound = (peak_score > 0);
+    bound = (rand()/double(RAND_MAX) < peak_score);
     if (bound) {
-      while (true){
-        pulled = (rand()/double(RAND_MAX) * max_fold < (peak_score*fsize));
-        //if (peak_score*fsize/max_fold > 0.1) std::cout << peak_score*fsize/max_fold <<std::endl;
-        if (pulled) output_fragments->push_back(frag);
-        if (rand()/double(RAND_MAX) < pcr_rate) break;
-      }
-    }else{
-      while (true){
-        if (rand()/double(RAND_MAX) * max_fold <
-              (ratio_beta * (pintervals->prob_pd_given_b) *fsize)) {
-          //std::cout << ratio_beta * (pintervals->prob_pd_given_b) *fsize/max_fold <<std::endl;
+      output_fragments->push_back(frag);
+    } else{
+      if (rand()/double(RAND_MAX) < ratio_beta) {
           output_fragments->push_back(frag);
-        }
-        if (rand()/double(RAND_MAX) < pcr_rate) break;
       }
     }
     current_pos += fsize;

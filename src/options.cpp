@@ -12,6 +12,7 @@ Options::Options() {
   outprefix = "";
   peakfiletype = "";
   countindex = -1;
+  noscale = false;
 
   // Required learn inputs
   chipbam = "";
@@ -31,6 +32,7 @@ Options::Options() {
   ratio_f = 0.03713;
   pcr_rate = 1.0;
   model_file = "";
+  recompute_f = false;
 
   // Additional simulation parameters
   region = "";
@@ -38,7 +40,7 @@ Options::Options() {
 
   // Additional learn parameters
   skip_frag = false;
-  output_frag_lens;
+  output_frag_lens = false;
 
   // sequencer
   sequencer_type = "";
@@ -52,6 +54,9 @@ Options::Options() {
   // learn only: intensity threshold
   intensity_threshold = 100;
   estimate_frag_length = 200;
+
+  // Other options
+  verbose = false;
 }
 
 Options::~Options() {}

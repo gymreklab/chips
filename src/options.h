@@ -16,6 +16,7 @@ class Options {
   std::string outprefix;
   std::string peakfiletype;
   std::int32_t countindex;
+  bool noscale;
 
   // Required learn inputs
   std::string chipbam;
@@ -35,6 +36,7 @@ class Options {
   float ratio_f;
   float pcr_rate; 
   std::string model_file;
+  bool recompute_f;
 
   std::string sequencer_type;
   float sub_rate;
@@ -51,6 +53,9 @@ class Options {
   bool skip_frag;
   bool output_frag_lens;
   virtual ~Options();
+
+  // Other options
+  bool verbose;
 };
 
 #endif  // SRC_OPTIONS_H__

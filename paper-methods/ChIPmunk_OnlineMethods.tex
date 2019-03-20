@@ -223,10 +223,20 @@ We model the per-base pair substitution rate, insertion rate, and deletion rate 
 
 \subsection*{Inferring parameters of ENCODE datasets}
 
-% Script to crawl ENCODE to get all relevant datasets
-% Download BAM+BED, run mark dup, index, run learn in single or paired end mode
+We used the ENCODE Project's REST API to write a Python script to automatically identify available ChIP-sequencing for the GM12878 cell line.
+We fetched unfiltered BAM files and narrowPeak or broadPeak peak files for transcription factors and histone modifications, respectively.
+If multiple replicates were available for a factor, we chose the first one as a training example.
+We chose a total of 221 datasets as examples.
 
-% TODO will add other methods sections based on the main text
+We used the Picard \cite{picard} MarkDuplicates tool with default parameters to mark duplicates in each BAM file.
+For paired end datasets, we called ChIPmunk's learn module with non-default parameter -{}-paired.
+For single end datasets, we used non-default parameters -c 7 -{}-thres 100 for transcription factors and -c 7 -{}-thres 5 for histone modifications.
+For 12 example paired-end datasets, we called learn in both paired end and single end mode to compare inferred fragment length distributions (\textbf{Supplementary Figure 2}).
+
+Inferred parameters as well as links to JSON model files that can be used as input to the ChIPmunk simreads module are provided in \textbf{Supplementary Table 2}.
+
+\bibliography{ChIPmunk_OnlineMethods}
+\bibliographystyle{ieeetr}
 
 \end{document}
 

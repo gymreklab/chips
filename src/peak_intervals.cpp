@@ -31,19 +31,26 @@ bool PeakIntervals::LoadPeaks(const Options& options,
 
   if (dataLoaded){
     // calculate the maximum coverage
-    max_coverage = 0;
-    for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
-      if (peaks[peakIndex].score > max_coverage){
-        max_coverage = peaks[peakIndex].score;
+    if (options.noscale) {
+      max_coverage = 1; // Effectively no scaling
+    } else {
+      max_coverage = 0;
+      for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
+	if (peaks[peakIndex].score > max_coverage){
+	  max_coverage = peaks[peakIndex].score;
+	}
       }
     }
 
     // calculate Prob(pulled down|bound)
     float total_signals = 0;
     float signal_region_length = 0;
+    total_bound_length = 0;
+
     for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
       signal_region_length += (peaks[peakIndex].length);
       total_signals += (peaks[peakIndex].length * peaks[peakIndex].score);
+      total_bound_length += peaks[peakIndex].length;
     }
     if (signal_region_length == 0){
         prob_pd_given_b = 1.0;
@@ -62,7 +69,7 @@ bool PeakIntervals::LoadPeaks(const Options& options,
 
 /*
 void PeakIntervals::EstNumFrags(const Options& options, std::vector<Fragment> peaks){
-    int total_length = 0;
+    long total_length = 0;
     int length_b = 0;
     float numfrags_b = 0;
     float numfrags_ub = 0;
@@ -181,3 +188,4 @@ float PeakIntervals::GetOverlap(const Fragment& frag, int& peakIndexStart) {
   float score = SearchList(frag, peakIndexStart);
   return score;
 }
+

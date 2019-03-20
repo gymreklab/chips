@@ -41,3 +41,11 @@ m4/Makefile
 m4/Makefile.in
 igv.log
 
+# Latex
+*.out
+*.aux
+*.log
+*.bbl
+*.blg
+ChIPmunk_OnlineMethods.pdf
+*DS_Store*
