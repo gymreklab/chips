@@ -22,21 +22,17 @@ do
     TAGDIRS="${TAGDIRS} ${OUTDIR}/${rl}.4.single/ ${OUTDIR}/${rl}.4.paired/ ${OUTDIR}/${rl}.5.single/ ${OUTDIR}/${rl}.5.paired/"
 done
 
+
 # Get coverage per bin + repeat lengths
 multiBamCov -bams ${BAMS} -bed ${OUTDIR}/hg19.hipstr.chr${CHROM}.AAGG.bed | \
     intersectBed -b stdin -a ${OUTDIR}/hg19.hipstr.chr${CHROM}.AAGG.bed -wa -wb | \
     cut -f 6-10 --complement > ${OUTDIR}/repeat_cov_byrl.bed
 
-# Get composite plots - all repeats
-annotatePeaks.pl ${OUTDIR}/hg19.hipstr.chr${CHROM}.AAGG.bed ${CHROMFA} \
-    -size 1000 -hist 1 \
-    -d ${TAGDIRS} > ${OUTDIR}/repeat_composite.txt
-
-# Get composite plots - repeats >40bp total
-for thresh in 20 40 60 80 100
+# Get composite plots long repeats
+for thresh in 0 20 40 60 80 100
 do
-    cat ${OUTDIR}/hg19.hipstr.chr${CHROM}.AAGG.bed | awk -v"thresh=$thresh" '($5>=thresh)' > ${OUTDIR}/hg19.hipstr.chr${CHROM}.AAGG.gt${thresh}.bed
+    cat ${OUTDIR}/hg19.hipstr.chr${CHROM}.AAGG.bed | awk -v"thresh=$thresh" '($5>=thresh)' | cut -f 1-3 > ${OUTDIR}/hg19.hipstr.chr${CHROM}.AAGG.gt${thresh}.bed
     annotatePeaks.pl ${OUTDIR}/hg19.hipstr.chr${CHROM}.AAGG.gt${thresh}.bed ${REFFA} \
-    -size 1000 -hist 1 \
-    -d ${TAGDIRS} > ${OUTDIR}/repeat_composite.gt${thresh}.txt
+	-size 500 -hist 1 \
+	-d ${TAGDIRS} > ${OUTDIR}/repeat_composite.gt${thresh}.txt
 done

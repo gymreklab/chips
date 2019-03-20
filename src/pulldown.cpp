@@ -29,7 +29,9 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   int32_t fstart, fend;
   float fsize;
   bool bound;
+  bool pulled;
   float peak_score;
+  float max_fold = pintervals->max_coverage * gamma_k * gamma_theta * 3; // 3 is an arbitrary number
 
   // update the start index of peaks
   if (chrom != prev_chrom){
@@ -62,9 +64,10 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
       if (rand()/double(RAND_MAX) < ratio_beta) {
           output_fragments->push_back(frag);
       }
-    } 
+    }
     current_pos += fsize;
   }
+
   peakIndexStart = peakIndex;
 }
 

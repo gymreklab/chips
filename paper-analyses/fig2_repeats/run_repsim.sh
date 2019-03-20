@@ -39,7 +39,7 @@ samtools sort -o ${OUTDIR}/${PREFIX}.sorted.bam ${OUTDIR}/${PREFIX}.bam
 samtools index ${OUTDIR}/${PREFIX}.sorted.bam
 
 # Convert to TDF
-#igvtools count -w 1 ${OUTDIR}/${PREFIX}.sorted.bam ${OUTDIR}/${PREFIX}.tdf ${REFFA}
+igvtools count -w 25 ${OUTDIR}/${PREFIX}.sorted.bam ${OUTDIR}/${PREFIX}.tdf ${REFFA}
 
 # Use Homer to make tag dir
 mkdir -p ${OUTDIR}/${PREFIX}
