@@ -246,9 +246,11 @@ int simulate_reads_main(int argc, char* argv[]) {
     PrintMessageDieOnError("Loading the input ChIP-seq peak file (and BAM file if given)", M_PROGRESS);
     PeakIntervals* pintervals = \
                new PeakIntervals(options, options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
+
+    // recompute f
     if (options.recompute_f) {
       RefGenome ref_genome(options.reffa);
-      float f = pintervals->total_bound_length/ref_genome.GetGenomeLength();
+      float f = pintervals->total_bound_length/pintervals->total_genome_length; // TODO recompute with new frag score
       if (f<0) {
 	PrintMessageDieOnError("Error. Estimated --frac negative. Likely overflow error on genome size", M_ERROR);
       }

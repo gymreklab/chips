@@ -15,6 +15,9 @@ class LibraryConstructor {
 
   void Perform(const vector<Fragment>& input_fragments,
 	       vector<Fragment>* output_fragments);
+
+ private:
+  float pcr_rate;
 };
 
 #endif  // SRC_LIBRARY_CONSTRUCTOR_H__

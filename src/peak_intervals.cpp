@@ -27,9 +27,10 @@ bool PeakIntervals::LoadPeaks(const Options& options,
 
   std::vector<Fragment> peaks;
   float frag_length = options.gamma_k * options.gamma_theta; 
-  bool dataLoaded = peakloader.Load(peaks, options.region, frag_length);
+  bool dataLoaded = peakloader.Load(peaks, options.region, frag_length, options.noscale);
 
   if (dataLoaded){
+    /*
     // calculate the maximum coverage
     if (options.noscale) {
       max_coverage = 1; // Effectively no scaling
@@ -41,7 +42,10 @@ bool PeakIntervals::LoadPeaks(const Options& options,
 	}
       }
     }
+    */
 
+    /*
+    // Note: now this prob_pd_given_b === 1.0 always
     // calculate Prob(pulled down|bound)
     float total_signals = 0;
     float signal_region_length = 0;
@@ -57,6 +61,13 @@ bool PeakIntervals::LoadPeaks(const Options& options,
     }else{
         prob_pd_given_b = total_signals/signal_region_length;
     }
+    */
+    total_bound_length = 0;
+    for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
+      total_bound_length += (peaks[peakIndex].length * peaks[peakIndex].score);
+    }
+    total_genome_length = peakloader.total_genome_length;
+
     // convert the vector into a map with keys as chromosome names
     for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
       peak_map[peaks[peakIndex].chrom].push_back(peaks[peakIndex]);

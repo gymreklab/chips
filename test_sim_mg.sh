@@ -23,8 +23,8 @@ do
 	--numcopies ${nc} \
 	--numreads 100000 \
 	--readlen 100 \
-	--gamma-frag 5.663,44.08 \
-	--spot 0.110237 --frac 0.00416413 \
+	--gamma-frag 14.2142,15.9923 \
+	--spot 0.00172121 --frac 8.43518e-05 \
 	--region chr19:1-40000000 \
 	--binsize 200000 \
     --thread 10 \
