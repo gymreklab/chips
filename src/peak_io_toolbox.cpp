@@ -62,7 +62,7 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if((count_colidx > 0) && (!noscale)) Rescale(peaks);
+  if((count_colidx > 0) && (!noscale)) Rescale(peaks, true);
   return 0;
 }
 
@@ -120,7 +120,7 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if((count_colidx > 0) && (!noscale)) Rescale(peaks);
+  if((count_colidx > 0) && (!noscale)) Rescale(peaks, true);
   return 0;
 }
 
@@ -245,7 +245,7 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   for(int peak_index=0; peak_index<peaks.size(); peak_index++){
     peaks[peak_index].score /= ((float) peaks[peak_index].length);
   }
-  Rescale(peaks);
+  Rescale(peaks, true);
 
   // total num of fragments in peaks
   float n_frags_in_peak = 0;
@@ -259,13 +259,30 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   return 0;
 }
 
-void PeakReader::Rescale(std::vector<Fragment>& peaks){
+void PeakReader::Rescale(std::vector<Fragment>& peaks, bool rm_outliers) {
+  // Find max, median
+  std::vector<float> scores;
   float max_score = 0;
   for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+    scores.push_back(peaks[peak_index].score);
     if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
   }
-  for(int peak_index=0; peak_index<peaks.size(); peak_index++){
-    peaks[peak_index].score /= max_score;
+  float threshold = max_score;
+  if (rm_outliers) {
+    size_t n = scores.size()/2;
+    nth_element(scores.begin(), scores.begin()+n, scores.end());
+    float median_score = scores[n];
+    float max_possible = median_score*2;
+    if (max_possible<max_score) {
+      threshold = max_possible;
+    }
+  }
+  for(int peak_index=0; peak_index<peaks.size(); peak_index++) {
+    if (peaks[peak_index].score >= threshold) {
+      peaks[peak_index].score = 1;
+    } else {
+      peaks[peak_index].score /= threshold;
+    }
   }
 }
 
