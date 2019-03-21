@@ -67,7 +67,7 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
   }
   std::stringstream ss;
   ss << "Sequencing total reads " << numreads << " for copy " << copy_index;
-  PrintMessageDieOnError(ss.str(), M_PROGRESS);
+  //PrintMessageDieOnError(ss.str(), M_PROGRESS);
   while (true) {
     std::random_shuffle(frag_indices.begin(), frag_indices.end());
     for (size_t fg=0; fg<frag_indices.size(); fg++) {
