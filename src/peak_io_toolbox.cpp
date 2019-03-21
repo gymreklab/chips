@@ -259,7 +259,7 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   float n_frags_in_peak = 0;
   for (int frag_index=0; frag_index<fragments.size(); frag_index++){
     int peak_index = frag2peak[frag_index];
-    n_frags_in_peak += (fragments[frag_index].score * peaks[peak_index].score);
+    n_frags_in_peak += (fragments[frag_index].score); // * peaks[peak_index].score); // TODO. don't weight by score in S
   }
 
   *ptr_tagcount_in_peaks = n_frags_in_peak;
