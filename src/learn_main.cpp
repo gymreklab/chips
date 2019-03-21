@@ -29,7 +29,6 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
                     const float remove_pct, float* ab_ratio_ptr, 
                     float *s_ptr, float* f_ptr, const float frag_param_a, const float frag_param_b, bool skip_frag);
 bool compare_location(Fragment a, Fragment b);
-bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
 bool learn_pcr(const std::string& bamfile, float* geo_rate);
 bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag);
 bool learn_frag_single(const std::string& bamfile, const std::string& peakfile, const std::string peakfileType,
@@ -71,7 +70,7 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
   if (skip_frag){return true;}
 
   /* First, get a vector of the fragment lengths */
-  int maxreads = 10000; int numreads = 0; // don't look at more than this many reads
+  int maxreads = 5000; int numreads = 0; // don't look at more than this many reads
   BamCramReader bamreader(bamfile);
   const BamHeader* bamheader = bamreader.bam_header();
   // Get first chrom to look at fragment lengths
@@ -195,9 +194,9 @@ bool learn_frag_single(const std::string& bamfile,
   std::vector<Fragment> peaks;
   if (!peakloader.Load(peaks)) PrintMessageDieOnError("Error loading peaks from " + peakfile, M_ERROR);
   for (int peak_idx=peaks.size()-1;peak_idx>=0;peak_idx--){
-    if (peaks[peak_idx].score < intensity_threshold) peaks.erase(peaks.begin()+peak_idx);
+    if (peaks[peak_idx].orig_score < intensity_threshold) peaks.erase(peaks.begin()+peak_idx);
     if (peaks.size() == 0)
-      PrintMessageDieOnError("There is no peaks satisfying the user-defined threshold: " + std::to_string(intensity_threshold), M_ERROR);
+      PrintMessageDieOnError("There are no peaks satisfying the user-defined threshold: " + std::to_string(intensity_threshold), M_ERROR);
   }
 
   /* Read reads from the BAM file */
