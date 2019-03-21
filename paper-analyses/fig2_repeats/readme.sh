@@ -10,8 +10,6 @@ BAMS=""
 TAGDIRS=""
 for rl in 36 #51 100 150
 do
-    #nreadsS=$(echo "${NUMTOTAL}/${rl}" | bc -l | cut -f 1 -d'.')
-    #nreadsP=$(echo "${nreadsS}/2" | bc -l | cut -f 1 -d'.')
     nreadsS=1000000
     nreadsP=1000000
 #    ./run_repsim.sh ${rl} ${nreadsP} ${rl}.4.paired 4 " --paired --noscale"

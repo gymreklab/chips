@@ -17,6 +17,7 @@ class Options {
   std::string peakfiletype;
   std::int32_t countindex;
   bool noscale;
+  bool scale_outliers;
 
   // Required learn inputs
   std::string chipbam;

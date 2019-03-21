@@ -143,6 +143,8 @@ int simulate_reads_main(int argc, char* argv[]) {
       }
     } else if (PARAMETER_CHECK("--noscale", 9, parameterLength)) {
       options.noscale = true;
+    } else if (PARAMETER_CHECK("--scale-outliers", 16, parameterLength)) {
+      options.scale_outliers = true;
     } else if (PARAMETER_CHECK("--thread", 8, parameterLength)){
       if ((i+1) < argc) {
 	options.n_threads = std::atoi(argv[i+1]);
@@ -246,12 +248,16 @@ int simulate_reads_main(int argc, char* argv[]) {
     PrintMessageDieOnError("Loading the input ChIP-seq peak file (and BAM file if given)", M_PROGRESS);
     PeakIntervals* pintervals = \
                new PeakIntervals(options, options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
+
+    // recompute f
     if (options.recompute_f) {
       RefGenome ref_genome(options.reffa);
-      float f = pintervals->total_bound_length/ref_genome.GetGenomeLength(); // TODO recompute with new frag score
-      if (f<0) {
-	PrintMessageDieOnError("Error. Estimated --frac negative. Likely overflow error on genome size", M_ERROR);
+      float f = pintervals->total_bound_length/ref_genome.GetGenomeLength();
+      if (f<0 || f>1) {
+	std::cerr << pintervals->total_bound_length << " " << pintervals->total_genome_length << std::endl;
+	PrintMessageDieOnError("Error. Estimated --frac not between 0 and 1. ", M_ERROR);
       }
+	
       model.SetF(f);
       model.UpdateOptions(options);
       PrintMessageDieOnError("Recomputed --frac. New model:", M_PROGRESS);
@@ -433,6 +439,7 @@ void simulate_reads_help(void) {
   cerr << "     -c <int>                    : The index of the BED file column used to score each peak (index starting from 1). Required if -b not used.\n"
        << "                                 : Default: " << options.countindex << "\n";
   cerr << "     --noscale                   : Don't scale peak scores by the max score.\n";                   
+  cerr << "     --scale-outliers            : Set all peaks with scores >2*median score to have binding prob 1. Recommended with real peak files\n";
   cerr << "\n[Other options]: " << "\n";
   cerr << "     --region <str>              : Only simulate reads from this region chrom:start-end\n"
        << "                                   Default: genome-wide \n";
