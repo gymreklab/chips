@@ -250,7 +250,8 @@ int simulate_reads_main(int argc, char* argv[]) {
     for (auto & cnsmr: consumers){
       cnsmr.join();
     }
-    
+   
+ 
     PrintMessageDieOnError("Writing reads into file", M_PROGRESS);
     for (int thread_index=0; thread_index<options.n_threads; thread_index++){
       if (options.paired){
