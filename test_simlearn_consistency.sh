@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Example:
+# ./test_simlearn_consistency.sh 10 1 0.2
+# e.g. Test that if we simulate s=0.2, we get out s=0.2
+
 nc=$1
 score=$2
 spot=$3
@@ -12,7 +16,7 @@ bedtools random -l 200 -n 1000 -seed 100 -g hg19.chr19.genome | \
     bedtools sort -i stdin > example_peaks.bed
 
 # Simulate reads
-~/workspace/ChIPmunk/src/chipmunk simreads \
+./src/chipmunk simreads \
     -f /storage/resources/dbase/human/hg19/chromFa/chr19.fa \
     -p example_peaks.bed -t bed -c 4 \
     --gamma-frag 10,20 --spot $spot --frac 0.05 --pcr_rate 1.0 \
@@ -23,8 +27,8 @@ bwa mem -t 10 /storage/resources/dbase/human/hg19/chromFa/chr19.fa \
 samtools sort -o test.${nc}.sorted.bam test.${nc}.bam
 samtools index test.${nc}.sorted.bam
 
-# Learn model
-~/workspace/ChIPmunk/src/chipmunk learn \
+# Learn 
+./src/chipmunk learn \
     -p example_peaks.bed -t bed -c 4 --thres 0 \
     -b test.${nc}.sorted.bam --noscale \
     -o test.${nc}
