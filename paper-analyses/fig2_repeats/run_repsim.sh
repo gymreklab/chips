@@ -12,7 +12,7 @@ source params.sh
 ~/workspace/ChIPmunk/src/chipmunk simreads \
     -p ${OUTDIR}/hg19.hipstr.chr${CHROM}.AAGG.bed \
     -t bed -c ${SCORECOL} --recomputeF \
-    -f ${CHROMFA} \
+    -f ${REFFA} \
     -o ${OUTDIR}/${PREFIX} \
     --numcopies ${NC} \
     --gamma-frag ${GAMMA} \
