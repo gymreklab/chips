@@ -124,64 +124,6 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
   return 0;
 }
 
-bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks,
-        const std::int32_t count_colidx, const std::string region, const bool noscale){
-  std::ifstream infile(peakfile.c_str());
-  if(infile.fail()) PrintMessageDieOnError("Input path \"" + peakfile + "\" does not exist", M_ERROR);
-
-  std::string line;
-  while (std::getline(infile, line)){
-      std::string chr;
-      std::int32_t start;
-      std::int32_t end;
-      std::int32_t length;
-      float count = -1;
-      
-      std::stringstream linestream(line);
-      std::string element;
-      uint32_t elem_idx=0;
-      while(!linestream.eof()){
-        linestream >> element;
-        if (elem_idx == 0){
-          chr = element;
-        }else if(elem_idx == 1){
-          start = std::stol(element);
-        }else if(elem_idx == 2){
-          end = std::stol(element);
-        }else if((count_colidx > 0) && (elem_idx == count_colidx-1)){
-          count = std::stof(element);
-        }
-        elem_idx++;
-      }
-      
-      if (region.empty()){
-        length = end-start;
-        Fragment peak_location(chr, start, length, count);
-        peaks.push_back(peak_location);
-      }else{
-        std::int32_t region_start;
-        std::int32_t region_end;
-        std::string region_chrom;
-        RegionParser(region, region_chrom, region_start, region_end);
-
-        if (region_chrom == chr){
-          std::int32_t overlap = std::min(end, region_end) - std::max(start, region_start);
-          overlap = std::max(0, overlap);
-          if (overlap > 0){
-            Fragment peak_location(chr, std::max(start, region_start), overlap, count);
-            peaks.push_back(peak_location);
-          }
-        }
-      }
-  }
-  // sort peaks
-  std::sort(peaks.begin(), peaks.end(), compare_location);
-  // if peak scores have been loaded from the bed file,
-  // then normalize peak scores and rescale them to 0-1
-  if((count_colidx > 0) && (!noscale)) Rescale(peaks);
-  return 0;
-}
-
 bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string bamfile,
             std::uint32_t* ptr_total_genome_length, float* ptr_total_tagcount, float* ptr_tagcount_in_peaks,
             const std::string region, const float frag_length){
