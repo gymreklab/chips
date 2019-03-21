@@ -62,15 +62,7 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if((count_colidx > 0)&& (!noscale)){
-    float max_score = 0;
-    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
-      if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
-    }
-    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
-      peaks[peak_index].score /= max_score;
-    }
-  }
+  if((count_colidx > 0) && (!noscale)) Rescale(peaks);
   return 0;
 }
 
@@ -128,15 +120,7 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if((count_colidx > 0) && (!noscale)){
-    float max_score = 0;
-    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
-      if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
-    }
-    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
-      peaks[peak_index].score /= max_score;
-    }
-  }
+  if((count_colidx > 0) && (!noscale)) Rescale(peaks);
   return 0;
 }
 
@@ -194,15 +178,7 @@ bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks,
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if((count_colidx > 0) && (!noscale)){
-    float max_score = 0;
-    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
-      if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
-    }
-    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
-      peaks[peak_index].score /= max_score;
-    }
-  }
+  if((count_colidx > 0) && (!noscale)) Rescale(peaks);
   return 0;
 }
 
@@ -324,14 +300,10 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   }
 
   // normalize peak scores
-  float max_score = 0;
   for(int peak_index=0; peak_index<peaks.size(); peak_index++){
     peaks[peak_index].score /= ((float) peaks[peak_index].length);
-    if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
   }
-  for(int peak_index=0; peak_index<peaks.size(); peak_index++){
-    peaks[peak_index].score /= max_score;
-  }
+  Rescale(peaks);
 
   // total num of fragments in peaks
   float n_frags_in_peak = 0;
@@ -343,6 +315,16 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   *ptr_tagcount_in_peaks = n_frags_in_peak;
   *ptr_total_tagcount = (float) fragments.size();
   return 0;
+}
+
+void PeakReader::Rescale(std::vector<Fragment>& peaks){
+  float max_score = 0;
+  for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+    if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
+  }
+  for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+    peaks[peak_index].score /= max_score;
+  }
 }
 
 bool PeakReader::compare_location(Fragment a, Fragment b){

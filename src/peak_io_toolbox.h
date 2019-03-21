@@ -33,6 +33,7 @@ class PeakReader{
     std::string peakfile;
     static bool compare_location(Fragment a, Fragment b);
     static void RegionParser(const std::string region, std::string& chromID, std::int32_t& start, std::int32_t& end);
+    void Rescale(std::vector<Fragment>& peaks);
 };
 
 
