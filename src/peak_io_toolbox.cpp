@@ -8,7 +8,7 @@ PeakReader::PeakReader(const std::string& _peakfile){
 }
 
 bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
-        const std::int32_t count_colidx, const std::string region){
+        const std::int32_t count_colidx, const std::string region, const bool noscale){
   std::ifstream infile(peakfile.c_str());
   if(infile.fail()) PrintMessageDieOnError("Input path \"" + peakfile + "\" does not exist", M_ERROR);
 
@@ -62,7 +62,7 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if(count_colidx > 0){
+  if((count_colidx > 0)&& (!noscale)){
     float max_score = 0;
     for(int peak_index=0; peak_index<peaks.size(); peak_index++){
       if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
@@ -75,7 +75,7 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
 }
 
 bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
-        const std::int32_t count_colidx, const std::string region){
+        const std::int32_t count_colidx, const std::string region, const bool noscale){
   std::ifstream infile(peakfile.c_str());
   if(infile.fail()) PrintMessageDieOnError("Input path \"" + peakfile + "\" does not exist", M_ERROR);
 
@@ -128,7 +128,7 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if(count_colidx > 0){
+  if((count_colidx > 0) && (!noscale)){
     float max_score = 0;
     for(int peak_index=0; peak_index<peaks.size(); peak_index++){
       if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
@@ -141,7 +141,7 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
 }
 
 bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks,
-        const std::int32_t count_colidx, const std::string region){
+        const std::int32_t count_colidx, const std::string region, const bool noscale){
   std::ifstream infile(peakfile.c_str());
   if(infile.fail()) PrintMessageDieOnError("Input path \"" + peakfile + "\" does not exist", M_ERROR);
 
@@ -194,7 +194,7 @@ bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks,
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if(count_colidx > 0){
+  if((count_colidx > 0) && (!noscale)){
     float max_score = 0;
     for(int peak_index=0; peak_index<peaks.size(); peak_index++){
       if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;

@@ -19,12 +19,13 @@ class PeakIntervals {
   /* Get score of peak overlapping fragment */
   float GetOverlap(const Fragment& frag, int& peakIndexStart);
   void resetSearchScope(const int index);
+  float total_bound_length;
+  float total_genome_length;
   //int peakIndexStart;
-  double prob_pd_given_b;
-  double prob_frag_kept;
-  double total_bound_length;
+  //double prob_pd_given_b;
   //double prob_frag_kept;
-  float max_coverage;
+  //double prob_frag_kept;
+  //float max_coverage;
 
  private:
   // peakmap:  key: chromID,  data: fragments
