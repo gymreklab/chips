@@ -13,6 +13,7 @@ Options::Options() {
   peakfiletype = "";
   countindex = -1;
   noscale = false;
+  scale_outliers = false;
 
   // Required learn inputs
   chipbam = "";

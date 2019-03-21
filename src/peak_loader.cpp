@@ -29,14 +29,15 @@ PeakLoader::PeakLoader(const std::string _peakfile, const std::string _peakfileT
   }
 }
 
-bool PeakLoader::Load(std::vector<Fragment>& peaks, const std::string region, const float frag_length, const bool noscale){
+bool PeakLoader::Load(std::vector<Fragment>& peaks, const std::string region, const float frag_length,
+		      const bool noscale, const bool scale_outliers){
   PeakReader peakreader(peakfile);
   switch (peakfileTypeList.at(peakfileType)){
     case 0:
-      peakreader.HomerPeakReader(peaks, count_colidx, region, noscale);
+      peakreader.HomerPeakReader(peaks, count_colidx, region, noscale, scale_outliers);
       break;
     case 2:
-      peakreader.BedPeakReader(peaks, count_colidx, region, noscale);
+      peakreader.BedPeakReader(peaks, count_colidx, region, noscale, scale_outliers);
       break;
     default:
       std::cerr << "An unexpected error happened in PeakLoader->Load()" << std::endl;
@@ -45,7 +46,8 @@ bool PeakLoader::Load(std::vector<Fragment>& peaks, const std::string region, co
   }
 
   if (bamfile != ""){
-    peakreader.UpdateTagCount(peaks, bamfile, &total_genome_length, &total_tagcount, &tagcount_in_peaks, region, frag_length);
+    peakreader.UpdateTagCount(peaks, bamfile, &total_genome_length, &total_tagcount, &tagcount_in_peaks,
+			      region, frag_length, scale_outliers);
   }
   return true;
 }

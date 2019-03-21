@@ -34,7 +34,7 @@ do
 	-bed ${OUTDIR}/windows/chr19_windows_${binsize}kb.bed > \
 	${OUTDIR}/${factor}/${factor}.${nc}.cov.${binsize}kb.bed
     BED=$(ls ${ENCDIR}/${factor}/*.bed | head -n 1) 
-    chipmunk learn \
+    ${CHIPMUNK} learn \
 	-b ${OUTDIR}/${factor}/${factor}.${nc}.flagged.bam \
 	-p ${BED} -t bed -c 7 --thres 5 \
 	-o ${OUTDIR}/${factor}/${factor}.${nc}.json

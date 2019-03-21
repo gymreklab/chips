@@ -1,4 +1,4 @@
-CHIPMUNK=chipmunk
+CHIPMUNK=/home/mgymrek/workspace/ChIPmunk/src/chipmunk
 OUTDIR=/storage/mgymrek/chipmunk/fig1_eval
 ENCDIR=/storage/mgymrek/chipmunk/encode
 REFFA=/storage/resources/dbase/human/hg19/hg19.fa

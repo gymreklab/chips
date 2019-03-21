@@ -8,7 +8,8 @@ PeakReader::PeakReader(const std::string& _peakfile){
 }
 
 bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
-        const std::int32_t count_colidx, const std::string region, const bool noscale){
+				 const std::int32_t count_colidx, const std::string region,
+				 const bool noscale, const bool scale_outliers) {
   std::ifstream infile(peakfile.c_str());
   if(infile.fail()) PrintMessageDieOnError("Input path \"" + peakfile + "\" does not exist", M_ERROR);
 
@@ -62,12 +63,13 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if((count_colidx > 0) && (!noscale)) Rescale(peaks, true);
+  if((count_colidx > 0) && (!noscale)) Rescale(peaks, scale_outliers);
   return 0;
 }
 
 bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
-        const std::int32_t count_colidx, const std::string region, const bool noscale){
+			       const std::int32_t count_colidx, const std::string region,
+			       const bool noscale, const bool scale_outliers){
   std::ifstream infile(peakfile.c_str());
   if(infile.fail()) PrintMessageDieOnError("Input path \"" + peakfile + "\" does not exist", M_ERROR);
 
@@ -120,13 +122,13 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if((count_colidx > 0) && (!noscale)) Rescale(peaks, true);
+  if((count_colidx > 0) && (!noscale)) Rescale(peaks, scale_outliers);
   return 0;
 }
 
 bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string bamfile,
-            std::uint32_t* ptr_total_genome_length, float* ptr_total_tagcount, float* ptr_tagcount_in_peaks,
-            const std::string region, const float frag_length){
+				std::uint32_t* ptr_total_genome_length, float* ptr_total_tagcount, float* ptr_tagcount_in_peaks,
+				const std::string region, const float frag_length, const bool scale_outliers){
   BamCramReader bamreader(bamfile);
   const BamHeader* bamheader = bamreader.bam_header();
   std::vector<std::string> seq_names = bamheader->seq_names();
@@ -245,7 +247,7 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   for(int peak_index=0; peak_index<peaks.size(); peak_index++){
     peaks[peak_index].score /= ((float) peaks[peak_index].length);
   }
-  Rescale(peaks, true);
+  Rescale(peaks, scale_outliers);
 
   // total num of fragments in peaks
   float n_frags_in_peak = 0;

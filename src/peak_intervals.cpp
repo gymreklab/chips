@@ -3,7 +3,7 @@
 #include "src/ref_genome.h"
 
 PeakIntervals::PeakIntervals(const Options& options, const std::string peakfile, const std::string peakfileType,
-        const std::string bamfile, const std::int32_t count_colidx) {
+			     const std::string bamfile, const std::int32_t count_colidx) {
   if (!LoadPeaks(options, peakfile, peakfileType, bamfile, count_colidx)) {
     PrintMessageDieOnError("Error loading peaks from " + peakfile, M_ERROR);
   }
@@ -21,13 +21,13 @@ PeakIntervals::~PeakIntervals() {}
   This function puts the peaks into a searachable data structure
  */
 bool PeakIntervals::LoadPeaks(const Options& options,
-        const std::string peakfile, const std::string peakfileType,
-        const std::string bamfile, const std::int32_t count_colidx) {
+			      const std::string peakfile, const std::string peakfileType,
+			      const std::string bamfile, const std::int32_t count_colidx) {
   PeakLoader peakloader(peakfile, peakfileType, bamfile, count_colidx);
 
   std::vector<Fragment> peaks;
   float frag_length = options.gamma_k * options.gamma_theta; 
-  bool dataLoaded = peakloader.Load(peaks, options.region, frag_length, options.noscale);
+  bool dataLoaded = peakloader.Load(peaks, options.region, frag_length, options.noscale, options.scale_outliers);
 
   if (dataLoaded){
     /*

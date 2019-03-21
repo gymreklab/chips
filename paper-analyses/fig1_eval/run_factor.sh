@@ -27,7 +27,7 @@ if [ "$RTYPE" = "Paired" ]; then
 fi
 time $CHIPMUNK simreads \
     -p ${BED} -b ${BAM} \
-    -t bed -c 7 \
+    -t bed -c 7 --scale-outliers \
     -f ${REFFA} \
     -o ${OUTDIR}/${factor}/${factor}.${nc} \
     --model ${MODEL} \
