@@ -99,10 +99,8 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
       if ( (!aln.IsMapped()) || (!aln.IsMateMapped()) || (!aln.IsPaired()) || (!aln.IsProperPair())
             || aln.IsFailedQC() || aln.IsSecondary() || aln.IsSupplementary()){continue;}
       tlen = aln.TemplateLength();
-      if (tlen > 0) {
-        fraglengths.push_back(abs(tlen));
-        numreads++;
-      }
+      fraglengths.push_back(abs(tlen));
+      numreads++;
     }
 
     if (fraglengths.size() == 0)
