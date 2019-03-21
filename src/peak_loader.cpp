@@ -29,17 +29,17 @@ PeakLoader::PeakLoader(const std::string _peakfile, const std::string _peakfileT
   }
 }
 
-bool PeakLoader::Load(std::vector<Fragment>& peaks, const std::string region, const float frag_length){
+bool PeakLoader::Load(std::vector<Fragment>& peaks, const std::string region, const float frag_length, const bool noscale){
   PeakReader peakreader(peakfile);
   switch (peakfileTypeList.at(peakfileType)){
     case 0:
-      peakreader.HomerPeakReader(peaks, count_colidx, region);
+      peakreader.HomerPeakReader(peaks, count_colidx, region, noscale);
       break;
     case 1:
-      peakreader.TestPeakReader(peaks, count_colidx, region);
+      peakreader.TestPeakReader(peaks, count_colidx, region, noscale);
       break;
     case 2:
-      peakreader.BedPeakReader(peaks, count_colidx, region);
+      peakreader.BedPeakReader(peaks, count_colidx, region, noscale);
       break;
     default:
       std::cerr << "An unexpected error happened in PeakLoader->Load()" << std::endl;
