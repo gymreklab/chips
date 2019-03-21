@@ -28,7 +28,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
 		 const std::string& peakfileType, const std::int32_t count_colidx,
 		 const float remove_pct, float* ab_ratio_ptr, 
 		 float *s_ptr, float* f_ptr, const float frag_param_a, const float frag_param_b,
-		 bool skip_frag, bool scale_outliers);
+		 bool skip_frag, bool noscale, bool scale_outliers);
 bool compare_location(Fragment a, Fragment b);
 bool learn_pcr(const std::string& bamfile, float* geo_rate);
 bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag);
@@ -417,7 +417,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
 		 const std::string& peakfileType, const std::int32_t count_colidx, 
 		 const float remove_pct, float* ab_ratio_ptr, float *s_ptr, float* f_ptr,
 		 const float frag_param_a, const float frag_param_b,
-		 bool skip_frag, bool scale_outliers) {
+		 bool skip_frag, bool noscale, bool scale_outliers) {
   /*
     Learn the ratio of alpha to beta from an input BAM file,
     and its correspounding peak file.
@@ -443,8 +443,8 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
   // and calculate the total length of peaks across the genomes
   std::vector<Fragment> peaks;
   PeakLoader peakloader(peakfile, peakfileType, bamfile, count_colidx);
-  const float frag_length = frag_param_a * frag_param_b;
-  peakloader.Load(peaks, "", frag_length, false, scale_outliers);
+  const float frag_length = frag_param_a * frag_param_b * 2; // added buffer to fraglength since we just guess the mean
+  peakloader.Load(peaks, "", frag_length, noscale, scale_outliers);
 
   // Remove top remove_pct% of peaks default is do not remove
   if (remove_pct > 0)
@@ -598,6 +598,8 @@ int learn_main(int argc, char* argv[]) {
       }
     } else if (PARAMETER_CHECK("--scale-outliers", 16, parameterLength)) {
       options.scale_outliers = true;
+    } else if (PARAMETER_CHECK("--noscale", 9, parameterLength)) {
+      options.noscale = true;
     } else if (PARAMETER_CHECK("--skip-frag", 11, parameterLength)){
       options.skip_frag = true;
     } else if (PARAMETER_CHECK("--thres", 7, parameterLength)) {
@@ -662,7 +664,7 @@ int learn_main(int argc, char* argv[]) {
     float s = -1;
     float f = -1;
     if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
-		     &ab_ratio, &s, &f, frag_param_a, frag_param_b, options.skip_frag, options.scale_outliers)){
+		     &ab_ratio, &s, &f, frag_param_a, frag_param_b, options.skip_frag, options.noscale, options.scale_outliers)){
       PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
     }
     model.SetF(f);
@@ -700,6 +702,7 @@ void learn_help(void) {
   cerr << "         -t <peakfile_type>: File type of the input peak file. Only `homer` or `bed` supported." << "\n";
   cerr << "         -o <outprefix>:     Prefix for output files" << "\n";
   cerr << "         -c <int>:           The index of the BED file column used to score each peak (index starting from 1)" << "\n";
+  cerr << "         --noscale:          Don't scale peak scores by the max score.\n";                   
   cerr << "         --scale-outliers:   Set all peaks with scores >2*median score to have binding prob 1. Recommended with real data\n";   
   cerr << "[Optional arguments]: " << "\n";
   cerr << "         -r <float>:         Ratio of high score peaks to ignore\n"

@@ -47,7 +47,7 @@ bool PeakLoader::Load(std::vector<Fragment>& peaks, const std::string region, co
 
   if (bamfile != ""){
     peakreader.UpdateTagCount(peaks, bamfile, &total_genome_length, &total_tagcount, &tagcount_in_peaks,
-			      region, frag_length, scale_outliers);
+			      region, frag_length, noscale, scale_outliers);
   }
   return true;
 }

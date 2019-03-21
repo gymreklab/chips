@@ -128,7 +128,7 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
 
 bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string bamfile,
 				std::uint32_t* ptr_total_genome_length, float* ptr_total_tagcount, float* ptr_tagcount_in_peaks,
-				const std::string region, const float frag_length, const bool scale_outliers){
+				const std::string region, const float frag_length, const bool noscale, const bool scale_outliers){
   BamCramReader bamreader(bamfile);
   const BamHeader* bamheader = bamreader.bam_header();
   std::vector<std::string> seq_names = bamheader->seq_names();
@@ -226,7 +226,7 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
         uint32_t frag_start = fragments[frag_index].start;
         uint32_t frag_end = fragments[frag_index].start + fragments[frag_index].length;
         if ((peak_start < frag_end) && (peak_end > frag_start)){
-          float overlap = (float) (std::min(peak_end,frag_end) - std::max(peak_start, frag_start)) / (float)(frag_end-frag_start);
+          float overlap = 1.0; //(float) (std::min(peak_end,frag_end) - std::max(peak_start, frag_start)) / (float)(frag_end-frag_start); // all or nothing
           fragments[frag_index].score = overlap;
           peaks[peak_index].score += overlap;
           frag2peak[frag_index] = peak_index;
@@ -244,10 +244,16 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   }
 
   // normalize peak scores
-  for(int peak_index=0; peak_index<peaks.size(); peak_index++){
-    peaks[peak_index].score /= ((float) peaks[peak_index].length);
+  if (!noscale) {
+    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+      peaks[peak_index].score /= ((float) peaks[peak_index].length);
+    }
+    Rescale(peaks, scale_outliers);
+  } else {
+    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+      peaks[peak_index].score = peaks[peak_index].orig_score;
+    }
   }
-  Rescale(peaks, scale_outliers);
 
   // total num of fragments in peaks
   float n_frags_in_peak = 0;

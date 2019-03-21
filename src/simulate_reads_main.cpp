@@ -252,10 +252,12 @@ int simulate_reads_main(int argc, char* argv[]) {
     // recompute f
     if (options.recompute_f) {
       RefGenome ref_genome(options.reffa);
-      float f = pintervals->total_bound_length/pintervals->total_genome_length; // TODO recompute with new frag score
-      if (f<0) {
-	PrintMessageDieOnError("Error. Estimated --frac negative. Likely overflow error on genome size", M_ERROR);
+      float f = pintervals->total_bound_length/ref_genome.GetGenomeLength();
+      if (f<0 || f>1) {
+	std::cerr << pintervals->total_bound_length << " " << pintervals->total_genome_length << std::endl;
+	PrintMessageDieOnError("Error. Estimated --frac not between 0 and 1. ", M_ERROR);
       }
+	
       model.SetF(f);
       model.UpdateOptions(options);
       PrintMessageDieOnError("Recomputed --frac. New model:", M_PROGRESS);
