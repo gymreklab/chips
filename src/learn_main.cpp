@@ -27,7 +27,7 @@ void learn_help(void);
 bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
                     const std::string& peakfileType, const std::int32_t count_colidx,
                     const float remove_pct, float* ab_ratio_ptr, 
-                    float *s_ptr, float* f_ptr);
+                    float *s_ptr, float* f_ptr, const float frag_param_a, const float frag_param_b, bool skip_frag);
 bool compare_location(Fragment a, Fragment b);
 bool learn_frag(const std::string& bamfile, float* alpha, float* beta);
 bool learn_pcr(const std::string& bamfile, float* geo_rate);
@@ -189,7 +189,9 @@ bool learn_frag_single(const std::string& bamfile,
 
   /* First read peaks and restrict reads origins */
   // peak intensity is only used for filtering out unreliable reads
+
   PeakLoader peakloader(peakfile, peakfileType, "", count_colidx);
+
   std::vector<Fragment> peaks;
   if (!peakloader.Load(peaks)) PrintMessageDieOnError("Error loading peaks from " + peakfile, M_ERROR);
   for (int peak_idx=peaks.size()-1;peak_idx>=0;peak_idx--){
@@ -238,10 +240,13 @@ bool learn_frag_single(const std::string& bamfile,
     for (int end_idx=0; end_idx<ends_in_peak.size(); end_idx++) ends.push_back(ends_in_peak[end_idx] - mid_pos);
   }
 
+  if (starts.size() == 0 || ends.size() == 0) {
+    PrintMessageDieOnError("No starts found. something went wrong in fragment length estimation", M_ERROR);
+  }
+
   /* mean value of fragment length*/
   float mean_frag_length = std::accumulate(ends.begin(), ends.end(), 0.0)/ (float) ends.size()
                         - std::accumulate(starts.begin(), starts.end(), 0.0)/ (float) starts.size();
-
   /* calculate CDF of starts and ends */
   /* start */
   std::int32_t start_lower_bound = std::floor(*std::min_element(starts.begin(), starts.end()));
@@ -250,7 +255,7 @@ bool learn_frag_single(const std::string& bamfile,
   vector<float> start_cdf(start_upper_bound-start_lower_bound+1, 0);
   vector<float> start_edf(start_upper_bound-start_lower_bound+1, 0);
   if (!calculate_distribution(starts, start_lower_bound, start_upper_bound,
-                        start_pdf, start_cdf, start_edf)){
+			      start_pdf, start_cdf, start_edf)){
     PrintMessageDieOnError("Error happened when calculating position distributions", M_ERROR);
   }
 
@@ -412,7 +417,8 @@ float calculate_gamma_pdf(const float x, const float k, const float theta){
 
 bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
         const std::string& peakfileType, const std::int32_t count_colidx, 
-        const float remove_pct, float* ab_ratio_ptr, float *s_ptr, float* f_ptr){
+        const float remove_pct, float* ab_ratio_ptr, float *s_ptr, float* f_ptr,
+        const float frag_param_a, const float frag_param_b, bool skip_frag){
   /*
     Learn the ratio of alpha to beta from an input BAM file,
     and its correspounding peak file.
@@ -432,11 +438,14 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
     - ab_ratio (float): the ratio of alpha to beta
    */
 
+  if (skip_frag){return true;}
+
   // Read peak locations from the ChIP-seq file,
   // and calculate the total length of peaks across the genomes
   std::vector<Fragment> peaks;
   PeakLoader peakloader(peakfile, peakfileType, bamfile, count_colidx);
-  peakloader.Load(peaks);
+  const float frag_length = frag_param_a * frag_param_b;
+  peakloader.Load(peaks, "", frag_length);
 
   // Remove top remove_pct% of peaks default is do not remove
   if (remove_pct > 0)
@@ -449,7 +458,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
 
   int plen = 0;
   for(int peak_index = 0; peak_index < peaks.size(); peak_index++){
-    plen += peaks[peak_index].length;
+    plen += (peaks[peak_index].length * peaks[peak_index].score);
   }
 
   // calculate f and s, and then ab_ratio
@@ -652,7 +661,7 @@ int learn_main(int argc, char* argv[]) {
     float s = -1;
     float f = -1;
     if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
-        &ab_ratio, &s, &f)){
+        &ab_ratio, &s, &f, frag_param_a, frag_param_b, options.skip_frag)){
       PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
     }
     model.SetF(f);

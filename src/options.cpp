@@ -12,6 +12,7 @@ Options::Options() {
   outprefix = "";
   peakfiletype = "";
   countindex = -1;
+  noscale = false;
 
   // Required learn inputs
   chipbam = "";
@@ -31,6 +32,7 @@ Options::Options() {
   ratio_f = 0.03713;
   pcr_rate = 1.0;
   model_file = "";
+  recompute_f = false;
 
   // Additional simulation parameters
   region = "";

@@ -90,3 +90,15 @@ bool RefGenome::GetLengths(map<string, int>* chromLengths) {
 RefGenome::~RefGenome() {
   fai_destroy(refindex);
 }
+
+int64_t RefGenome::GetGenomeLength() {
+  std::map<std::string, int> chromlens;
+  if (!GetLengths(&chromlens)) {
+    PrintMessageDieOnError("Error getting chrom lengths", M_ERROR);
+  }
+  int64_t gsize = 0;
+  for (std::map<std::string, int>::iterator it = chromlens.begin(); it != chromlens.end(); it++) {
+    gsize += it->second;
+  }
+  return gsize;
+}

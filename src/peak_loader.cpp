@@ -29,7 +29,7 @@ PeakLoader::PeakLoader(const std::string _peakfile, const std::string _peakfileT
   }
 }
 
-bool PeakLoader::Load(std::vector<Fragment>& peaks, const std::string region){
+bool PeakLoader::Load(std::vector<Fragment>& peaks, const std::string region, const float frag_length){
   PeakReader peakreader(peakfile);
   switch (peakfileTypeList.at(peakfileType)){
     case 0:
@@ -48,7 +48,7 @@ bool PeakLoader::Load(std::vector<Fragment>& peaks, const std::string region){
   }
 
   if (bamfile != ""){
-    peakreader.UpdateTagCount(peaks, bamfile, &total_genome_length, &total_tagcount, &tagcount_in_peaks, region);
+    peakreader.UpdateTagCount(peaks, bamfile, &total_genome_length, &total_tagcount, &tagcount_in_peaks, region, frag_length);
   }
   return true;
 }

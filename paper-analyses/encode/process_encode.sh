@@ -11,7 +11,7 @@ FACTOR=$4
 RTYPE=$5
 THRESH=$6
 
-MAXFILESIZE=4294967296 # 4GB. Skip large files so AWS doesn't run out of space
+MAXFILESIZE=4294967296 # 4GB. Skip large files so AWS doesn't run out of space. TODO set bigger for PE
 
 if [[ -z $THRESH ]]; then
     THRESH=100
@@ -34,8 +34,6 @@ TMPDIR=${OUTDIR}/${FACTOR}/tmp
 echo "Downloading ENCODE data"
 curl -s -L --max-filesize ${MAXFILESIZE} -o ${OUTDIR}/${FACTOR}/${FACTOR}.bam ${BAMURL} || die "Could not download BAM"
 curl -s -L --max-filesize ${MAXFILESIZE} -o ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz ${BEDURL} || die "Could not download BED"
-#wget -q -O ${OUTDIR}/${FACTOR}/${FACTOR}.bam ${BAMURL} || die "Could not download BAM"
-#wget -q -O ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz ${BEDURL} || die "Could not download BED"
 
 echo "Unzipping and indexing"
 gunzip -f ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz || die "Could not unzip BED"

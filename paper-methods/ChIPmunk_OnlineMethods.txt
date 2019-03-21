@@ -1,0 +1,238 @@
+\documentclass[12pt]{article}
+
+% Imports
+\usepackage{hyperref}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{ctable}
+\usepackage{array}
+\usepackage{titlesec}
+\usepackage{amsmath}
+
+% Paragraph spacing
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0.5em}
+
+% Default font
+\renewcommand*{\familydefault}{\sfdefault}
+
+% title spacing
+\titlespacing*{\section}
+{0pt}{2pt}{0pt}
+\titlespacing*{\subsection}
+{0pt}{2pt}{0pt}
+
+% table lines
+\newcolumntype{?}{!{\vrule width 1pt}}
+
+% hyperlinks
+\hypersetup{
+  breaklinks=true,  % so long urls are correctly broken across lines
+  colorlinks=true,
+  urlcolor=blue,
+  linkcolor=red,
+  citecolor=red,
+ }
+
+\begin{document}
+
+%%% Notes %%%%
+% * Put one sentence per line to make github track changes easier
+% * Do not hard code references to figures, equations in this doc. use \ref{label} instead
+\section*{Online Methods}
+
+\subsection*{ChIPmunk model}
+
+ChIPmunk models each major step (shearing, pulldown, PCR, and sequencing) of the ChIP-seq protocol (\textbf{Figure 1A, steps 1-4}) as a distinct module. It assumes binding sites for the target epitome are known, unlike other tools [refs] which focus on simulating binding sites themselves. Model parameters are summarized in \textbf{Table 1}.
+
+\subsubsection*{1. Shearing}
+
+In step 1, cross-linked DNA is sheared to a target fragment length, typically by sonication.
+ChIPmunk models the length distribution of fragments.
+We model fragment lengths using a gamma distribution (\textbf{Figure 1B}) based on empirical observation of fragment distributions which have long right tails (\textbf{Supplementary Figure 2}).
+In the case of paired-end reads, fragment lengths can be determined trivially from the mapping locations of paired reads.
+For single-end reads, individual fragment lengths are not directly observed. We outline a novel method for inferring summary statistics for the length distribution using single-end reads.
+
+\paragraph{Inferring fragment lengths from paired-end reads}
+The observed fragment length ($X_i$) for each read pair $i$ can be computed based on the mapping coordinates of the two reads.
+The learn module randomly selects 10,000 read pairs from the input BAM for fitting a gamma distribution.
+Read pairs are filtered to remove fragments marked as duplicates or secondary alignments. % TODO what about if not proper pair? and not mapping to same chrom?
+Read pairs are further filtered to remove fragments with length greater than 3 times the median length of selected fragments.
+
+The mean fragment length is easily computed as $\mu = \dfrac{\sum_{i=1}^{n}X_i}{n}$, where $n$ is the number of fragments remaining after filtering. We then use the method of moments to find maximum likelihood estimates of the gamma distribution shape ($k$) and scale parameters ($\theta$):
+
+\begin{equation}
+  k =  \dfrac{\mu}{\theta}
+\end{equation}
+\begin{equation}
+  \theta = \dfrac{1}{n\mu}\sum_{i=1}^{n}(X_i - \mu)^2
+\end{equation}
+
+\paragraph{Inferring fragment lengths from single-end reads}
+To estimate the fragment length distribution from single-end reads, we assume the length distribution follows gamma distribution with the mean $\mu$ and variance $v$, and use reads located inside ChIP-seq peaks (provided as input) to estimate $\mu$ and $v$ which are used to compute $k$, $\theta$ and the probability density function of gamma distribution $p_{\mu,v}(x)$ as is shown below.
+\begin{equation}
+  \begin{array}{c} \label{eq:gamma}
+k_{\mu,v} = \frac{\mu^2}{v} \\
+\theta_{\mu,v} = \frac{v}{\mu} \\
+p_{\mu,v}(x) =  \frac{1}{\Gamma(k_{\mu,v}) \theta^k_{\mu,v}}x^{k_{\mu,v}-1}e^{-\frac{x}{\theta_{\mu,v}}}\\
+\end{array}
+\end{equation}
+
+For each peak $peak_i$, we keep track of two lists, $\{start\}_{peak_i}$ and $\{end\}_{peak_i}$.
+For each read overlapping $peak_i$, if the read is on the forward strand we add its start coordinate to $\{start\}_{peak_i}$.
+If the read is on the reverse strand we add its start coordinate to $\{end\}_{peak_i}$.
+The center point of this peak is calculated as:
+
+\begin{equation} \label{eq:center}
+  center_{peak_i} = \frac{mean(\{start\}_{peak_i}) + mean(\{end\}_{peak_i})}{2}
+\end{equation}
+
+
+For every $peak_i$ we offset the coordinates in $\{start\}_{peak_i}$ and $\{end\}_{peak_i}$ by $center_{peak_i}$, so that coordinates in different peaks are normalized and their start points and end points are symmetric around zero.
+We then concatenate lists from each peak to form $\{start\}$ and $\{end\}$:
+
+\begin{equation} \label{eq:concat}
+  \begin{array}{c}
+  \{start\} = \oplus_{i=0}^{n} (\{start\}_{peak_i} - center_{peak_i})\\
+  \{end\} = \oplus_{i=0}^{n} (\{end\}_{peak_i} - center_{peak_i})
+  \end{array}
+\end{equation}
+
+The mean value of fragment length $\mu$ can be estimated as:
+\begin{equation}
+  \mu = mean(\{end\}) - mean(\{start\})
+\end{equation}
+
+We calculate the probability density functions, cumulative density functions and expected density functions for both $\{start\}$ and $\{end\}$.
+The expected density function $EDF(x)$ is defined as the expected deviation of a random element in the list to $x$:
+\begin{equation} \label{eq:EDF}
+  \begin{array}{c}
+    EDF_{start}(x) = E(|S - x|) \\
+    EDF_{end}(x) = E(|E - x|)
+    \end{array}
+\end{equation}
+where $S$ is a random element in $\{start\}$ and $E$ is a random element in $\{end\}$.
+Since we can compute $\mu$, we can reduce the density function of the fragment length distribution from $p_{\mu,v}(x)$ to $p_v(x)$.
+We construct a score function $F(v)$ as shown below.
+
+\begin{equation}
+  \begin{array}{c} \label{eq:Fv}
+F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2}|) + E(|E- \frac{\mu}{2}|) \\
+E_v(|S + L/2|) = \sum_{x=0}^\infty p_v(x) * EDF_{start}(-\frac{x}{2}) \\
+E_v(|E - L/2|) = \sum_{x=0}^\infty p_v(x) * EDF_{end}(\frac{x}{2}) \\
+E(|S + \frac{\mu}{2}|)=EDF_{start}(x) \\
+E(|E - \frac{\mu}{2}|)=EDF_{end}(x) \\
+\end{array}
+\end{equation}
+
+Ideally, if we have a correct guess of $v$, $F(v)$ should be equal to zero. And to find an optimal $v$ that minimizes $|F(v)|$, we conduct a binary search between 1000 and 10,000.
+
+In practice, we add offsets the last two items in the score function in \textbf{Equation~\ref{eq:Fv}} to get the score below, which gave slightly more accurate estimation of $v$ on real data. This may be due to the fact that fragment length distributions are truncated on the left end, with little or no fragments with lengths less than 100bp observed, and thus do not follow a true gamma distribution.
+
+\begin{equation}
+F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2} - \frac{E- \frac{\mu}{2}}{4}|) - E(|E- \frac{\mu}{2} - \frac{S + \frac{\mu}{2}}{4}|)
+\end{equation}
+
+\subsubsection*{Pulldown}
+In step 2, sheared cross-linked DNA is subject to pulldown, during which an antibody for the protein or modification of interest is used to enrich the pool of fragments for those bound to the epitope recognized by the antibody.
+This process is imperfect: some bound fragments will not be pulled down, and some unbound fragments will be pulled down.
+
+We first model the ratio of the probabilities for a bound vs. an unbound fragment to be pulled down.
+Let $P(D|B)$ and $P(D|\overline{B})$ denote the probability that a randomly chosen fragment is pulled down ($D$) given that it is bound ($B$) or unbound ($\overline{B}$).
+Then using Baye's Rule:
+
+\begin{equation} \label{eq:bayesPDB}
+    P(D|B) = \frac{P(B|D)P(D)}{P(B)}
+\end{equation}
+\begin{equation} \label{eq:bayesPDUB}
+    P(D|\overline{B}) = \frac{P(\overline{B}|D)P(D)}{P(\overline{B})}
+\end{equation}
+
+Taking the ratio of these cancles $P(D)$ and gives:
+\begin{equation} \label{eq:ratio}
+  R = \frac{P(D|B)}{P(D|\overline{B})} = \frac{P(B|D)P(\overline{B})}{P(\overline{B}|D)P(B)}
+\end{equation}
+
+$P(B)$, or the probability that a fragment is bound, is equal to the fraction of the genome bound by the factor of interest ($f$).
+We can approximate $f$ as the sum of the lengths of all peaks divided by the total length of the genome.
+Thus $P(B) \approx f$ and $P(\overline{B}) \approx 1-f$.
+
+$P(B|D)$, or the probability that a fragment is bound given that it is pulled down, is a measure of the specificity of the antibody. This can be approximated by analyzing the percent of reads falling within peaks, commonly referred to as the SPOT score, which we denote as $s$.
+Thus $P(B|D) \approx s$ and $P(\overline{B}|D) \approx 1-s$.
+
+Using these two metrics, $f$, and $s$ (\textbf{Supplementary Table 1}), we can simplify the ratio $R$ as:
+\begin{equation} \label{eq:ratiosimple}
+  R = \frac{s(1-f)}{(1-s)f}
+\end{equation}
+
+We additionally model peak to peak variability using a peak score, which models the probability that a fragment overlapping peak $i$ will be pulled down ($C(i)$).
+Scores can either be based on peak intensities given in an input peak BED file or determined based on read counts if a BAM file is specified.
+If peak intensities are given, $C(i)$ is defined as the intensity of peak $i$ divided by the maximum peak intensity.
+If a BAM file is specified, $C(i)$ is defined as the number of reads overlapping peak $i$ divided by the maximum number of reads overlapping any peak.
+This scaling ensures all peak scores are between 0 and 1.
+
+We can use peak scores to assign a fragment score, $F(j)$ to each fragment $j$.
+If fragment $j$ overlaps one or more peaks, $F(j)$ is set to $\max_{p \in P_j} C(p)$ where $P_j$ is the set of all peaks overlapping fragment $j$.
+Otherwise, $F(j)$ is set to 0.
+
+By combining the pulldown ratio $R$ with fragment scores $F(j)$, we pull down fragment $j$ with the following probability:
+\begin{equation} \label{eq:pulldowncombine}
+  P(D(j)) = F(j) + (1-F(j))(1/R)
+\end{equation}
+
+Note since we can only compute the ratio $R$ of $\frac{P(D|B)}{P(D|\overline{B})}$, we set in \textbf{Equation~\ref{eq:pulldowncombine}} $P(D|B)=1$ and $P(D|\overline{B})=1/R$
+ to preserve the ratio $R$.
+
+\subsubsection*{PCR}
+
+In step 3, PCR is used to amplify pulled down fragments before sequencing.
+Let $n_i$ represent the number of reads (or read pairs) with $i$ PCR duplicates (including the original fragment).
+$n_i$ is modeled using a geometric distribution, where $r$ gives the probability that a fragment has no PCR duplicates.
+The parameter $r$ is estimated as $1/\overline{n}$, where $\overline{n} = \frac{\sum_{i=1}^\infty (i * n_i)}{\sum_{i=1}^\infty n_i}$.
+
+\subsubsection*{Sequencing}
+
+In step 4, amplified fragments are subject to sequencing.
+Sequences are based on an input reference genome using the coordinates of each fragment.
+We model the per-base pair substitution rate, insertion rate, and deletion rate (\textbf{Supplementary Table 1}).
+
+\subsection*{ChIPmunk implementation}
+
+\subsubsection*{Learn implementation}
+% TODO
+% user input bam, bed, single vs. paired
+% shearing for paired or single
+% pulldown learn f or s
+% PCR learn r. Require duplicates marked
+% output as JSON format
+
+\subsubsection*{Simulation implementation}
+% TODO
+% User inputs bed, optional BAM, model params
+
+% Choose num copies. Separate sim per copy. discuss numcopies issue here
+
+% For each copy:
+% - Generate fragments, walking along chrom and choosing sizes from gamma distr
+% - Decide based on overlap with peak whether to pull down
+% - PCR on the pool of frags
+% - Sequence
+
+% Analyze one bin at a time for computational efficiency (how choose bin size, how deal with boundaries of bins)
+% In practice, need to decide how many reads to generate from each chunk (see Michael's old pulldown text in scratch.tex)
+
+\subsubsection*{C++ implementation details}
+% TODO
+% C++ implementation
+% open source on github
+% use standard open source libraries (htslib for BAM reading, pthread for multithreading)
+% work with standard file formats (BED, BAM, jSON)
+
+\subsection*{Inferring parameters of ENCODE datasets}
+
+% Script to crawl ENCODE to get all relevant datasets
+% Download BAM+BED, run mark dup, index, run learn in single or paired end mode
+
+% TODO will add other methods sections based on the main text
+
+\end{document}
+

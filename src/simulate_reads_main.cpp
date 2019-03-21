@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <stdio.h>
+#include <random>
 
 #include "src/bingenerator.h"
 #include "src/common.h"
@@ -25,8 +26,9 @@ const bool DEBUG_SIM=true;
 // Function declarations
 void simulate_reads_help(void);
 void merge_files(std::string ifilename, std::string ofilename);
-void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, int thread_index);
+void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, const std::vector<int>& reads_per_copy, int thread_index);
 void fill_queue(const int numcopies, TaskQueue<int> & q);
+void GetReadsPerCopy(std::vector<int>* reads_per_copy, const Options& options);
 
 int simulate_reads_main(int argc, char* argv[]) {
   bool showHelp = false;
@@ -104,6 +106,8 @@ int simulate_reads_main(int argc, char* argv[]) {
 	model.SetF(options.ratio_f);
 	i++;
       }
+    } else if (PARAMETER_CHECK("--recomputeF", 12, parameterLength)) {
+      options.recompute_f = true;
     } else if (PARAMETER_CHECK("--model", 7, parameterLength)) {
       if ((i+1) < argc) {
 	options.model_file = argv[i+1];
@@ -129,38 +133,40 @@ int simulate_reads_main(int argc, char* argv[]) {
       }
     } else if (PARAMETER_CHECK("-t", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.peakfiletype = argv[i+1];
-    i++;
+	options.peakfiletype = argv[i+1];
+	i++;
       }
     } else if (PARAMETER_CHECK("-c", 2, parameterLength)){
       if ((i+1) < argc) {
-    options.countindex = std::atoi(argv[i+1]);
-    i++;
+	options.countindex = std::atoi(argv[i+1]);
+	i++;
       }
+    } else if (PARAMETER_CHECK("--noscale", 9, parameterLength)) {
+      options.noscale = true;
     } else if (PARAMETER_CHECK("--thread", 8, parameterLength)){
       if ((i+1) < argc) {
-    options.n_threads = std::atoi(argv[i+1]);
-    i++;
+	options.n_threads = std::atoi(argv[i+1]);
+	i++;
       }
     } else if (PARAMETER_CHECK("--sequencer", 11, parameterLength)){
       if ((i+1) < argc){
-    options.sequencer_type = argv[i+1];
-    i++;
+	options.sequencer_type = argv[i+1];
+	i++;
       }
     } else if (PARAMETER_CHECK("--sub", 5, parameterLength)){
       if ((i+1) < argc){
-    options.sub_rate = std::atof(argv[i+1]);
-    i++;
+	options.sub_rate = std::atof(argv[i+1]);
+	i++;
       }
     } else if (PARAMETER_CHECK("--ins", 5, parameterLength)){
       if ((i+1) < argc){
-    options.ins_rate = std::atof(argv[i+1]);
-    i++;
+	options.ins_rate = std::atof(argv[i+1]);
+	i++;
       }
     } else if (PARAMETER_CHECK("--del", 5, parameterLength)){
       if ((i+1) < argc){
-    options.del_rate = std::atof(argv[i+1]);
-    i++;
+	options.del_rate = std::atof(argv[i+1]);
+	i++;
       }
     } else if (PARAMETER_CHECK("--pcr_rate", 10, parameterLength)){
       if ((i+1) < argc){
@@ -198,10 +204,16 @@ int simulate_reads_main(int argc, char* argv[]) {
 
   if (!showHelp) {
     // Print out parsed model
+    PrintMessageDieOnError("Running simulate with the following model", M_PROGRESS);
     model.PrintModel();
 
+    // Set up jobs
     TaskQueue<int> task_queue;
     fill_queue(options.numcopies, task_queue);
+
+    // Determine number of reads per copy
+    std::vector<int> reads_per_copy;
+    GetReadsPerCopy(&reads_per_copy, options);
 
     // Remove previous existing fastqs
     if (options.paired){
@@ -234,15 +246,23 @@ int simulate_reads_main(int argc, char* argv[]) {
     PrintMessageDieOnError("Loading the input ChIP-seq peak file (and BAM file if given)", M_PROGRESS);
     PeakIntervals* pintervals = \
                new PeakIntervals(options, options.peaksbed, options.peakfiletype, options.chipbam, options.countindex);
+    if (options.recompute_f) {
+      RefGenome ref_genome(options.reffa);
+      float f = pintervals->total_bound_length/ref_genome.GetGenomeLength(); // TODO recompute with new frag score
+      if (f<0) {
+	PrintMessageDieOnError("Error. Estimated --frac negative. Likely overflow error on genome size", M_ERROR);
+      }
+      model.SetF(f);
+      model.UpdateOptions(options);
+      PrintMessageDieOnError("Recomputed --frac. New model:", M_PROGRESS);
+      model.PrintModel();
+    }
 
-    //BinQueue<GenomeBin> bq;
-    //fill_queue(bingenerator, bq);
-
-    // Keeps track of number of reads for naming
+    // Create threads
     PrintMessageDieOnError("Simulating reads based on the input profile", M_PROGRESS);
     std::vector<std::thread> consumers;
     for (int thread_index=0; thread_index<options.n_threads; thread_index++){
-      std::thread cnsmr(std::bind(consume, std::ref(task_queue), options, pintervals, thread_index));
+      std::thread cnsmr(std::bind(consume, std::ref(task_queue), options, pintervals, reads_per_copy, thread_index));
       consumers.push_back(std::move(cnsmr));
     }
 
@@ -283,7 +303,27 @@ int simulate_reads_main(int argc, char* argv[]) {
 }
 
 /*
- * A thread that keep generate bins
+ * Determine the number of reads per genome copy
+ * */
+void GetReadsPerCopy(std::vector<int>* reads_per_copy, const Options& options) {
+  // Initialize vector
+  reads_per_copy->clear();
+  for (size_t i=0; i<options.numcopies; i++) {
+    reads_per_copy->push_back(0);
+  }
+  // Assign each read to a copy
+  std::random_device rd;
+  std::mt19937 rng(rd());
+  std::uniform_int_distribution<int> uni(0, options.numcopies-1);
+  int copynum;
+  for (size_t i=0; i<options.numreads; i++) {
+    copynum = uni(rng);
+    (*reads_per_copy)[copynum] += 1;
+  }
+}
+
+/*
+ * A thread that generates genome copies
  * */
 void fill_queue(const int numcopies, TaskQueue<int> & q){
   for (int copy_index=0; copy_index<numcopies; copy_index++){
@@ -293,9 +333,9 @@ void fill_queue(const int numcopies, TaskQueue<int> & q){
 
 
 /*
- * A tread that operate on bins
+ * A thread that operate on a single genome copy
  * */
-void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, int thread_index){
+void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, const std::vector<int>& reads_per_copy, int thread_index){
   while (true){
     int copy_index = -1;
     try{
@@ -310,33 +350,38 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, in
         PrintMessageDieOnError("Simulated " + std::to_string(job_percentage) +"% reads.", M_PROGRESS);
     }
 
+    if (reads_per_copy[copy_index] == 0) {
+      continue; // If we're not going to get any reads, don't bother simulating
+    }
     int total_reads = 0;
     int peakIndexStart = 0;
     int start_offset = 0;
     std::string prev_chrom = "";
     BinGenerator bingenerator(options);
+    // set up. Clear pulldown each time. Append to lib_fragments and sequence at the end
+    vector <Fragment> pulldown_fragments, lib_fragments;
     while (bingenerator.GotoNextBin()){
       if (options.verbose) {
 	stringstream ss;
 	ss << "Processing bin " << bingenerator.GetCurrentBinStr() << " " << copy_index;
 	PrintMessageDieOnError(ss.str(), M_PROGRESS);
       }
-      // set up
-      vector <Fragment> pulldown_fragments, lib_fragments;
 
       /*** Step 1/2: Shearing + Pulldown ***/
       Pulldown pulldown(options, bingenerator.GetCurrentBin(),\
-                            prev_chrom, peakIndexStart, start_offset);
+			prev_chrom, peakIndexStart, start_offset);
       pulldown.Perform(&pulldown_fragments, pintervals);
 
       /*** Step 3: Library construction ***/
       LibraryConstructor lc(options);
       lc.Perform(pulldown_fragments, &lib_fragments);
 
-      /*** Step 4: Sequencing ***/
-      Sequencer seq(options);
-      seq.Sequence(lib_fragments, total_reads, thread_index, copy_index);
+      /*** Cleanup for next bin ***/
+      pulldown_fragments.clear();
     }
+    /*** Step 4: Sequencing ***/
+    Sequencer seq(options);
+    seq.Sequence(lib_fragments, reads_per_copy[copy_index], total_reads, thread_index, copy_index);
   }
 }
 
@@ -379,13 +424,15 @@ void simulate_reads_help(void) {
        << "                                   Default: " << options.ratio_s << "\n";
   cerr << "     --frac <float>              : Fraction of the genome that is bound \n"
        << "                                   Default: " << options.ratio_f << "\n";
+  cerr << "     --recomputeF                : Recompute --frac param based on input peaks.\n";
   cerr << "     --pcr_rate <float>          : The rate of geometric distribution for PCR simulation\n"
        << "                                   Default: " << options.pcr_rate << "\n";
   cerr << "\n[Peak scoring: choose one]: " << "\n";
-  cerr << "     -b <reads.bam>:             : Read BAM file used to score each peak\n"
+  cerr << "     -b <reads.bam>              : Read BAM file used to score each peak\n"
        << "                                 : Default: None (use the scores from the peak file)\n";
-  cerr << "     -c <int>:                   : The index of the BED file column used to score each peak (index starting from 1). Required if -b not used.\n"
+  cerr << "     -c <int>                    : The index of the BED file column used to score each peak (index starting from 1). Required if -b not used.\n"
        << "                                 : Default: " << options.countindex << "\n";
+  cerr << "     --noscale                   : Don't scale peak scores by the max score.\n";                   
   cerr << "\n[Other options]: " << "\n";
   cerr << "     --region <str>              : Only simulate reads from this region chrom:start-end\n"
        << "                                   Default: genome-wide \n";

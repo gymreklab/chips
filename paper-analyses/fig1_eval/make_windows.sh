@@ -2,4 +2,6 @@
 
 source params.sh
 
-bedtools makewindows -g chr19.txt -w 1000 > ${OUTDIR}/windows/chr19_windows_1kb.bed
+binsize=$1
+
+bedtools makewindows -g chr19.txt -w ${binsize}000 > ${OUTDIR}/windows/chr19_windows_${binsize}kb.bed

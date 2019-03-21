@@ -27,8 +27,8 @@ class PeakReader{
     bool BedPeakReader(std::vector<Fragment>& peaks, const std::int32_t count_colidx, const std::string region);
     bool TestPeakReader(std::vector<Fragment>& peaks, const std::int32_t count_colidx, const std::string region);
     bool UpdateTagCount(std::vector<Fragment>& peaks, const std::string bamfile,
-            uint32_t* ptr_total_genome_length, uint32_t* ptr_total_tagcount,
-            uint32_t* ptr_tagcount_in_peaks,const std::string region);
+            std::uint32_t* ptr_total_genome_length, float* ptr_total_tagcount,
+            float* ptr_tagcount_in_peaks,const std::string region, const float frag_length);
   private:
     std::string peakfile;
     static bool compare_location(Fragment a, Fragment b);

@@ -14,16 +14,9 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
   gamma_theta = options.gamma_theta;
   ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
 
-  pcr_rate = options.pcr_rate;
-
   prev_chrom = _prev_chrom;
   peakIndexStart = _peakIndexStart;
   start_offset_ptr = & _start_offset;
-
-  debug_pulldown = false; // TODO remove
-  if (debug_pulldown) {
-    PrintMessageDieOnError("Loading peaks", M_DEBUG);
-  }
 }
 
 void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals) {
@@ -36,7 +29,9 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   int32_t fstart, fend;
   float fsize;
   bool bound;
+  bool pulled;
   float peak_score;
+  float max_fold = pintervals->max_coverage * gamma_k * gamma_theta * 3; // 3 is an arbitrary number
 
   // update the start index of peaks
   if (chrom != prev_chrom){
@@ -62,29 +57,17 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
     Fragment frag(chrom, current_pos, fsize);
     peak_score = pintervals->GetOverlap(frag, peakIndex);
 
-    bound = (rand()/double(RAND_MAX) < peak_score*(pintervals->prob_frag_kept));
+    bound = (rand()/double(RAND_MAX) < peak_score);
     if (bound) {
-        while (true){
+      output_fragments->push_back(frag);
+    } else{
+      if (rand()/double(RAND_MAX) < ratio_beta) {
           output_fragments->push_back(frag);
-          if (rand()/double(RAND_MAX) < pcr_rate) break;
-        }
-    }else{
-      //std::cout<<(ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )<<std::endl;
-      //std::cout<<fsize<<std::endl;
-      //std::cout<<(ratio_beta) << " " << (pintervals->prob_pd_given_b) << " "<<pintervals->prob_frag_kept <<std::endl;
-      if (rand()/double(RAND_MAX) <
-              (ratio_beta * (pintervals->prob_pd_given_b) * (pintervals->prob_frag_kept) )) {
-        while (true){
-          output_fragments->push_back(frag);
-          if (rand()/double(RAND_MAX) < pcr_rate) break;
-        }
       }
     }
-    
     current_pos += fsize;
   }
 
-  //peakIndexStart = pintervals->peakIndexStart;
   peakIndexStart = peakIndex;
 }
 
