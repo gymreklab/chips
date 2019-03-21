@@ -13,6 +13,7 @@ depcomp
 install-sh
 missing
 power-analysis/
+sanity-checks/
 src/.deps/
 src/.libs/
 src/.*

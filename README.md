@@ -83,7 +83,7 @@ chipmunk simreads \
 ### chipmunk learn
 
 Required parameters:
-* `-b <file.bam>`: BAM file containing aligned reads. Must be sorted and indexed. Paired end or single end data are supported.
+* `-b <file.bam>`: BAM file containing aligned reads. Must be sorted, duplicates flagged, and indexed. Paired end or single end data are supported.
 * `-p <peaks>`: file containing peaks. 
 * `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
 * `-o <outprefix>`: Prefix to name output files. Outputs file `<outprefix>.json` with learned model parameters.
