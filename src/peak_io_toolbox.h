@@ -23,17 +23,17 @@ class PeakReader{
   public:
     PeakReader(const std::string& peakfile);
     bool HomerPeakReader(std::vector<Fragment>& peaks,
-            const std::int32_t count_colidx, const std::string region, const bool noscale);
-    bool BedPeakReader(std::vector<Fragment>& peaks, const std::int32_t count_colidx, const std::string region, const bool noscale);
-    bool TestPeakReader(std::vector<Fragment>& peaks, const std::int32_t count_colidx, const std::string region, const bool noscale);
+			 const std::int32_t count_colidx, const std::string region, const bool noscale, const bool scale_outliers);
+    bool BedPeakReader(std::vector<Fragment>& peaks, const std::int32_t count_colidx, const std::string region, const bool noscale, const bool scale_outliers);
     bool UpdateTagCount(std::vector<Fragment>& peaks, const std::string bamfile,
-            std::uint32_t* ptr_total_genome_length, float* ptr_total_tagcount,
-            float* ptr_tagcount_in_peaks,const std::string region, const float frag_length);
+			std::uint32_t* ptr_total_genome_length, float* ptr_total_tagcount,
+			float* ptr_tagcount_in_peaks,const std::string region, const float frag_length,
+			const bool noscale, const bool scale_outliers);
   private:
     std::string peakfile;
     static bool compare_location(Fragment a, Fragment b);
     static void RegionParser(const std::string region, std::string& chromID, std::int32_t& start, std::int32_t& end);
-    void Rescale(std::vector<Fragment>& peaks);
+    void Rescale(std::vector<Fragment>& peaks, bool rm_outliers);
 };
 
 

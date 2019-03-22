@@ -13,6 +13,7 @@ class Fragment {
   int32_t start;
   size_t length;
   float score; // store tagcounts or probabilty of being bound
+  float orig_score; // store score before scaling
 };
 
 #endif  // SRC_FRAGMENT_H__

@@ -8,7 +8,8 @@ PeakReader::PeakReader(const std::string& _peakfile){
 }
 
 bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
-        const std::int32_t count_colidx, const std::string region, const bool noscale){
+				 const std::int32_t count_colidx, const std::string region,
+				 const bool noscale, const bool scale_outliers) {
   std::ifstream infile(peakfile.c_str());
   if(infile.fail()) PrintMessageDieOnError("Input path \"" + peakfile + "\" does not exist", M_ERROR);
 
@@ -62,12 +63,13 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if((count_colidx > 0) && (!noscale)) Rescale(peaks);
+  if((count_colidx > 0) && (!noscale)) Rescale(peaks, scale_outliers);
   return 0;
 }
 
 bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
-        const std::int32_t count_colidx, const std::string region, const bool noscale){
+			       const std::int32_t count_colidx, const std::string region,
+			       const bool noscale, const bool scale_outliers){
   std::ifstream infile(peakfile.c_str());
   if(infile.fail()) PrintMessageDieOnError("Input path \"" + peakfile + "\" does not exist", M_ERROR);
 
@@ -120,71 +122,13 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if((count_colidx > 0) && (!noscale)) Rescale(peaks);
-  return 0;
-}
-
-bool PeakReader::TestPeakReader(std::vector<Fragment>& peaks,
-        const std::int32_t count_colidx, const std::string region, const bool noscale){
-  std::ifstream infile(peakfile.c_str());
-  if(infile.fail()) PrintMessageDieOnError("Input path \"" + peakfile + "\" does not exist", M_ERROR);
-
-  std::string line;
-  while (std::getline(infile, line)){
-      std::string chr;
-      std::int32_t start;
-      std::int32_t end;
-      std::int32_t length;
-      float count = -1;
-      
-      std::stringstream linestream(line);
-      std::string element;
-      uint32_t elem_idx=0;
-      while(!linestream.eof()){
-        linestream >> element;
-        if (elem_idx == 0){
-          chr = element;
-        }else if(elem_idx == 1){
-          start = std::stol(element);
-        }else if(elem_idx == 2){
-          end = std::stol(element);
-        }else if((count_colidx > 0) && (elem_idx == count_colidx-1)){
-          count = std::stof(element);
-        }
-        elem_idx++;
-      }
-      
-      if (region.empty()){
-        length = end-start;
-        Fragment peak_location(chr, start, length, count);
-        peaks.push_back(peak_location);
-      }else{
-        std::int32_t region_start;
-        std::int32_t region_end;
-        std::string region_chrom;
-        RegionParser(region, region_chrom, region_start, region_end);
-
-        if (region_chrom == chr){
-          std::int32_t overlap = std::min(end, region_end) - std::max(start, region_start);
-          overlap = std::max(0, overlap);
-          if (overlap > 0){
-            Fragment peak_location(chr, std::max(start, region_start), overlap, count);
-            peaks.push_back(peak_location);
-          }
-        }
-      }
-  }
-  // sort peaks
-  std::sort(peaks.begin(), peaks.end(), compare_location);
-  // if peak scores have been loaded from the bed file,
-  // then normalize peak scores and rescale them to 0-1
-  if((count_colidx > 0) && (!noscale)) Rescale(peaks);
+  if((count_colidx > 0) && (!noscale)) Rescale(peaks, scale_outliers);
   return 0;
 }
 
 bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string bamfile,
-            std::uint32_t* ptr_total_genome_length, float* ptr_total_tagcount, float* ptr_tagcount_in_peaks,
-            const std::string region, const float frag_length){
+				std::uint32_t* ptr_total_genome_length, float* ptr_total_tagcount, float* ptr_tagcount_in_peaks,
+				const std::string region, const float frag_length, const bool noscale, const bool scale_outliers){
   BamCramReader bamreader(bamfile);
   const BamHeader* bamheader = bamreader.bam_header();
   std::vector<std::string> seq_names = bamheader->seq_names();
@@ -282,7 +226,7 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
         uint32_t frag_start = fragments[frag_index].start;
         uint32_t frag_end = fragments[frag_index].start + fragments[frag_index].length;
         if ((peak_start < frag_end) && (peak_end > frag_start)){
-          float overlap = (float) (std::min(peak_end,frag_end) - std::max(peak_start, frag_start)) / (float)(frag_end-frag_start);
+          float overlap = 1.0; //(float) (std::min(peak_end,frag_end) - std::max(peak_start, frag_start)) / (float)(frag_end-frag_start); // all or nothing
           fragments[frag_index].score = overlap;
           peaks[peak_index].score += overlap;
           frag2peak[frag_index] = peak_index;
@@ -300,17 +244,22 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   }
 
   // normalize peak scores
-  for(int peak_index=0; peak_index<peaks.size(); peak_index++){
-    //if (peaks[peak_index].score > 400) std::cout << peaks[peak_index].score << "\t" <<peaks[peak_index].length << std::endl;
-    peaks[peak_index].score /= ((float) peaks[peak_index].length);
+  if (!noscale) {
+    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+      peaks[peak_index].score /= ((float) peaks[peak_index].length);
+    }
+    Rescale(peaks, scale_outliers);
+  } else {
+    for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+      peaks[peak_index].score = peaks[peak_index].orig_score;
+    }
   }
-  Rescale(peaks);
 
   // total num of fragments in peaks
   float n_frags_in_peak = 0;
   for (int frag_index=0; frag_index<fragments.size(); frag_index++){
     int peak_index = frag2peak[frag_index];
-    n_frags_in_peak += (fragments[frag_index].score * peaks[peak_index].score);
+    n_frags_in_peak += (fragments[frag_index].score); // * peaks[peak_index].score); // TODO. don't weight by score in S
   }
 
   *ptr_tagcount_in_peaks = n_frags_in_peak;
@@ -318,13 +267,30 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   return 0;
 }
 
-void PeakReader::Rescale(std::vector<Fragment>& peaks){
+void PeakReader::Rescale(std::vector<Fragment>& peaks, bool rm_outliers) {
+  // Find max, median
+  std::vector<float> scores;
   float max_score = 0;
   for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+    scores.push_back(peaks[peak_index].score);
     if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
   }
-  for(int peak_index=0; peak_index<peaks.size(); peak_index++){
-    peaks[peak_index].score /= (max_score);
+  float threshold = max_score;
+  if (rm_outliers) {
+    size_t n = scores.size()/2;
+    nth_element(scores.begin(), scores.begin()+n, scores.end());
+    float median_score = scores[n];
+    float max_possible = median_score*2;
+    if (max_possible<max_score) {
+      threshold = max_possible;
+    }
+  }
+  for(int peak_index=0; peak_index<peaks.size(); peak_index++) {
+    if (peaks[peak_index].score >= threshold) {
+      peaks[peak_index].score = 1;
+    } else {
+      peaks[peak_index].score /= threshold;
+    }
   }
 }
 
