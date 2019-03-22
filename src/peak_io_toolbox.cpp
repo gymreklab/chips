@@ -280,7 +280,7 @@ void PeakReader::Rescale(std::vector<Fragment>& peaks, bool rm_outliers) {
     size_t n = scores.size()/2;
     nth_element(scores.begin(), scores.begin()+n, scores.end());
     float median_score = scores[n];
-    float max_possible = median_score*2;
+    float max_possible = median_score*3; // TODO what threshold
     if (max_possible<max_score) {
       threshold = max_possible;
     }

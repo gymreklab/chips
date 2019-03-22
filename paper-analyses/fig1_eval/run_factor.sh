@@ -11,6 +11,9 @@ RTYPE=$5
 BED=$(ls ${ENCDIR}/${factor}/*.bed | head -n 1)
 BAM=$(ls ${ENCDIR}/${factor}/*.flagged.bam | head -n 1)
 MODEL=$(ls ${ENCDIR}/${factor}/*.json | head -n 1)
+if [ "$RTYPE" = "Paired" ]; then
+    MODEL=$(ls ${ENCDIR}/${factor}/*.paired.json | head -n 1)
+fi
 
 mkdir -p ${OUTDIR}/${factor}
 
@@ -34,6 +37,7 @@ time $CHIPMUNK simreads \
     --numcopies ${nc} \
     --numreads ${NREADS} \
     --readlen ${READLEN} \
+    --thread 10 \
     --region chr19:1-59128983 ${OPTARGS}
 
 # Map reads
