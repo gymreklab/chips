@@ -454,9 +454,12 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
     peaks.resize(keep_peaks, Fragment("", 0, 0));
   }
 
-  int plen = 0;
+  float plen = 0;
   for(int peak_index = 0; peak_index < peaks.size(); peak_index++){
     plen += (peaks[peak_index].length * peaks[peak_index].score);
+    //std::stringstream ss;
+    //ss << "score: "<< peaks[peak_index].score <<"\tpeak-length: "<<peaks[peak_index].length<<"\ttotal: "<< peakloader.total_genome_length;
+    //PrintMessageDieOnError(ss.str(), M_DEBUG);
   }
 
   // calculate f and s, and then ab_ratio

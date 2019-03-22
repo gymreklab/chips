@@ -301,6 +301,7 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
 
   // normalize peak scores
   for(int peak_index=0; peak_index<peaks.size(); peak_index++){
+    //if (peaks[peak_index].score > 400) std::cout << peaks[peak_index].score << "\t" <<peaks[peak_index].length << std::endl;
     peaks[peak_index].score /= ((float) peaks[peak_index].length);
   }
   Rescale(peaks);
@@ -323,7 +324,7 @@ void PeakReader::Rescale(std::vector<Fragment>& peaks){
     if (peaks[peak_index].score > max_score) max_score = peaks[peak_index].score;
   }
   for(int peak_index=0; peak_index<peaks.size(); peak_index++){
-    peaks[peak_index].score /= max_score;
+    peaks[peak_index].score /= (max_score);
   }
 }
 
