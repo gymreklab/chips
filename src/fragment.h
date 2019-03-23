@@ -6,12 +6,12 @@
 
 class Fragment {
  public:
-  Fragment(const std::string& _chrom, const int32_t& _start, const size_t& _length, const float& _score=0);
+  Fragment(const std::string& _chrom, const std::int32_t& _start, const std::size_t& _length, const float& _score=0);
   virtual ~Fragment();
   
   std::string chrom;
-  int32_t start;
-  size_t length;
+  std::int32_t start;
+  std::size_t length;
   float score; // store tagcounts or probabilty of being bound
   float orig_score; // store score before scaling
 };

@@ -30,38 +30,6 @@ bool PeakIntervals::LoadPeaks(const Options& options,
   bool dataLoaded = peakloader.Load(peaks, options.region, frag_length, options.noscale, options.scale_outliers);
 
   if (dataLoaded){
-    /*
-    // calculate the maximum coverage
-    if (options.noscale) {
-      max_coverage = 1; // Effectively no scaling
-    } else {
-      max_coverage = 0;
-      for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
-	if (peaks[peakIndex].score > max_coverage){
-	  max_coverage = peaks[peakIndex].score;
-	}
-      }
-    }
-    */
-
-    /*
-    // Note: now this prob_pd_given_b === 1.0 always
-    // calculate Prob(pulled down|bound)
-    float total_signals = 0;
-    float signal_region_length = 0;
-    total_bound_length = 0;
-
-    for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
-      signal_region_length += (peaks[peakIndex].length);
-      total_signals += (peaks[peakIndex].length * peaks[peakIndex].score);
-      total_bound_length += peaks[peakIndex].length;
-    }
-    if (signal_region_length == 0){
-        prob_pd_given_b = 1.0;
-    }else{
-        prob_pd_given_b = total_signals/signal_region_length;
-    }
-    */
     total_bound_length = 0;
     for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
       total_bound_length += (peaks[peakIndex].length * peaks[peakIndex].score);
@@ -74,67 +42,8 @@ bool PeakIntervals::LoadPeaks(const Options& options,
     }
   }
 
-  //EstNumFrags(options, peaks);
   return dataLoaded;
 }
-
-/*
-void PeakIntervals::EstNumFrags(const Options& options, std::vector<Fragment> peaks){
-    long total_length = 0;
-    int length_b = 0;
-    float numfrags_b = 0;
-    float numfrags_ub = 0;
-    float ratio_beta = options.ratio_f*(1-options.ratio_s)/(options.ratio_s*(1-options.ratio_f));
-    float prob_pd_given_ub = ratio_beta * prob_pd_given_b;
-    float frag_length = options.gamma_k * options.gamma_theta;
-    //if(options.region.empty()){
-
-    // estimate number of reads per run
-    // bound regions
-    for (int peakIndex=0; peakIndex<peaks.size(); peakIndex++){
-      length_b += peaks[peakIndex].length;
-      numfrags_b += ((float) peaks[peakIndex].length) * (peaks[peakIndex].score);
-    }
-
-    // unbound regions
-    if(options.region.empty()){
-      std::map<std::string, int> chromLengths;
-      RefGenome ref (options.reffa);
-      if (!ref.GetLengths(&chromLengths))
-        PrintMessageDieOnError("Could not gather chromosome lengths from "
-                                + options.reffa, M_ERROR);
-      for (auto _chrom : chromLengths){total_length += _chrom.second;}
-    }else{
-      // parse "chrID:start-end"
-      std::vector<std::string> parts;
-      std::stringstream ss(options.region);
-      std::string split;
-      while(std::getline(ss, split, ':')) parts.push_back(split);
-      if (parts.size() != 2) PrintMessageDieOnError("Improper region input format should be chrom:start-end", M_ERROR);
-      std::string region_chrom = parts[0];
-      std::string start_end = parts[1];
-
-      parts.clear();
-      ss.str(start_end);
-      ss.clear();
-
-      while(getline(ss, split, '-')) parts.push_back(split);
-      if (parts.size() != 2) PrintMessageDieOnError("Improper region input format should be chrom:start-end", M_ERROR);
-      int region_start = stoi(parts[0]);
-      int region_end = stoi(parts[1]);
-      total_length = region_end - region_start;
-    }
-    numfrags_ub = prob_pd_given_ub * (double) (total_length - length_b);
-    // put together
-    double numfrags_per_run = numfrags_ub + numfrags_b;
-    prob_frag_kept = (double) (options.numreads * options.pcr_rate)
-                        / (double) (numfrags_per_run * options.numcopies);
-}
-*/
-/*
-void PeakIntervals::resetSearchScope(const int index){
-  peakIndexStart = index;
-}*/
 
 /*
  * Inputs:
@@ -146,7 +55,7 @@ void PeakIntervals::resetSearchScope(const int index){
  * */
 float PeakIntervals::SearchList(const Fragment& frag, int& peakIndexStart){
   std::vector<float> probBoundList;
-  uint32_t frag_start, frag_end, peak_start, peak_end;
+  std::int32_t frag_start, frag_end, peak_start, peak_end;
   float overlap;
   std::vector<Fragment> & peaks = peak_map[frag.chrom];
   for(int peakIndex=peakIndexStart; peakIndex < peaks.size(); peakIndex++){
