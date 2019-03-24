@@ -1,0 +1,2 @@
+READNUMS=1000000,5000000,10000000,50000000,100000000
+OUTDIR=/storage/mgymrek/chipmunk/fig2_power/
