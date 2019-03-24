@@ -28,6 +28,7 @@ def main():
     parser.add_argument("--model", help="JSON model file", type=str, required=True)
     parser.add_argument("--readnums", help="comma separated list of read nums", type=str, default=RLIST)
     parser.add_argument("--out", help="Output directory", type=str, required=True)
+    parser.add_argument("--optargs", help="Extra arguments to chipmunk", type=str, default="")
     parser.add_argument("--debug", help="Print commands, but don't run them", action="store_true")
 
     args = parser.parse_args()
@@ -53,26 +54,28 @@ def main():
                     '--gamma-frag %s,%s '
                     '--pcr_rate %f '
                     '--scale-outliers '
-                    '--thread %d ')%(CHIPMUNK, bed_file, REFFA, output_prefix, PARAM_NC, numreads, PARAM_RL, args.model, MODEL_K, MODEL_THETA, MODEL_PCR, THREADS)
+                    '--thread %d %s')%(CHIPMUNK, bed_file, REFFA, output_prefix, PARAM_NC, numreads, PARAM_RL, args.model, MODEL_K, MODEL_THETA, MODEL_PCR, THREADS, args.optargs)
         commands.append(chipmunk)
         chipmunk_wce = ('%s simreads '
-                    '-t wce '
-                    '-f %s '
-                    '-o %s.wce '
-                    '--numcopies %d '
-                    '--numreads %d '
-                    '--readlen %d '
-                    '--model %s '
-                    '--gamma-frag %s,%s '
-                    '--pcr_rate %f '
-                    '--thread %d ')%(CHIPMUNK, REFFA, output_prefix, PARAM_NC, numreads, PARAM_RL, args.model, MODEL_K, MODEL_THETA, MODEL_PCR, THREADS)
+                        '-t wce '
+                        '-f %s '
+                        '-o %s.wce '
+                        '--numcopies %d '
+                        '--numreads %d '
+                        '--readlen %d '
+                        '--model %s '
+                        '--gamma-frag %s,%s '
+                        '--pcr_rate %f '
+                        '--thread %d %s')%(CHIPMUNK, REFFA, output_prefix, PARAM_NC, numreads, PARAM_RL, args.model, MODEL_K, MODEL_THETA, MODEL_PCR, THREADS, args.optargs)
         commands.append(chipmunk_wce)
         for pref in [output_prefix, output_prefix+".wce"]:
             align_fastq = 'bwa mem %s %s.fastq | samtools view -bS - > %s.bam'%(REFFA, pref, pref)
             index_bam = 'samtools sort -T %s %s.bam > %s.sorted.bam; samtools index %s.sorted.bam'%(pref, pref, pref, pref)
-            remove_fastq = 'rm %s*.fastq'%(pref)
+            remove_fastq = 'rm %s.fastq'%(pref)
             markdup = 'java -jar  -Xmx12G -Djava.io.tmpdir=%s $PICARD MarkDuplicates VALIDATION_STRINGENCY=SILENT VERBOSITY=WARNING I=%s.sorted.bam M=%s.metrics O=%s.flagged.bam'%(pref, pref, pref, pref)
             commands.extend([align_fastq, index_bam, remove_fastq, markdup])
+        macs = 'macs2 callpeak -t %s.flagged.bam -c %s.wce.flagged.bam --name %s --outdir %s'%(output_prefix, output_prefix, os.path.basename(output_prefix), os.path.dirname(output_prefix))
+        commands.append(macs)
 
 #        make_tags = "mkdir -p %s; makeTagDirectory %s %s.sorted.bam"%(output_prefix, output_prefix, output_prefix)
 #        find_peaks = "findPeaks %s -o auto"%(output_prefix)
