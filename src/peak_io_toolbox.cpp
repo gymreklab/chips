@@ -267,6 +267,10 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   return 0;
 }
 
+bool PeakReader::EmptyPeakReader() {
+  // TODO
+}
+
 void PeakReader::Rescale(std::vector<Fragment>& peaks, bool rm_outliers) {
   // Find max, median
   std::vector<float> scores;

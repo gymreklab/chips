@@ -28,12 +28,14 @@ def main():
     parser.add_argument("--model", help="JSON model file", type=str, required=True)
     parser.add_argument("--readnums", help="comma separated list of read nums", type=str, default=RLIST)
     parser.add_argument("--out", help="Output directory", type=str, required=True)
+    parser.add_argument("--debug", help="Print commands, but don't run them", action="store_true")
 
     args = parser.parse_args()
     OUTDIR = args.out
     read_list = [int(item) for item in args.readnums.split(",")]
 
     for numreads in read_list:
+        commands = []
         bed_file = args.bed
         factor = os.path.basename(bed_file).strip(".bed")
         output_prefix = os.path.join(OUTDIR, factor+"."+str(numreads))
@@ -52,14 +54,34 @@ def main():
                     '--pcr_rate %f '
                     '--scale-outliers '
                     '--thread %d ')%(CHIPMUNK, bed_file, REFFA, output_prefix, PARAM_NC, numreads, PARAM_RL, args.model, MODEL_K, MODEL_THETA, MODEL_PCR, THREADS)
-        align_fastq = 'bwa mem %s %s.fastq | samtools view -bS - > %s.bam'%(REFFA, output_prefix, output_prefix)
-        index_bam = 'samtools sort %s.bam > %s.sorted.bam; samtools index %s.sorted.bam'%(output_prefix, output_prefix, output_prefix)
-        remove_fastq = 'rm %s*.fastq'%(output_prefix)
-        make_tags = "mkdir -p %s; makeTagDirectory %s %s.sorted.bam"%(output_prefix, output_prefix, output_prefix)
-        find_peaks = "findPeaks %s -o auto"%(output_prefix)
-        convert_to_bed = "pos2bed.pl %s/peaks.txt > %s.bed"%(output_prefix, output_prefix)
+        commands.append(chipmunk)
+        chipmunk_wce = ('%s simreads '
+                    '-t wce '
+                    '-f %s '
+                    '-o %s.wce '
+                    '--numcopies %d '
+                    '--numreads %d '
+                    '--readlen %d '
+                    '--model %s '
+                    '--gamma-frag %s,%s '
+                    '--pcr_rate %f '
+                    '--thread %d ')%(CHIPMUNK, REFFA, output_prefix, PARAM_NC, numreads, PARAM_RL, args.model, MODEL_K, MODEL_THETA, MODEL_PCR, THREADS)
+        commands.append(chipmunk_wce)
+        for pref in [output_prefix, output_prefix+".wce"]:
+            align_fastq = 'bwa mem %s %s.fastq | samtools view -bS - > %s.bam'%(REFFA, pref, pref)
+            index_bam = 'samtools sort -T %s %s.bam > %s.sorted.bam; samtools index %s.sorted.bam'%(pref, pref, pref, pref)
+            remove_fastq = 'rm %s*.fastq'%(pref)
+            markdup = 'java -jar  -Xmx12G -Djava.io.tmpdir=%s $PICARD MarkDuplicates VALIDATION_STRINGENCY=SILENT VERBOSITY=WARNING I=%s.sorted.bam M=%s.metrics O=%s.flagged.bam'%(pref, pref, pref, pref)
+            commands.extend([align_fastq, index_bam, remove_fastq, markdup])
 
-        for cmd in [chipmunk, align_fastq, index_bam, remove_fastq, make_tags, find_peaks, convert_to_bed]:
+#        make_tags = "mkdir -p %s; makeTagDirectory %s %s.sorted.bam"%(output_prefix, output_prefix, output_prefix)
+#        find_peaks = "findPeaks %s -o auto"%(output_prefix)
+#        convert_to_bed = "pos2bed.pl %s/peaks.txt > %s.bed"%(output_prefix, output_prefix)
+
+        for cmd in commands:
+            if args.debug:
+                print(cmd)
+                continue
             p = Popen(cmd, shell=True)
             p.communicate()
             if p.returncode != 0: sys.exit("Error running: %s\n"%cmd)
