@@ -69,7 +69,7 @@ def main():
                         '--thread %d %s')%(CHIPMUNK, REFFA, output_prefix, PARAM_NC, numreads, PARAM_RL, args.model, MODEL_K, MODEL_THETA, MODEL_PCR, THREADS, args.optargs)
         commands.append(chipmunk_wce)
         for pref in [output_prefix, output_prefix+".wce"]:
-            align_fastq = 'bwa -t %d mem %s %s.fastq | samtools view -bS - > %s.bam'%(THREADS, REFFA, pref, pref)
+            align_fastq = 'bwa mem -t %d %s %s.fastq | samtools view -bS - > %s.bam'%(THREADS, REFFA, pref, pref)
             index_bam = 'samtools sort --threads %d -T %s %s.bam > %s.sorted.bam; samtools index %s.sorted.bam'%(THREADS-1, pref, pref, pref, pref)
             remove_fastq = 'rm %s.fastq'%(pref)
             markdup = 'java -jar  -Xmx12G -Djava.io.tmpdir=%s $PICARD MarkDuplicates VALIDATION_STRINGENCY=SILENT VERBOSITY=WARNING I=%s.sorted.bam M=%s.metrics O=%s.flagged.bam'%(pref, pref, pref, pref)
