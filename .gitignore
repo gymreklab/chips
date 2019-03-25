@@ -50,3 +50,10 @@ igv.log
 *.blg
 ChIPmunk_OnlineMethods.pdf
 *DS_Store*
+
+# Paper analyses
+*.ipynb_checkpoints*
+*.pos 
+
+# Releases
+*.tar.gz

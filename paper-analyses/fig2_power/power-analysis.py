@@ -69,12 +69,12 @@ def main():
                         '--thread %d %s')%(CHIPMUNK, REFFA, output_prefix, PARAM_NC, numreads, PARAM_RL, args.model, MODEL_K, MODEL_THETA, MODEL_PCR, THREADS, args.optargs)
         commands.append(chipmunk_wce)
         for pref in [output_prefix, output_prefix+".wce"]:
-            align_fastq = 'bwa mem %s %s.fastq | samtools view -bS - > %s.bam'%(REFFA, pref, pref)
-            index_bam = 'samtools sort -T %s %s.bam > %s.sorted.bam; samtools index %s.sorted.bam'%(pref, pref, pref, pref)
+            align_fastq = 'bwa -t %d mem %s %s.fastq | samtools view -bS - > %s.bam'%(THREADS, REFFA, pref, pref)
+            index_bam = 'samtools sort --threads %d -T %s %s.bam > %s.sorted.bam; samtools index %s.sorted.bam'%(THREADS-1, pref, pref, pref, pref)
             remove_fastq = 'rm %s.fastq'%(pref)
             markdup = 'java -jar  -Xmx12G -Djava.io.tmpdir=%s $PICARD MarkDuplicates VALIDATION_STRINGENCY=SILENT VERBOSITY=WARNING I=%s.sorted.bam M=%s.metrics O=%s.flagged.bam'%(pref, pref, pref, pref)
             commands.extend([align_fastq, index_bam, remove_fastq, markdup])
-        macs = 'macs2 callpeak -t %s.flagged.bam -c %s.wce.flagged.bam --name %s --outdir %s'%(output_prefix, output_prefix, os.path.basename(output_prefix), os.path.dirname(output_prefix))
+        macs = 'macs2 callpeak -t %s.flagged.bam -c %s.wce.flagged.bam --name %s.%s --outdir %s'%(output_prefix, output_prefix, os.path.basename(output_prefix), numreads, os.path.dirname(output_prefix))
         commands.append(macs)
 
 #        make_tags = "mkdir -p %s; makeTagDirectory %s %s.sorted.bam"%(output_prefix, output_prefix, output_prefix)
