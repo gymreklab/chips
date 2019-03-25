@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 ChIPmunk power analysis
 
@@ -12,14 +12,11 @@ from subprocess import Popen, PIPE
 import glob
 from collections import defaultdict
 
-CHIPMUNK="/home/mgymrek/workspace/ChIPmunk/src/chipmunk"
 MODEL_K = 10
 MODEL_THETA = 20
 MODEL_PCR = 0.85
 PARAM_NC = 100
 PARAM_RL = 100
-THREADS = 10
-REFFA = '/storage/resources/dbase/human/hg19/hg19.fa'
 RLIST="100000,500000,1000000,5000000,1e8"
 
 def main():
@@ -30,17 +27,23 @@ def main():
     parser.add_argument("--out", help="Output directory", type=str, required=True)
     parser.add_argument("--optargs", help="Extra arguments to chipmunk", type=str, default="")
     parser.add_argument("--debug", help="Print commands, but don't run them", action="store_true")
+    parser.add_argument("--chipmunk-path", help="Path to ChIPmunk", type=str, default="/home/mgymrek/workspace/ChIPmunk/src/chipmunk")
+    parser.add_argument("--reffa", help="Reference fastq file", type=str, default="/storage/resources/dbase/human/hg19/hg19.fa")
+    parser.add_argument("--threads", help="Use this many threads", type=int, default=7)
 
     args = parser.parse_args()
     OUTDIR = args.out
     read_list = [int(item) for item in args.readnums.split(",")]
+
+    CHIPMUNK = args.chipmunk_path
+    REFFA = args.reffa
+    THREADS = args.threads
 
     for numreads in read_list:
         commands = []
         bed_file = args.bed
         factor = os.path.basename(bed_file).strip(".bed")
         output_prefix = os.path.join(OUTDIR, factor+"."+str(numreads))
-#                     '--region chr19:1-59128983 '
         chipmunk = ('%s simreads '
                     '-p %s '
                     '-t bed '
@@ -76,7 +79,8 @@ def main():
             commands.extend([align_fastq, index_bam, remove_fastq, markdup])
         macs = 'macs2 callpeak -t %s.flagged.bam -c %s.wce.flagged.bam --name %s.%s --outdir %s'%(output_prefix, output_prefix, os.path.basename(output_prefix), numreads, os.path.dirname(output_prefix))
         commands.append(macs)
-
+        macs_broad = 'macs2 callpeak --broad -t %s.flagged.bam -c %s.wce.flagged.bam --name %s.%s.broad --outdir %s'%(output_prefix, output_prefix, os.path.basename(output_prefix), numreads, os.path.dirname(output_prefix))
+        commands.append(macs_broad)
 #        make_tags = "mkdir -p %s; makeTagDirectory %s %s.sorted.bam"%(output_prefix, output_prefix, output_prefix)
 #        find_peaks = "findPeaks %s -o auto"%(output_prefix)
 #        convert_to_bed = "pos2bed.pl %s/peaks.txt > %s.bed"%(output_prefix, output_prefix)
