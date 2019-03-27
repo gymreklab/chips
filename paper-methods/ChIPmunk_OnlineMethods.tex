@@ -272,6 +272,8 @@ It’s noteworthy that this estimation step requires a BAM file with PCR copies 
 ChIPmunk is implemented using C++, and the its source code is publicly available on Github: https://github.com/gymreklab/ChIPmunk.
 As input, it supports the standrad BAM file format, and two BED file formats including HOMER format and ENCODE BED format.
 
+All analyses were performed using ChIPmunk v1.9. % TODO rerun with this one
+
 \subsection*{Inferring parameters of ENCODE datasets}
 
 We used the ENCODE Project's REST API to write a Python script to automatically identify available ChIP-sequencing for the GM12878 cell line.
@@ -279,12 +281,31 @@ We fetched unfiltered BAM files and narrowPeak or broadPeak peak files for trans
 If multiple replicates were available for a factor, we chose the first one as a training example.
 We chose a total of 221 datasets as examples.
 
-We used the Picard \cite{picard} MarkDuplicates tool with default parameters to mark duplicates in each BAM file.
+We used the Picard \cite{picard} MarkDuplicates tool (v2.18.11) with default parameters to mark duplicates in each BAM file.
 For paired end datasets, we called ChIPmunk's learn module with non-default parameter -{}-paired.
 For single end datasets, we used non-default parameters -c 7 -{}-thres 100 for transcription factors and -c 7 -{}-thres 5 for histone modifications.
 For 12 example paired-end datasets, we called learn in both paired end and single end mode to compare inferred fragment length distributions (\textbf{Supplementary Figure 2}).
 
 Inferred parameters as well as links to JSON model files that can be used as input to the ChIPmunk simreads module are provided in \textbf{Supplementary Table 2}.
+
+\subsection*{Evaluating ChIPmunk using ENCODE datasets}
+
+We performed simulations using an increasing number of genome copies (ChIPmunk argument -{}-nc 1, 5, 10, 25, 50, 100, or 1000) for two factors (the histone modification H3K27ac and the transcription factor BACH1) with ENCODE data available in the GM12878 cell line.(BAM accession ENCFF097SQI and broadPeak [BED] accession ENCFF465WTH for H3K27ac; BAM accession ENCFF518TTP and narrowPeak [BED] accession ENCFF465WTH for BACH1.
+For each copy number in each factor, we ran ChIPmunk's simreads tools on hg19 chromosome 19 (-{}-region chr19:1-59128983) using the corresponding learned ENCODE model (see \textbf{Supplementary Table 2}) and the same sequencing parameters as the ENCODE reads from chromosome 19 for each dataset (-{}-numreads 269113 -{}-readlen 51 for H3Ka7ac; -{}-numreads 665975 -{}-readlen 101 -{}-paired for BACH1). 
+We additionally used options -p ENCODE.bed -t bed -c 7 -{}-scale-outliers, where ENCODE.bed represents the corresponding peak file for each factor with accessions listed above.
+Simulated reads were aligned to the hg19 reference genome using BWA MEM \cite{bwamem} v0.7.12-r1039 with default parameters and converted to sorted and indexed BAM files using samtools \cite{samtools} version 1.5. Duplicates were flagged using the Picard \cite{picard} MarkDuplicates tool (v2.18.11) with default parameters.
+
+We used the bedtools \cite{bedtools} (v2.27.1) makewindows command to generate a list of non-overlapping windows of 5kb across chromosome 19 and the bedtools multicov command to count the number of reads from each BAM file falling in each window. We used the bedtools intersect command to determine the intersection of each bin with the input peak files. For each bin, we determined the Pearson correlation bewteen log10 read counts in each simulated vs. the ENCODE dataset after removing bins with 0 counts in each dataset and adding a pseudocount of 1 read to each bin.
+
+Timing experiments were performed in a Linux environment running Centos 7.4.1708 on a server with 28 cores (Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} CPU E5-2660 v4 @ 2.00GHz) and 125 GB RAM using the UNIX ``time'' command and are based on the ``sys'' time reported. % TODO should this be sys+user and performed on a single core?
+
+%% TODO chipulate comparison %%
+
+\subsection*{Power analysis}
+% TODO Melissa
+
+\subsection*{Analysis of spike in controls}
+% TODO Melissa
 
 \bibliography{ChIPmunk_OnlineMethods}
 \bibliographystyle{ieeetr}
