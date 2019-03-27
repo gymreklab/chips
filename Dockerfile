@@ -32,9 +32,9 @@ RUN ./configure --without-curses && make && make install
 
 # Install ChIPmunk
 WORKDIR /dependencies
-COPY chipmunk-1.7-dirty.tar.gz /dependencies/chipmunk-1.7-dirty.tar.gz
-RUN tar -xzvf chipmunk-1.7-dirty.tar.gz
-WORKDIR /dependencies/chipmunk-1.7-dirty
+COPY chipmunk-1.8.tar.gz /dependencies/chipmunk-1.8.tar.gz
+RUN tar -xzvf chipmunk-1.8.tar.gz
+WORKDIR /dependencies/chipmunk-1.8
 RUN ./configure && make && make install
 
 # Install Picard

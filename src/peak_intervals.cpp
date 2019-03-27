@@ -41,7 +41,6 @@ bool PeakIntervals::LoadPeaks(const Options& options,
       peak_map[peaks[peakIndex].chrom].push_back(peaks[peakIndex]);
     }
   }
-
   return dataLoaded;
 }
 

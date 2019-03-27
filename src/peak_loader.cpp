@@ -8,17 +8,17 @@
  */
 #include "src/peak_loader.h"
 
-const std::map<std::string, int> PeakLoader::peakfileTypeList = {{"homer", 0}, {"bed", 2}};
+const std::map<std::string, int> PeakLoader::peakfileTypeList = {{"homer", 0}, {"wce", 1}, {"bed", 2}};
 
 PeakLoader::PeakLoader(const std::string _peakfile, const std::string _peakfileType,
                         const std::string _bamfile, const std::int32_t _count_colidx){
-  if(_peakfileType == ""){
+  if (_peakfileType == "") {
     std::cerr << "****** ERROR: Need to specify the type of the peak file ******" << std::endl;
     std::exit(1);
-  }else if ((_bamfile == "") && (_count_colidx == -1)){
+  } else if ((_bamfile == "") && (_count_colidx == -1) && (_peakfileType != "wce")) {
     std::cerr << "****** ERROR: Need to specify either parameter -c or parameter -b ******" << std::endl;
     std::exit(1);
-  }else{
+  } else {
     peakfile = _peakfile;
     peakfileType = _peakfileType;
     bamfile = _bamfile;
@@ -32,17 +32,20 @@ PeakLoader::PeakLoader(const std::string _peakfile, const std::string _peakfileT
 bool PeakLoader::Load(std::vector<Fragment>& peaks, const std::string region, const float frag_length,
 		      const bool noscale, const bool scale_outliers){
   PeakReader peakreader(peakfile);
-  switch (peakfileTypeList.at(peakfileType)){
-    case 0:
-      peakreader.HomerPeakReader(peaks, count_colidx, region, noscale, scale_outliers);
-      break;
-    case 2:
-      peakreader.BedPeakReader(peaks, count_colidx, region, noscale, scale_outliers);
-      break;
-    default:
-      std::cerr << "An unexpected error happened in PeakLoader->Load()" << std::endl;
-      return false;
-      break;
+  switch (peakfileTypeList.at(peakfileType)) {
+  case 0:
+    peakreader.HomerPeakReader(peaks, count_colidx, region, noscale, scale_outliers);
+    break;
+  case 1:
+    peakreader.EmptyPeakReader();
+    break;
+  case 2:
+    peakreader.BedPeakReader(peaks, count_colidx, region, noscale, scale_outliers);
+    break;
+  default:
+    std::cerr << "An unexpected error happened in PeakLoader->Load(). Invalid peak type specified. Options are bed, homer, or wce" << std::endl;
+    return false;
+    break;
   }
 
   if (bamfile != ""){

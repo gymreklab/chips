@@ -187,8 +187,8 @@ int simulate_reads_main(int argc, char* argv[]) {
   model.UpdateOptions(options);
 
   // Check inputs
-  if (options.peaksbed.empty()) {
-    cerr << "****** ERROR: Must specify peaks with -p ******" << endl;
+  if (options.peaksbed.empty() and options.peakfiletype != "wce") {
+    cerr << "****** ERROR: Must specify peaks with -p unless using -t wce ******" << endl;
     showHelp = true;
   }
   if (options.reffa.empty()) {

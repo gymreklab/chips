@@ -8,12 +8,12 @@ source params.sh
 # Run simulation for various read lengths, paired/single
 BAMS=""
 TAGDIRS=""
-for rl in 36 #51 100 150
+for rl in 36 51 100 150
 do
     nreadsS=1000000
     nreadsP=1000000
-#    ./run_repsim.sh ${rl} ${nreadsP} ${rl}.4.paired 4 " --paired --noscale"
-#    ./run_repsim.sh ${rl} ${nreadsS} ${rl}.4.single 4 " --noscale"
+    ./run_repsim.sh ${rl} ${nreadsP} ${rl}.4.paired 4 " --paired --noscale"
+    ./run_repsim.sh ${rl} ${nreadsS} ${rl}.4.single 4 " --noscale"
     ./run_repsim.sh ${rl} ${nreadsP} ${rl}.5.paired 5 " --paired"
     ./run_repsim.sh ${rl} ${nreadsS} ${rl}.5.single 5
     BAMS="${BAMS} ${OUTDIR}/${rl}.4.single.sorted.bam ${OUTDIR}/${rl}.4.paired.sorted.bam ${OUTDIR}/${rl}.5.single.sorted.bam ${OUTDIR}/${rl}.5.paired.sorted.bam "
