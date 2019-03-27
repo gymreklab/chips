@@ -129,52 +129,75 @@ F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2} - 
 \subsubsection*{Pulldown}
 In step 2, sheared cross-linked DNA is subject to pulldown, during which an antibody for the protein or modification of interest is used to enrich the pool of fragments for those bound to the epitope recognized by the antibody.
 This process is imperfect: some bound fragments will not be pulled down, and some unbound fragments will be pulled down.
+To better model this process, we built the following formula to quantify the probability of pulldown for fragments in peak regions and also fragments in non-peak regions.
 
-We first model the ratio of the probabilities for a bound vs. an unbound fragment to be pulled down.
-Let $P(D|B)$ and $P(D|\overline{B})$ denote the probability that a randomly chosen fragment is pulled down ($D$) given that it is bound ($B$) or unbound ($\overline{B}$).
-Then using Baye's Rule:
+We use $B$ to represent if a random fragment is bound, and $\overline{B}$ if unbound. And we use $D$ to denote if a fragment is pulled down.
+For any fragment, the probability of being pulled down is:
+\begin{equation} \label{eq:pulldown}
+    P(D) = P(D, B) + P(D, \overline{B}) = P(D|B)*P(B) + P(D|\overline{B})*P(\overline{B})
+\end{equation}
+
+In peak regions, due to the nature of ChIP-sequencing experiments, $P(D, B)$ is much greater than $P(D, \overline{B})$.
+Thus, for fragment $i$ overlapped with peak $k$, the equation \textbf{Equation~\ref{eq:pulldown}} reduces to:
+\begin{equation} \label{eq:pulldown_peak}
+    P_i(D) \approx P_{ik}(D|B)*P_{ik}(B)
+\end{equation}
+For any fragment $i$, we assume that the probability of its being bound $P_{ik}(B)$ is directly proportional to the peak score $C_k$ with a coefficient $\alpha$, i.e. $P_{ik}(B) = \alpha*C_k$,
+and once it is bound, the probability of its being pulled down is 100\%, i.e. $P_{ik}(D|B) = 1$.
+Based users' choices, peak scores can either be based on peak intensities given in an input peak BED file or determined based on counts of overlapped fragments if a BAM file is specified.
+If peak intensities are given, $C_k$ is defined as the intensity of peak $k$ divided by the maximum peak intensity.
+If a BAM file is specified, $C_k$ is defined as the number of fragments overlapping peak $k$ divided by the maximum number of reads overlapping any peak.
+This scaling ensures all peak scores are between 0 and 1. Thus for a fragment $i$ overlapped with peak $k$, the probability of its being pulled down is:
+\begin{equation} \label{eq:pulldown_peak_in_practice}
+P_i(D) \approx \alpha C_k
+\end{equation}
+
+For a fragment $j$ in a non-peak region, since the probability of its being bound is extremely small, we set $P_j(B) = 0$ and $P_j(\overline{B}) = 1$ as an approximation.
+And we treat them uniformly with the same probability of pull-down, i.e. $P_{j}(D|\overline{B}) = P_{avg}(D|\overline{B})$.
+Thus the equation \textbf{Equation~\ref{eq:pulldown}} reduces into:
+\begin{equation} \label{eq:pulldown_nonpeak}
+    P_j(D) \approx P_{avg}(D|\overline{B})
+\end{equation}
+To estimate the probability $P_{avg}(D|\overline{B})$, we model the ratio of the probabilities for a bound vs. an unbound fragment to be pulled down. Using Baye's Rule, we have:
 
 \begin{equation} \label{eq:bayesPDB}
-    P(D|B) = \frac{P(B|D)P(D)}{P(B)}
+    P_{avg}(D|B) = \frac{P_{avg}(B|D)P_{avg}(D)}{P_{avg}(B)}
 \end{equation}
 \begin{equation} \label{eq:bayesPDUB}
-    P(D|\overline{B}) = \frac{P(\overline{B}|D)P(D)}{P(\overline{B})}
+    P_{avg}(D|\overline{B}) = \frac{P_{avg}(\overline{B}|D)P_{avg}(D)}{P_{avg}(\overline{B})}
 \end{equation}
 
-Taking the ratio of these cancles $P(D)$ and gives:
+Taking the ratio of these cancels $P_{avg}(D)$ and gives:
 \begin{equation} \label{eq:ratio}
-  R = \frac{P(D|B)}{P(D|\overline{B})} = \frac{P(B|D)P(\overline{B})}{P(\overline{B}|D)P(B)}
+  R = \frac{P_{avg}(D|B)}{P_{avg}(D|\overline{B})} = \frac{P(B|D)P_{avg}(\overline{B})}{P(\overline{B}|D)P_{avg}(B)}
 \end{equation}
 
-$P(B)$, or the probability that a fragment is bound, is equal to the fraction of the genome bound by the factor of interest ($f$).
-We can approximate $f$ as the sum of the lengths of all peaks divided by the total length of the genome.
-Thus $P(B) \approx f$ and $P(\overline{B}) \approx 1-f$.
+$P_{avg}(B)$, or the probability that a fragment is bound on average, is equal to the fraction of the genome bound by the factor of interest $f$.
+We can approximate $f$ as the sum of the lengths of all peaks $l_k$ divided by the total length of the genome $T$.
+We can approximate $f$ with \textbf{Equation~\ref{eq:avg_b}}, in which $l_k$ denotes the length of peak $k$ and this equation calculates the expected sum length of bound fragments divided by the total length of the genome $T$. Then we have $P(B) \approx f$ and $P(\overline{B}) \approx 1-f$.
+\begin{equation} \label{eq:avg_b}
+  f \approx \frac{1}{nT} \sum_{k=1}^{n} P_k(B) l_k \approx \frac{\alpha}{nT} \sum_{k=1}^{n} C_k l_k
+\end{equation}
 
-$P(B|D)$, or the probability that a fragment is bound given that it is pulled down, is a measure of the specificity of the antibody. This can be approximated by analyzing the percent of reads falling within peaks, commonly referred to as the SPOT score, which we denote as $s$.
-Thus $P(B|D) \approx s$ and $P(\overline{B}|D) \approx 1-s$.
+
+$P_{avg}(B|D)$, or the averaged probability that a fragment is bound given that it is pulled down, is a measure of the specificity of the antibody. This can be approximated by analyzing the percent of fragments falling within peaks, which we denote as $s$.
+Thus $P_{avg}(B|D) \approx s$ and $P_{avg}(\overline{B}|D) \approx 1-s$.
 
 Using these two metrics, $f$, and $s$ (\textbf{Supplementary Table 1}), we can simplify the ratio $R$ as:
 \begin{equation} \label{eq:ratiosimple}
   R = \frac{s(1-f)}{(1-s)f}
 \end{equation}
 
-We additionally model peak to peak variability using a peak score, which models the probability that a fragment overlapping peak $i$ will be pulled down ($C(i)$).
-Scores can either be based on peak intensities given in an input peak BED file or determined based on read counts if a BAM file is specified.
-If peak intensities are given, $C(i)$ is defined as the intensity of peak $i$ divided by the maximum peak intensity.
-If a BAM file is specified, $C(i)$ is defined as the number of reads overlapping peak $i$ divided by the maximum number of reads overlapping any peak.
-This scaling ensures all peak scores are between 0 and 1.
-
-We can use peak scores to assign a fragment score, $F(j)$ to each fragment $j$.
-If fragment $j$ overlaps one or more peaks, $F(j)$ is set to $\max_{p \in P_j} C(p)$ where $P_j$ is the set of all peaks overlapping fragment $j$.
-Otherwise, $F(j)$ is set to 0.
-
-By combining the pulldown ratio $R$ with fragment scores $F(j)$, we pull down fragment $j$ with the following probability:
-\begin{equation} \label{eq:pulldowncombine}
-  P(D(j)) = F(j) + (1-F(j))(1/R)
+Combining all equations from \textbf{Equation~\ref{eq:pulldown_nonpeak}} to \textbf{Equation~\ref{eq:ratiosimple}} together, we can have the estimation of $P(D)$ for fragments in non-peak regions as is shown below:
+\begin{equation} \label{eq:pulldown_nonpeak_in_practice_1}
+P_j(D) \approx \frac{(1-s)f}{s(1-f)} * P_{avg}(D|B)
+\end{equation}
+Since we assume $P(D|B)$ is always equal to 1, \textbf{Equation~\ref{eq:pulldown_nonpeak}} can be further written as:
+\begin{equation} \label{eq:pulldown_nonpeak_in_practice_2}
+P_j(D) \approx \frac{(1-s)f}{s(1-f)}
 \end{equation}
 
-Note since we can only compute the ratio $R$ of $\frac{P(D|B)}{P(D|\overline{B})}$, we set in \textbf{Equation~\ref{eq:pulldowncombine}} $P(D|B)=1$ and $P(D|\overline{B})=1/R$
- to preserve the ratio $R$.
+Because $f$ is very small in practice and proportional to the coefficient $\alpha$ in \textbf{Equation~\ref{eq:avg_b}}, $P_j(D)$ is also nearly proportional to $\alpha$ same as $P_i(D)$ of peak regions. Thus, the probability of pull-down is always proportional to $\alpha$ regardless of the fragment location, and we set $\alpha = 1$ in practice.
 
 \subsubsection*{PCR}
 
@@ -198,6 +221,18 @@ We model the per-base pair substitution rate, insertion rate, and deletion rate 
 % pulldown learn f or s
 % PCR learn r. Require duplicates marked
 % output as JSON format
+Our learning module models read files, and generates parameters for 
+(1) fragment length distribution, (2) pull-down efficiency, (3) PCR efficiency.
+To estimate the fragment length distribution of an input read file,
+our learning module chooses a modeling function based on the type of the read file (single-end or double-end reads),
+and finds the best fit gamma distribution $Gamma (k, \theta)$.
+To calculate pull-down efficiency, our learning module takes both the read file and the its peak file as input,
+and returns the fraction of the genome bound by the factor of interest $f$ and the SPOT score $s$.
+In the estimation of PCR efficiency, we scan through the read file, 
+identify unique samples and the numbers of their PCR copies,
+and fit them to a geometric distribution $Geo(p)$ with the number of PCR copies (including the original copy)
+as x-axis and the number of samples falling into each bin as y-axis.
+It’s noteworthy that this estimation step requires a BAM file with PCR copies flagged. Lastly, the learning module summarizes up all parameters, including $k$, $theta$, $f$, $s$ and $p$, and writes them into a json file with a user-specified path prefix.
 
 \subsubsection*{Simulation implementation}
 % TODO
@@ -220,6 +255,8 @@ We model the per-base pair substitution rate, insertion rate, and deletion rate 
 % open source on github
 % use standard open source libraries (htslib for BAM reading, pthread for multithreading)
 % work with standard file formats (BED, BAM, jSON)
+ChIPmunk is implemented using C++, and the its source code is publicly available on Github: https://github.com/gymreklab/ChIPmunk.
+As input, it supports the standrad BAM file format, and two BED file formats including HOMER format and ENCODE BED format.
 
 \subsection*{Inferring parameters of ENCODE datasets}
 

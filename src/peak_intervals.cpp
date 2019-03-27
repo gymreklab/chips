@@ -54,7 +54,7 @@ bool PeakIntervals::LoadPeaks(const Options& options,
  * */
 float PeakIntervals::SearchList(const Fragment& frag, int& peakIndexStart){
   std::vector<float> probBoundList;
-  uint32_t frag_start, frag_end, peak_start, peak_end;
+  std::int32_t frag_start, frag_end, peak_start, peak_end;
   float overlap;
   std::vector<Fragment> & peaks = peak_map[frag.chrom];
   for(int peakIndex=peakIndexStart; peakIndex < peaks.size(); peakIndex++){
