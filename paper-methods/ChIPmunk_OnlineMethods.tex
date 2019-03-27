@@ -192,12 +192,26 @@ We model the per-base pair substitution rate, insertion rate, and deletion rate 
 \subsection*{ChIPmunk implementation}
 
 \subsubsection*{Learn implementation}
-% TODO
 % user input bam, bed, single vs. paired
 % shearing for paired or single
 % pulldown learn f or s
 % PCR learn r. Require duplicates marked
 % output as JSON format
+The Learn module requires a BAM file, a peaks file, a prefix name for the output model, and the type of the peaks file.
+The BAM file must be sorted, have its duplicates flagged, and be indexed.
+The type of the peaks file can be specified as "homer" or "bed" in order to accurately parse through the correct file format.
+The module has two options, single and paired end estimation, for learning the shearing fragment length distribution parameters, $k$ and $\theta$.
+By default the module chooses single end estimation, however the user can specify if paired end estimation should be used instead.
+Single end estimation requires reading through the BAM file and the peaks file to calculate the gamma distribution parameters whereas paired end only requires the BAM file.
+Next, the module generates the pulldown parameters, $s$ and $f$.
+This requires reading through the peak and BAM file to get the genome length and tagcount which are used to create parameters that determine whether a fragment at a particular location will be pulled down. 
+Lastly, the module will create the parameter for PCR rate, $r$. 
+The BAM file must be marked for duplicates otherwise this part of the module will fail to give an accurate result because it uses these flags to determine the rate modeled after a geometric distribution.
+All of the values generated from this module are outputted to the name and location specified in prefix in a JSON format under the labels: frag, pcr$\_$rate, and pulldown.
+"frag" holds $k$ and $\theta$ estimated parameters for shearing.
+"pcr$\_$rate" holds $r$, the probability that a fragment will not be copied.
+"pulldown" holds the spot and frac scores, $s$ and $f$.
+
 
 \subsubsection*{Simulation implementation}
 % TODO
