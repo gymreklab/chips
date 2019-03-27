@@ -191,7 +191,7 @@ Using these two metrics, $f$, and $s$ (\textbf{Supplementary Table 1}), we can s
 \end{equation}
 
 % How it's done in practice
-Since we only know the ratio $R$, for simplicity in simulations we set $P(D|B)=1$ and $P(D|\overline{B})=\frac{1}{\alpha}$.
+Since we only know the ratio $\alpha$, for simplicity in simulations we set $P(D|B)=1$ and $P(D|\overline{B})=\frac{1}{\alpha}$.
 Substituting into Equation~\ref{eq:pulldown} above, we compute the probability that fragment $i$ is pulled down as:
 
 \begin{equation}
@@ -218,6 +218,15 @@ Sequences are based on an input reference genome using the coordinates of each f
 We model the per-base pair substitution rate, insertion rate, and deletion rate (\textbf{Supplementary Table 1}).
 
 \subsection*{ChIPmunk implementation}
+
+\subsubsection*{Peak scores}
+% TODO scaling peak scores to be probabilities
+%For any fragment $i$, we assume that the probability of its being bound $P_{ik}(B)$ is directly proportional to the peak score $C_k$ with a coefficient $\alpha$, i.e. $P_{ik}(B) = \alpha*C_k$,
+%and once it is bound, the probability of its being pulled down is 100\%, i.e. $P_{ik}(D|B) = 1$.
+%Based users' choices, peak scores can either be based on peak intensities given in an input peak BED file or determined based on counts of overlapped fragments if a BAM file is specified.
+%If peak intensities are given, $C_k$ is defined as the intensity of peak $k$ divided by the maximum peak intensity.
+%If a BAM file is specified, $C_k$ is defined as the number of fragments overlapping peak $k$ divided by the maximum number of reads overlapping any peak.
+
 
 \subsubsection*{Learn implementation}
 % user input bam, bed, single vs. paired
@@ -268,23 +277,11 @@ It’s noteworthy that this estimation step requires a BAM file with PCR copies 
 % Analyze one bin at a time for computational efficiency (how choose bin size, how deal with boundaries of bins)
 % In practice, need to decide how many reads to generate from each chunk (see Michael's old pulldown text in scratch.tex)
 
-% TODO scaling peak scores to be probabilities
-%For any fragment $i$, we assume that the probability of its being bound $P_{ik}(B)$ is directly proportional to the peak score $C_k$ with a coefficient $\alpha$, i.e. $P_{ik}(B) = \alpha*C_k$,
-%and once it is bound, the probability of its being pulled down is 100\%, i.e. $P_{ik}(D|B) = 1$.
-%Based users' choices, peak scores can either be based on peak intensities given in an input peak BED file or determined based on counts of overlapped fragments if a BAM file is specified.
-%If peak intensities are given, $C_k$ is defined as the intensity of peak $k$ divided by the maximum peak intensity.
-%If a BAM file is specified, $C_k$ is defined as the number of fragments overlapping peak $k$ divided by the maximum number of reads overlapping any peak.
-
-
 
 \subsubsection*{C++ implementation details}
-% TODO
-% C++ implementation
-% open source on github
-% use standard open source libraries (htslib for BAM reading, pthread for multithreading)
-% work with standard file formats (BED, BAM, jSON)
-ChIPmunk is implemented using C++, and the its source code is publicly available on Github: https://github.com/gymreklab/ChIPmunk.
-As input, it supports the standrad BAM file format, and two BED file formats including HOMER format and ENCODE BED format.
+ChIPmunk is implemented as an open source C++ project with source code publicly available on Github: https://github.com/gymreklab/ChIPmunk.
+It uses the open source libraries htslib (www.htslib.org) for parsing BAM files and POSIX threads for implementing multithreading.
+It supports standard file formats including BAM/CRAM for aligned reads, BED for peak files, JSON for model files, and FASTQ for raw reads.
 
 All analyses were performed using ChIPmunk v1.9. % TODO rerun with this one
 
