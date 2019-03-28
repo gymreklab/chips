@@ -23,12 +23,18 @@ If you are installing from the tarball, type the following commands.
 ```
 tar -xzvf chipmunk-X.X.tar.gz
 cd chipmunk-X.X
-./configure [--prefix=$PREFIX]
+./configure
 make
 make install
 ``` 
 
-If you do not have root access, you can set `--prefix=$HOME`, which will install `chipmunk` to `~/bin/chipmunk`.
+If you do not have root access, you can instead run:
+```
+./configure --prefix=$HOME
+make
+make install
+```
+which will install `chipmunk` to `~/bin/chipmunk`.
 If you get a pkg-config error, you may need to set PKG_CONFIG_PATH to a directory where it kind find `htslib.pc`.
 
 Typing `chipmunk --help` should show a help message if ChIPmunk was successfully installed.
@@ -83,7 +89,7 @@ chipmunk simreads \
 ### chipmunk learn
 
 Required parameters:
-* `-b <file.bam>`: BAM file containing aligned reads. Must be sorted, duplicates flagged, and indexed. Paired end or single end data are supported.
+* `-b <file.bam>`: BAM file containing aligned reads. Must be sorted, duplicates flagged, and indexed. Both paired-end or single-end data are supported.
 * `-p <peaks>`: file containing peaks. 
 * `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
 * `-o <outprefix>`: Prefix to name output files. Outputs file `<outprefix>.json` with learned model parameters.
@@ -103,7 +109,7 @@ Experiment parameters:
 * `--numcopies <int>`: Number of copies of the genome to simulate (Default: 100)
 * `--numreads <int>`: Number of reads (or read pairs) to simulate (Default: 1000000)
 * `--readlen <int>`: Read length to generate (Default: 36bp)
-* --paired`: Simulated paired-end reads (by default single-end reads are generated).
+* `--paired`: Simulated paired-end reads (by default single-end reads are generated).
 
 Model parameters: (either user-specified or learned from `chipmunk learn`:
 * `--model <str>`: JSON file with model parameters (e.g. from running learn. Setting parameters with other options overrides anything in the JSON file.
@@ -112,8 +118,8 @@ Model parameters: (either user-specified or learned from `chipmunk learn`:
 * `--frac <float>`: Fraction of the genome that is bound. Default: 0.03
 * `--pcr_rate <float>`: The geometric step size paramters for simulating PCR. Default: 1.0.
 
-Peark scoring:
-* `-b <reads.bam>`: Use a provided BAM file to obtain scores for each peak. No BAM is required. If a BAM is not given, scores in the peak files are used.
+Peak scoring:
+* `-b <reads.bam>`: Use a provided BAM file to obtain scores for each peak (optional). If a BAM is not given, scores in the peak files are used.
 * `-c <int>`: The index of the BED file column used to score each peak (index starting from 1). Required if not using `-b`.
 
 Other options:
@@ -130,11 +136,11 @@ Other options:
 
 ### Peak files
 
-Peak files may be either in Homer or Bed format. For all modules, the option `-t` should specify either "homer" or "bed" appropriately.
+Peak files may be either in BED or HOMER peak format. For all modules, the option `-t` should specify either "bed" or "homer" appropriately.
 
 With `-t bed`, your peak file must be tab-delimited with no header line. The first three columns are chromosome, start, and end. For `chipmunk simreads` if you don't supply a BAM file you'll also need to specify which column contains the peak score using `-c <colnum>`. For example if your file just has four columns, chrom, start, end, and score, set `-c 4`. If your peaks don't have scores you can modify your peak file to set all peaks to have score 1.
 
-With `-t homer`, your peak file should be in the format output by the [Homer peak caller](http://homer.ucsd.edu/homer/ngs/peaks.html). For homer files, set `-c 6` since the peak score intensity is in column 6.
+With `-t homer`, your peak file should be in the format output by the [HOMER peak caller](http://homer.ucsd.edu/homer/ngs/peaks.html). For HOMER files, set `-c 6` since the peak score intensity is in column 6.
 
 ### Model files
 
