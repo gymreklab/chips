@@ -154,4 +154,4 @@ Model files are in JSON syntax, and follow the example below. Hundreds of model 
 }
 ```
 
-`chipmunk learn` outputs a JSON model file. `chipmunk simreads` can take in a model file with all or some of these parameters specified. Model parameters set on the command line override those set in the JSON model file.
+`chipmunk learn` outputs a JSON model file. `chipmunk simreads` can take in a model file with all or some of these parameters specified. Model parameters set on the command line override those set in the JSON model file. 
