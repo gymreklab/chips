@@ -66,3 +66,17 @@ echo $cmd
 # Run on AWS
 ./run_aws_power.sh
 
+# Get AWS peak results
+aws s3 ls s3://gymreklab/chipmunk-power/ |grep Peak | grep "03-29" | awk '{print $NF}' | \
+    xargs -n1 -P1 -I% sh -c "aws s3 cp s3://gymreklab/chipmunk-power/% /storage/mgymrek/chipmunk/fig2_power/froms3/"
+
+# Get Power with AWS peaks
+```
+factors="GM12878_H3K27ac_ENCFF097SQI_ENCFF465WTH GM12878_H3K4me3_ENCFF398NET_ENCFF068UAA GM12878_H3K27me3_ENCFF014HHB_ENCFF533IKU GM12878_H3K36me3_ENCFF191SDM_ENCFF695NNX GM12878_H3K4me1_ENCFF252ZII_ENCFF966LMJ GM12878_BACH1_ENCFF518TTP_ENCFF866OLZ GM12878_CTCF_ENCFF584BRF_ENCFF559IXF"
+
+for factor in $factors
+do
+  ./summ_power_aws.sh ${factor}
+  ./summ_power_broad.sh ${factor}
+done
+```
