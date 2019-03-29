@@ -1,4 +1,4 @@
-FROM gymreklab/chipmunk-1.7
+FROM gymreklab/chipmunk-1.9
 
 RUN apt-get update
 
