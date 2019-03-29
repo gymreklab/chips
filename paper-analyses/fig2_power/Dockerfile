@@ -1,4 +1,4 @@
-FROM gymreklab/chipmunk-1.8
+FROM gymreklab/chipmunk-1.9
 
 RUN apt-get install -y \
     curl \
