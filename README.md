@@ -109,7 +109,7 @@ Other optional parameters:
 
 Required parameters:
 * `-p <peaks>`: file containing peaks. 
-* `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
+* `-t <homer|bed|wce>`: Specify the format of the peaks file. Options are "bed" or "homer" when loading peaks. Specify `-t wce` and no peaks input file to simulate whole cell extract control data.
 * `-f <ref.fa>`: Reference genome fasta file. Must be indexed (e.g. `samtools faidx <ref.fa>`)
 * `-o <outprefix>`: Prefix to name output files. Outputs `<outprefix>.fastq` for single-end data or `<outprefix>_1.fastq` and `<outprefix>_2.fastq` for paired-end data.
 
@@ -125,10 +125,13 @@ Model parameters: (either user-specified or learned from `chipmunk learn`:
 * `--spot <float>`: SPOT score (fraction of reads in peaks). Default: 0.18
 * `--frac <float>`: Fraction of the genome that is bound. Default: 0.03
 * `--pcr_rate <float>`: The geometric step size paramters for simulating PCR. Default: 1.0.
+* `--recomputeF`: Recompute `--frac` param based on input peaks. Recommended especially when using model parameters that were not learned on real data.
 
 Peak scoring:
 * `-b <reads.bam>`: Use a provided BAM file to obtain scores for each peak (optional). If a BAM is not given, scores in the peak files are used.
 * `-c <int>`: The index of the BED file column used to score each peak (index starting from 1). Required if not using `-b`.
+* `--scale-outliers`: Set all peaks with scores $>$2x median score to have binding prob 1. Recommended with real data.
+* `--noscale`: Don't scale peak scores. Treat given scores as binding probabilities.
 
 Other options:
 * `--region <str>`: Only simulate reads from this region chrom:start-end. By default, simulate genome-wide.
