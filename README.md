@@ -1,17 +1,16 @@
 # ChIPmunk
 
-** Under construction. Official release coming very soon! **
-
 ChIPmunk is a tool for simulating ChIP-sequencing experiments.
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
 
-[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats)
+[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats) | [FAQ](#faq)
 
 <a name="download"></a>
 ## Download
 
 The latest ChIPmunk release is available on the [releases page](https://github.com/gymreklab/ChIPmunk/releases).
+ChIPmunk is also packaged in a docker container available on the [Gymrek Lab docker hub](https://hub.docker.com/u/gymreklab) under `gymreklab/chipmunk-X.X` where `X.X` is the ChIPmunk version number.
 
 <a name="install"></a>
 ## Basic Install
@@ -89,7 +88,7 @@ chipmunk simreads \
 ### chipmunk learn
 
 Required parameters:
-* `-b <file.bam>`: BAM file containing aligned reads. Must be sorted, duplicates flagged, and indexed. Both paired-end or single-end data are supported.
+* `-b <file.bam>`: BAM file containing aligned reads. Should be sorted and indexed. To accurately estimate PCR duplicate rate, duplicates must be flagged e.g. using Picard. Both paired-end or single-end data are supported.
 * `-p <peaks>`: file containing peaks. 
 * `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
 * `-c <int>`: The index of the BED file column used to score each peak (index starting from 1)
@@ -172,3 +171,12 @@ Model files are in JSON syntax, and follow the example below. Hundreds of model 
 ```
 
 `chipmunk learn` outputs a JSON model file. `chipmunk simreads` can take in a model file with all or some of these parameters specified. Model parameters set on the command line override those set in the JSON model file. 
+
+<a name="faq"></a>
+## FAQ
+
+**Q**: What should I set the number of genome copies (`--nc`) parameter to for `simreads`?<br>
+**A**: This number is not directly comparable to the actual number of cells used in an experiment since we do not currently model pulldown inefficiency. We have found in most settings performance starts to plateau after around 25 copies with best performance around `--nc 100`. Note, run time increases linearly with the value set for this parameter.
+<br><br>
+**Q**: I get a `pcr_rate` output from `learn` of 1.0 (no duplicates) but I know there should be duplicates in my data!<br>
+**A**: Make sure duplicates are marked, e.g. using [Picard MarkDuplicates](https://broadinstitute.github.io/picard/command-line-overview.html#MarkDuplicates).
