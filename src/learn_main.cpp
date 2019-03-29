@@ -705,13 +705,13 @@ void learn_help(void) {
   cerr << "         -t <peakfile_type>: File type of the input peak file. Only `homer` or `bed` supported." << "\n";
   cerr << "         -o <outprefix>:     Prefix for output files" << "\n";
   cerr << "         -c <int>:           The index of the BED file column used to score each peak (index starting from 1)" << "\n";
-  cerr << "         --noscale:          Don't scale peak scores by the max score.\n";                   
-  cerr << "         --scale-outliers:   Set all peaks with scores >2*median score to have binding prob 1. Recommended with real data\n";   
   cerr << "[Optional arguments]: " << "\n";
   cerr << "         -r <float>:         Ratio of high score peaks to ignore\n"
        << "                             Default: " <<options.remove_pct<< "\n";
   cerr << "         --est <int>:        Estimated fragment length\n"
        << "                             Default: " <<options.estimate_frag_length<< "\n";
+  cerr << "         --noscale:          Don't scale peak scores by the max score.\n";                   
+  cerr << "         --scale-outliers:   Set all peaks with scores >2*median score to have binding prob 1. Recommended with real data\n";
   cerr << "[BAM-file arguments]: " << "\n";
   cerr << "         --paired:           Loading paired-end reads\n"
        << "                             Default: false\n";
