@@ -79,7 +79,7 @@ chipmunk learn \
 chipmunk simreads \
   -p <peaks> \
   -f <ref.fa>
-  -t <homer|bed> \
+  -t <homer|bed|wce> \
   -o <outprefix>
 ```
 
@@ -92,10 +92,18 @@ Required parameters:
 * `-b <file.bam>`: BAM file containing aligned reads. Must be sorted, duplicates flagged, and indexed. Both paired-end or single-end data are supported.
 * `-p <peaks>`: file containing peaks. 
 * `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
+* `-c <int>`: The index of the BED file column used to score each peak (index starting from 1)
 * `-o <outprefix>`: Prefix to name output files. Outputs file `<outprefix>.json` with learned model parameters.
 
-Optional parameters:
-* `--skip-frag`: Skip learning fragment parameters. Only learn pulldown and PCR.
+Optional parameters for BAM parsing:
+* `--paired`: Data is paired
+* `--thres <float>`: For estimating fragment length distribution from single end data, only consider peaks with scores above this threshold.
+
+Other optional parameters:
+* `--scale-outliers`: Set all peaks with scores $>$2x median score to have binding prob 1. Recommended with real data.
+* `--noscale`: Don't scale peak scores. Treat given scores as binding probabilities.
+* `--est <int>`: Estimated fragment length. Used as a rough guess to guide inference of fragment length distribution from single end data.
+* `-r <float>`: Ignore peaks with top r% of peak scores.
 
 ### chipmunk simreads
 
