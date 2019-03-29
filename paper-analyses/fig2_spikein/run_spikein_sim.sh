@@ -3,7 +3,7 @@
 OUTDIR=$1
 SCALES=$2
 
-CHIPMUNK="/home/mgymrek/workspace/ChIPmunk/src/chipmunk"
+CHIPMUNK=chipmunk-1.9
 
 f=1
 for scale in ${SCALES} 1

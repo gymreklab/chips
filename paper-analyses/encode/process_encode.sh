@@ -13,11 +13,7 @@ THRESH=$6
 
 MAXFILESIZE=4294967296 # 4GB. Skip large files so AWS doesn't run out of space. TODO set bigger for PE
 
-if [[ -z $THRESH ]]; then
-    THRESH=100
-fi
-
-CHIPMUNK=/home/mgymrek/workspace/ChIPmunk/src/chipmunk
+CHIPMUNK=chipmunk #/home/mgymrek/workspace/ChIPmunk/src/chipmunk
 
 die()
 {
@@ -32,28 +28,32 @@ TMPDIR=${OUTDIR}/${FACTOR}/tmp
 
 # Download ENCODE data
 echo "Downloading ENCODE data"
-#curl -s -L --max-filesize ${MAXFILESIZE} -o ${OUTDIR}/${FACTOR}/${FACTOR}.bam ${BAMURL} || die "Could not download BAM"
-#curl -s -L --max-filesize ${MAXFILESIZE} -o ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz ${BEDURL} || die "Could not download BED"
+if [ ! -f ${OUTDIR}/${FACTOR}/${FACTOR}.bam ]; then
+    curl -s -L --max-filesize ${MAXFILESIZE} -o ${OUTDIR}/${FACTOR}/${FACTOR}.bam ${BAMURL} || die "Could not download BAM"
+    samtools index ${OUTDIR}/${FACTOR}/${FACTOR}.bam || die "Could not index BAM file"
+fi
 
-echo "Unzipping and indexing"
-#gunzip -f ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz || die "Could not unzip BED"
-#samtools index ${OUTDIR}/${FACTOR}/${FACTOR}.bam || die "Could not index BAM file"
+if [ ! -f ${OUTDIR}/${FACTOR}/${FACTOR}.bed ]; then
+    curl -s -L --max-filesize ${MAXFILESIZE} -o ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz ${BEDURL} || die "Could not download BED"
+    gunzip -f ${OUTDIR}/${FACTOR}/${FACTOR}.bed.gz || die "Could not unzip BED"
+fi
+
 
 # Flag the BAM file
 # Need $PICARD env var set
 echo "MarkDuplicates"
-#java -jar -Xmx12G -Djava.io.tmpdir=${TMPDIR} $PICARD \
-#    MarkDuplicates VALIDATION_STRINGENCY=SILENT VERBOSITY=WARNING \
-#    I=${OUTDIR}/${FACTOR}/${FACTOR}.bam \
-#    O=${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam \
-#    M=${OUTDIR}/${FACTOR}/${FACTOR}.metrics || die "Error running mark duplicates"
-#samtools index ${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam || die "Error indexing dup file"
+java -jar -Xmx12G -Djava.io.tmpdir=${TMPDIR} $PICARD \
+    MarkDuplicates VALIDATION_STRINGENCY=SILENT VERBOSITY=WARNING \
+    I=${OUTDIR}/${FACTOR}/${FACTOR}.bam \
+    O=${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam \
+    M=${OUTDIR}/${FACTOR}/${FACTOR}.metrics || die "Error running mark duplicates"
+samtools index ${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam || die "Error indexing dup file"
 
 if [ "${RTYPE}" = "Paired" ] || [ "${RTYPE}" = "Both" ]; then
     $CHIPMUNK learn \
 	-b ${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam \
 	-p ${OUTDIR}/${FACTOR}/${FACTOR}.bed \
-	-o ${OUTDIR}/${FACTOR}/${FACTOR}.paired \
+	-o ${OUTDIR}/${FACTOR}/${FACTOR}.paired-1.9 \
 	-t bed --scale-outliers \
 	--paired 
 fi
@@ -62,5 +62,5 @@ if [ "${RTYPE}" = "Single" ] || [ "${RTYPE}" = "Both" ]; then
 	-b ${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam \
 	-p ${OUTDIR}/${FACTOR}/${FACTOR}.bed \
 	-t bed --scale-outliers \
-	-o ${OUTDIR}/${FACTOR}/${FACTOR} -c 7 --thres $THRESH
+	-o ${OUTDIR}/${FACTOR}/${FACTOR}-1.9 -c 7 --thres $THRESH
 fi

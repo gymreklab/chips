@@ -25,6 +25,15 @@ echo "Get encode bins"
 #    igvtools count ${BAM} ${OUTDIR}/${f}/${f}.encode.tdf ${REFFA}
 #done
 
+# Get overlap of bins with peak/no peak
+intersectBed \
+    -a ${OUTDIR}/windows/chr19_windows_${binsize}kb.bed \
+    -b ${BED} -wa -u > ${OUTDIR}/${factor}/windows_${binsize}kb_peak.bed
+intersectBed \
+    -a ${OUTDIR}/windows/chr19_windows_${binsize}kb.bed \
+    -b ${BED} -wa -v > ${OUTDIR}/${factor}/windows_${binsize}kb_nopeak.bed
+
+
 for nc in 1 5 10 25 50 100 1000 #10000
 do
     echo $nc
@@ -32,7 +41,7 @@ do
     ./run_factor.sh ${factor} ${nc} 51 269113 Single # info for h3k27ac
 #    ./run_factor.sh ${factor} ${nc} 36 525661 Single # info for MEF2A #36 908621 Single # info for BCLAF1
 #    ./run_factor.sh ${factor} ${nc} 101 665975 Paired # info for BACH1
-    bedtools multicov -bams ${OUTDIR}/${factor}/${factor}.${nc}.sorted.bam \
+    bedtools multicov -bams ${OUTDIR}/${factor}/${factor}.${nc}.flagged.bam \
 	-bed ${OUTDIR}/windows/chr19_windows_${binsize}kb.bed > \
 	${OUTDIR}/${factor}/${factor}.${nc}.cov.${binsize}kb.bed
     BED=$(ls ${ENCDIR}/${factor}/*.bed | head -n 1) 
@@ -42,10 +51,3 @@ do
 	-o ${OUTDIR}/${factor}/${factor}.${nc}.json
 done
 
-# Get overlap of bins with peak/no peak
-intersectBed \
-    -a ${OUTDIR}/windows/chr19_windows_${binsize}kb.bed \
-    -b ${BED} -wa -u > ${OUTDIR}/${factor}/windows_${binsize}kb_peak.bed
-intersectBed \
-    -a ${OUTDIR}/windows/chr19_windows_${binsize}kb.bed \
-    -b ${BED} -wa -v > ${OUTDIR}/${factor}/windows_${binsize}kb_nopeak.bed

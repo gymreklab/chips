@@ -408,7 +408,7 @@ void simulate_reads_help(void) {
   cerr << "Usage:   " << PROGRAM_NAME << " simreads -p peaks.bed -f ref.fa -o outprefix [OPTIONS] " << endl;
   cerr << "\n[Required arguments]: " << "\n";
   cerr << "     -p <peaks.bed>: BED file with peak regions" << "\n";
-  cerr << "     -t <str>: The file format of your input peak file. Only `homer` or `bed` are supported." << "\n";
+  cerr << "     -t <str>: The file format of your input peak file. Only `homer` or `bed` are supported. You can use -t wce with no BED file to simulate whole cell extract control data." << "\n";
   cerr << "     -f <ref.fa>: FASTA file with reference genome" << "\n";
   cerr << "     -o <outprefix>: Prefix for output files" << "\n";
   cerr << "\n[Experiment parameters]: " << "\n";

@@ -42,36 +42,38 @@
 
 \subsection*{ChIPmunk model}
 
-ChIPmunk models each major step (shearing, pulldown, PCR, and sequencing) of the ChIP-seq protocol (\textbf{Figure 1A, steps 1-4}) as a distinct module. It assumes binding sites for the target epitome are known, unlike other tools [refs] which focus on simulating binding sites themselves. Model parameters are summarized in \textbf{Table 1}.
+ChIPmunk models each major step (shearing, pulldown, PCR, and sequencing) of the ChIP-seq protocol (\textbf{Figure 1a, steps 1-4}) as a distinct module. It assumes binding sites for the target epitope and their binding scores (probabilities) are known. Model parameters are summarized in \textbf{Table 1}.
 
 \subsubsection*{1. Shearing}
 
-In step 1, cross-linked DNA is sheared to a target fragment length, typically by sonication.
+In step 1, cross-linked DNA is sheared to a target fragment length, for instance by sonication.
 ChIPmunk models the length distribution of fragments.
-We model fragment lengths using a gamma distribution (\textbf{Figure 1B}) based on empirical observation of fragment distributions which have long right tails (\textbf{Supplementary Figure 2}).
+We model fragment lengths using a gamma distribution (\textbf{Figure 1b}) based on empirical observation of fragment distributions which have long right tails (\textbf{Supplementary Figure 2}).
 In the case of paired-end reads, fragment lengths can be determined trivially from the mapping locations of paired reads.
-For single-end reads, individual fragment lengths are not directly observed. We outline a novel method for inferring summary statistics for the length distribution using single-end reads.
+For single-end reads, individual fragment lengths are not directly observed.
+We outline a novel method below for inferring summary statistics for the length distribution using single-end reads.
 
 \paragraph{Inferring fragment lengths from paired-end reads}
 The observed fragment length ($X_i$) for each read pair $i$ can be computed based on the mapping coordinates of the two reads.
 The learn module randomly selects 10,000 read pairs from the input BAM for fitting a gamma distribution.
-Read pairs are filtered to remove fragments marked as duplicates or secondary alignments. % TODO what about if not proper pair? and not mapping to same chrom?
+Read pairs are filtered to remove fragments that are unaligned, not properly paired, marked as duplicates or marked as secondary alignments.
 Read pairs are further filtered to remove fragments with length greater than 3 times the median length of selected fragments.
 
 The mean fragment length is easily computed as $\mu = \dfrac{\sum_{i=1}^{n}X_i}{n}$, where $n$ is the number of fragments remaining after filtering. We then use the method of moments to find maximum likelihood estimates of the gamma distribution shape ($k$) and scale parameters ($\theta$):
 
 \begin{equation}
-  k =  \dfrac{\mu}{\theta}
-\end{equation}
-\begin{equation}
   \theta = \dfrac{1}{n\mu}\sum_{i=1}^{n}(X_i - \mu)^2
+\end{equation}
+
+\begin{equation}
+  k =  \dfrac{\mu}{\theta}
 \end{equation}
 
 \paragraph{Inferring fragment lengths from single-end reads}
 To estimate the fragment length distribution from single-end reads, we assume the length distribution follows gamma distribution with the mean $\mu$ and variance $v$, and use reads located inside ChIP-seq peaks (provided as input) to estimate $\mu$ and $v$ which are used to compute $k$ and $\theta$.
 
 For each peak $peak_i$, we keep track of two lists, $\{start\}_{peak_i}$ and $\{end\}_{peak_i}$.
-For each read overlapping $peak_i$, if the read is on the forward strand we add its start coordinate $\{start\}_{peak_i}$.
+For each read overlapping $peak_i$, if the read is on the forward strand we add its start coordinate to $\{start\}_{peak_i}$.
 If the read is on the reverse strand we add its start coordinate to $\{end\}_{peak_i}$.
 The center point of this peak is calculated as:
 
@@ -79,7 +81,7 @@ The center point of this peak is calculated as:
   center_{peak_i} = \frac{mean(\{start\}_{peak_i}) + mean(\{end\}_{peak_i})}{2}
 \end{equation}
   
-For every $peak_i$ we offset the coordinates in $\{start\}_{peak_i}$ and $\{end\}_{peak_i}$ by $center_{peak_i}$t, so that the coordinates of start points and end points are normalized and symmetric around zero.
+For every $peak_i$ we offset the coordinates in $\{start\}_{peak_i}$ and $\{end\}_{peak_i}$ by $center_{peak_i}$, so that the coordinates of start points and end points are symmetric around zero.
 We then concatenate lists from each peak to form $\{start\}$ and $\{end\}$:
 
 \begin{equation} \label{eq:concat}
@@ -89,7 +91,7 @@ We then concatenate lists from each peak to form $\{start\}$ and $\{end\}$:
   \end{array}
 \end{equation}
 
-The mean value of fragment length mu can be estimated as:
+The mean fragment length $\mu$ can be estimated as:
 \begin{equation}
   \mu = mean(\{end\}) - mean(\{start\})
 \end{equation}
@@ -104,10 +106,11 @@ The expected density function $EDF(x)$ is defined as the expected deviation of a
 \end{equation}
 where $S$ is a random element in $\{start\}$ and $E$ is a random element in $\{end\}$.
 
-Since we can compute $\mu$, we can reduce the density function of the fragment length distribution to $p_v(x)$. % TODO p_v(x) is the PDF. now just function of v and x.
+Since we can compute $\mu$, we can reduce the density function of the fragment length distribution to $p_v(x)$, the probability density function of the fragment length variance. % TODO p_v(x) is the PDF. now just function of v and x.
 We construct a score function $F(v)$ as shown below.
 Intuitively, if we have a correct guess of $v$, $F(v)$ should be equal to zero.
 
+%% TODO what is L??
 \begin{equation}
   \begin{array}{c} \label{eq:Fv}
 F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2}|) + E(|E- \frac{\mu}{2}|) \\
@@ -120,7 +123,8 @@ E(|E - \frac{\mu}{2}|)=EDF_{end}(x) \\
 
 To find an optimal $v$ that minimizes $|F(v)|$, we conduct a binary search between 1000 and 10,000.
 
-In practice, we slightly offset the last two items in the score function in \textbf{Equation~\ref{eq:Fv}} to get the score below, which gave slightly more accurate estimation of $v$ on real data. This may be due to the fact that fragment length distributions are truncated on the left end, with little or no fragments with lengths less than 100bp observed, and thus do not follow a true gamma distribution.
+In practice, we slightly offset the last two items in the score function in \textbf{Equation~\ref{eq:Fv}} to get the score below, which gives slightly more accurate estimation of $v$ on real data.
+This may be due to the fact that fragment length distributions are truncated on the left end, with little or no fragments with lengths less than 100bp observed, and thus do not follow a true gamma distribution.
 
 \begin{equation}
 F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2} - \frac{E- \frac{\mu}{2}}{4}|) - E(|E- \frac{\mu}{2} - \frac{S + \frac{\mu}{2}}{4}|)
@@ -129,82 +133,83 @@ F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2} - 
 \subsubsection*{Pulldown}
 In step 2, sheared cross-linked DNA is subject to pulldown, during which an antibody for the protein or modification of interest is used to enrich the pool of fragments for those bound to the epitope recognized by the antibody.
 This process is imperfect: some bound fragments will not be pulled down, and some unbound fragments will be pulled down.
-To better model this process, we built the following formula to quantify the probability of pulldown for fragments in peak regions and also fragments in non-peak regions.
+To model this process, we use quantify the ratio of the probability of pulling down a bound vs. unbound fragment as described below.
+This value is specific to each ChIP-seq experiment and depends on the antibody specificity as well as the fraction of the genome bound by the factor of interest.
 
-We use $B$ to represent if a random fragment is bound, and $\overline{B}$ if unbound. And we use $D$ to denote if a fragment is pulled down.
-For any fragment, the probability of being pulled down is:
+We use $B_i$ to denote that fragment $i$ is bound, $\overline{B_i}$ to denote that fragment $i$ is unbound, and $D_i$ to denote that fragment $i$ is pulled down. For a fragment $i$, the probability of being pulled down can then be written as:
 \begin{equation} \label{eq:pulldown}
-    P(D) = P(D, B) + P(D, \overline{B}) = P(D|B)*P(B) + P(D|\overline{B})*P(\overline{B})
+  P(D_i) = P(D, B_i) + P(D, \overline{B_i}) + P(D|B)P(B_i) + P(D|\overline{B})(1-P(B_i))
 \end{equation}
 
-In peak regions, due to the nature of ChIP-sequencing experiments, $P(D, B)$ is much greater than $P(D, \overline{B})$.
-Thus, for fragment $i$ overlapped with peak $k$, the equation \textbf{Equation~\ref{eq:pulldown}} reduces to:
-\begin{equation} \label{eq:pulldown_peak}
-    P_i(D) \approx P_{ik}(D|B)*P_{ik}(B)
-\end{equation}
-For any fragment $i$, we assume that the probability of its being bound $P_{ik}(B)$ is directly proportional to the peak score $C_k$ with a coefficient $\alpha$, i.e. $P_{ik}(B) = \alpha*C_k$,
-and once it is bound, the probability of its being pulled down is 100\%, i.e. $P_{ik}(D|B) = 1$.
-Based users' choices, peak scores can either be based on peak intensities given in an input peak BED file or determined based on counts of overlapped fragments if a BAM file is specified.
-If peak intensities are given, $C_k$ is defined as the intensity of peak $k$ divided by the maximum peak intensity.
-If a BAM file is specified, $C_k$ is defined as the number of fragments overlapping peak $k$ divided by the maximum number of reads overlapping any peak.
-This scaling ensures all peak scores are between 0 and 1. Thus for a fragment $i$ overlapped with peak $k$, the probability of its being pulled down is:
-\begin{equation} \label{eq:pulldown_peak_in_practice}
-P_i(D) \approx \alpha C_k
+where $P(D|B)$ denotes the probability that a given bound fragment will be pulled down and $P(D|\overline{B})$ denotes the probability that a given unbound fragment will be pulled down.
+
+For any fragment $i$, we set the probability of it being bound $P(B_i)$ based on the scores of peaks it overlaps:
+
+\begin{equation}
+  P(B_i) = \begin{cases}
+    0, & \text{ if the fragment doesn't overlap any peaks} \\
+    1-\Pi_{r \in R} (1-S_r), & \text {if the fragment overlaps one ore more peaks}
+    \end{cases}
 \end{equation}
 
-For a fragment $j$ in a non-peak region, since the probability of its being bound is extremely small, we set $P_j(B) = 0$ and $P_j(\overline{B}) = 1$ as an approximation.
-And we treat them uniformly with the same probability of pull-down, i.e. $P_{j}(D|\overline{B}) = P_{avg}(D|\overline{B})$.
-Thus the equation \textbf{Equation~\ref{eq:pulldown}} reduces into:
-\begin{equation} \label{eq:pulldown_nonpeak}
-    P_j(D) \approx P_{avg}(D|\overline{B})
-\end{equation}
-To estimate the probability $P_{avg}(D|\overline{B})$, we model the ratio of the probabilities for a bound vs. an unbound fragment to be pulled down. Using Baye's Rule, we have:
+where $R$ is the set of all peak regions overlapping fragment $i$ and $S(r)$ is the probability that peak $r$ is bound. A description of how this probability is set for each peak in practice is given below.
 
-\begin{equation} \label{eq:bayesPDB}
-    P_{avg}(D|B) = \frac{P_{avg}(B|D)P_{avg}(D)}{P_{avg}(B)}
+We compute conditional pulldown probabilities using Baye's Rule:
+\begin{equation}
+  P(D|B) = \frac{P(B|D)P(D)}{P(B)}
 \end{equation}
-\begin{equation} \label{eq:bayesPDUB}
-    P_{avg}(D|\overline{B}) = \frac{P_{avg}(\overline{B}|D)P_{avg}(D)}{P_{avg}(\overline{B})}
+\begin{equation}
+  P(\overline{B}) = \frac{P(\overline{B}|D)P(D)}{P(\overline{B})}
 \end{equation}
 
-Taking the ratio of these cancels $P_{avg}(D)$ and gives:
-\begin{equation} \label{eq:ratio}
-  R = \frac{P_{avg}(D|B)}{P_{avg}(D|\overline{B})} = \frac{P(B|D)P_{avg}(\overline{B})}{P(\overline{B}|D)P_{avg}(B)}
+where here $P(B|D)$ and $P(\overline{B}|D)$ represent averages across all fragments.
+We do not have a straightforward way to compute $P(D)$, the average probability that a fragment is pulled down, using only observed ChIP-seq reads since we do not actually observe fragments that are not pulled down.
+Thus, we do not attempt to compute these conditional probabilities directly.
+Instead, we take the ratio which cancels $P(D)$:
+
+\begin{equation}
+\alpha = \frac{P(D|B)}{P(D|\overline{B})} = \frac{P(B|D)P(\overline{B})}{P(\overline{B}|D)P(B)}
 \end{equation}
 
-$P_{avg}(B)$, or the probability that a fragment is bound on average, is equal to the fraction of the genome bound by the factor of interest $f$.
-We can approximate $f$ as the sum of the lengths of all peaks $l_k$ divided by the total length of the genome $T$.
-We can approximate $f$ with \textbf{Equation~\ref{eq:avg_b}}, in which $l_k$ denotes the length of peak $k$ and this equation calculates the expected sum length of bound fragments divided by the total length of the genome $T$. Then we have $P(B) \approx f$ and $P(\overline{B}) \approx 1-f$.
-\begin{equation} \label{eq:avg_b}
-  f \approx \frac{1}{nT} \sum_{k=1}^{n} P_k(B) l_k \approx \frac{\alpha}{nT} \sum_{k=1}^{n} C_k l_k
+% Define f
+$P(B)$, or the probability that a fragment is bound on average, is equal to the fraction of the genome bound by the factor of interest $f$.
+We can approximate $f$ as the sum of the lengths of all peaks $l_k$ weighted by their binding probabilities divided by the total length of the genome $T$:
+
+\begin{equation}
+  f \approx \frac{1}{G} \sum_{r \in R} S(r)l_r
 \end{equation}
 
+where $G$ is the size of the reference genome, $S(r)$ is the probability peak reagion $r$ is bound as described above, and $l_r$ is the length of peak $r$, assuming no overlap between peaks. % TODO hmm what if peaks overlap?
 
-$P_{avg}(B|D)$, or the averaged probability that a fragment is bound given that it is pulled down, is a measure of the specificity of the antibody. This can be approximated by analyzing the percent of fragments falling within peaks, which we denote as $s$.
-Thus $P_{avg}(B|D) \approx s$ and $P_{avg}(\overline{B}|D) \approx 1-s$.
+% Define s
+$P(B|D)$, or the average probability that a fragment is bound given that it is pulled down, is a measure of the specificity of the antibody. Assuming the majority of reads falling in peaks are truly bound, we can roughly approximated this as the percent of fragments falling within peaks, which we denote as $s$.
 
+% Ratio
 Using these two metrics, $f$, and $s$ (\textbf{Supplementary Table 1}), we can simplify the ratio $R$ as:
 \begin{equation} \label{eq:ratiosimple}
-  R = \frac{s(1-f)}{(1-s)f}
+  \alpha = \frac{s(1-f)}{(1-s)f}
 \end{equation}
 
-Combining all equations from \textbf{Equation~\ref{eq:pulldown_nonpeak}} to \textbf{Equation~\ref{eq:ratiosimple}} together, we can have the estimation of $P(D)$ for fragments in non-peak regions as is shown below:
-\begin{equation} \label{eq:pulldown_nonpeak_in_practice_1}
-P_j(D) \approx \frac{(1-s)f}{s(1-f)} * P_{avg}(D|B)
-\end{equation}
-Since we assume $P(D|B)$ is always equal to 1, \textbf{Equation~\ref{eq:pulldown_nonpeak}} can be further written as:
-\begin{equation} \label{eq:pulldown_nonpeak_in_practice_2}
-P_j(D) \approx \frac{(1-s)f}{s(1-f)}
-\end{equation}
+% How it's done in practice
+Since we only know the ratio $\alpha$, for simplicity in simulations we set $P(D|B)=1$ and $P(D|\overline{B})=\frac{1}{\alpha}$.
+Substituting into Equation~\ref{eq:pulldown} above, we compute the probability that fragment $i$ is pulled down as:
 
-Because $f$ is very small in practice and proportional to the coefficient $\alpha$ in \textbf{Equation~\ref{eq:avg_b}}, $P_j(D)$ is also nearly proportional to $\alpha$ same as $P_i(D)$ of peak regions. Thus, the probability of pull-down is always proportional to $\alpha$ regardless of the fragment location, and we set $\alpha = 1$ in practice.
+\begin{equation}
+  P(D_i) = P(B_i) + \frac{1}{\alpha}(1-P(B_i))
+\end{equation}
+where $P(B_i)$ is based on peak scores as defined above.
+
+Note, in reality, $P(D|B)$ is likely to be much less than 1, since the pulldown process is inefficient and many fragments are lost.
+Further, the number is likely to vary largely across different experiments.
+Estimating the absolute value of $P(D|B)$ from real datasets is a topic of future work.
+This issue and its relationship to the number of genome copies simulated is discuseed further in implementation details below.
 
 \subsubsection*{PCR}
 
 In step 3, PCR is used to amplify pulled down fragments before sequencing.
 Let $n_i$ represent the number of reads (or read pairs) with $i$ PCR duplicates (including the original fragment).
-$n_i$ is modeled using a geometric distribution, where $r$ gives the probability that a fragment has no PCR duplicates.
-The parameter $r$ is estimated as $1/\overline{n}$, where $\overline{n} = \frac{\sum_{i=1}^\infty (i * n_i)}{\sum_{i=1}^\infty n_i}$.
+$n_i$ is modeled using a geometric distribution, where $p$ gives the probability that a fragment has no PCR duplicates.
+The parameter $p$ is estimated as $1/\overline{n}$, where $\overline{n} = \frac{\sum_{i=1}^\infty (i  n_i)}{\sum_{i=1}^\infty n_i}$.
 
 \subsubsection*{Sequencing}
 
@@ -213,6 +218,15 @@ Sequences are based on an input reference genome using the coordinates of each f
 We model the per-base pair substitution rate, insertion rate, and deletion rate (\textbf{Supplementary Table 1}).
 
 \subsection*{ChIPmunk implementation}
+
+\subsubsection*{Peak scores}
+% TODO scaling peak scores to be probabilities
+%For any fragment $i$, we assume that the probability of its being bound $P_{ik}(B)$ is directly proportional to the peak score $C_k$ with a coefficient $\alpha$, i.e. $P_{ik}(B) = \alpha*C_k$,
+%and once it is bound, the probability of its being pulled down is 100\%, i.e. $P_{ik}(D|B) = 1$.
+%Based users' choices, peak scores can either be based on peak intensities given in an input peak BED file or determined based on counts of overlapped fragments if a BAM file is specified.
+%If peak intensities are given, $C_k$ is defined as the intensity of peak $k$ divided by the maximum peak intensity.
+%If a BAM file is specified, $C_k$ is defined as the number of fragments overlapping peak $k$ divided by the maximum number of reads overlapping any peak.
+
 
 \subsubsection*{Learn implementation}
 % TODO
@@ -249,14 +263,13 @@ It’s noteworthy that this estimation step requires a BAM file with PCR copies 
 % Analyze one bin at a time for computational efficiency (how choose bin size, how deal with boundaries of bins)
 % In practice, need to decide how many reads to generate from each chunk (see Michael's old pulldown text in scratch.tex)
 
+
 \subsubsection*{C++ implementation details}
-% TODO
-% C++ implementation
-% open source on github
-% use standard open source libraries (htslib for BAM reading, pthread for multithreading)
-% work with standard file formats (BED, BAM, jSON)
-ChIPmunk is implemented using C++, and the its source code is publicly available on Github: https://github.com/gymreklab/ChIPmunk.
-As input, it supports the standrad BAM file format, and two BED file formats including HOMER format and ENCODE BED format.
+ChIPmunk is implemented as an open source C++ project with source code publicly available on Github: https://github.com/gymreklab/ChIPmunk.
+It uses the open source libraries htslib (www.htslib.org) for parsing BAM files and POSIX threads for implementing multithreading.
+It supports standard file formats including BAM/CRAM for aligned reads, BED for peak files, JSON for model files, and FASTQ for raw reads.
+
+All analyses were performed using ChIPmunk v1.9. % TODO rerun with this one
 
 \subsection*{Inferring parameters of ENCODE datasets}
 
@@ -265,12 +278,45 @@ We fetched unfiltered BAM files and narrowPeak or broadPeak peak files for trans
 If multiple replicates were available for a factor, we chose the first one as a training example.
 We chose a total of 221 datasets as examples.
 
-We used the Picard \cite{picard} MarkDuplicates tool with default parameters to mark duplicates in each BAM file.
+We used the Picard \cite{picard} MarkDuplicates tool (v2.18.11) with default parameters to mark duplicates in each BAM file.
 For paired end datasets, we called ChIPmunk's learn module with non-default parameter -{}-paired.
 For single end datasets, we used non-default parameters -c 7 -{}-thres 100 for transcription factors and -c 7 -{}-thres 5 for histone modifications.
 For 12 example paired-end datasets, we called learn in both paired end and single end mode to compare inferred fragment length distributions (\textbf{Supplementary Figure 2}).
 
 Inferred parameters as well as links to JSON model files that can be used as input to the ChIPmunk simreads module are provided in \textbf{Supplementary Table 2}.
+
+\subsection*{Evaluating ChIPmunk using ENCODE datasets}
+
+We performed simulations using an increasing number of genome copies (ChIPmunk argument -{}-nc 1, 5, 10, 25, 50, 100, or 1000) for two factors (the histone modification H3K27ac and the transcription factor BACH1) with ENCODE data available in the GM12878 cell line.(BAM accession ENCFF097SQI and broadPeak [BED] accession ENCFF465WTH for H3K27ac; BAM accession ENCFF518TTP and narrowPeak [BED] accession ENCFF465WTH for BACH1.
+For each copy number in each factor, we ran ChIPmunk's simreads tool on hg19 chromosome 19 (-{}-region chr19:1-59128983) using the corresponding learned ENCODE model (see \textbf{Supplementary Table 2}) and the same sequencing parameters as the ENCODE reads from chromosome 19 for each dataset (-{}-numreads 269113 -{}-readlen 51 for H3Ka7ac; -{}-numreads 665975 -{}-readlen 101 -{}-paired for BACH1). 
+We additionally used options -p ENCODE.bed -t bed -c 7 -{}-scale-outliers, where ENCODE.bed represents the corresponding peak file for each factor with accessions listed above.
+Simulated reads were aligned to the hg19 reference genome using BWA MEM \cite{bwamem} v0.7.12-r1039 with default parameters and converted to sorted and indexed BAM files using samtools \cite{samtools} version 1.5. Duplicates were flagged using the Picard \cite{picard} MarkDuplicates tool (v2.18.11) with default parameters.
+
+We used the bedtools \cite{bedtools} (v2.27.1) makewindows command to generate a list of non-overlapping windows of 5kb across chromosome 19 and the bedtools multicov command to count the number of reads from each BAM file falling in each window. We used the bedtools intersect command to determine the intersection of each bin with the input peak files. For each bin, we determined the Pearson correlation bewteen log10 read counts in each simulated vs. the ENCODE dataset after removing bins with 0 counts in each dataset and adding a pseudocount of 1 read to each bin.
+
+Timing experiments were performed in a Linux environment running Centos 7.4.1708 on a server with 28 cores (Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} CPU E5-2660 v4 @ 2.00GHz) and 125 GB RAM using the UNIX ``time'' command and are based on the ``sys'' time reported. % TODO should this be sys+user and performed on a single core?
+
+%% TODO chipulate comparison %%
+
+\subsection*{Power analysis}
+We used ChIPmunk's simreads tool to generate genome-wide ChIP-seq datasets for five histone modifications (HMs) (H3K27ac, H3K4me3, H3K4me1, H3K27me3, and H3K36me3) and two transcription facetors (TFs) (BACH1 and CTCF) based on model parameters ($f$ and $s$) learned from available ENCODE datasets (BAM/BED accessions ENCFF097SQI/ENCFF465WTH, ENCFF398NET/ENCFF068UAA, ENCFF252ZII/ENCFF966LMJ, ENCFF014HHB/ENCFF533IKU, ENCFF191SDM/ENCFF695NNX, ENCFF518TTP/ENCFF866OLZ, and ENCFF584BRF/ENCFF559IXF for H3K27ac, H3K4me3, H3K4me1, H3K27me3, H3K36me3, BACH1, and CTCF, respectively. BED accessions are for broadPeak files for the histone modifications and narrowPeak files for the transcription factors.
+
+For each HM and TF, we used options -p ENCODE.bed -t bed -c 7 -{}-scale-outliers where ENCODE.bed represents the corresponding peak file for each factor with accessions listed above and set -{}-gamma-frag 10,20 -{}-pcr\_rate 0.85 -{}-nc 100 -{}-readlen 100 to keep these parameters constant across all runs.
+We simulated datasets using numbers of reads (-{}-numreads) set to 1, 5, 10, 50, or 100 million reads.
+We additionally simulated a control dataset (whole cell extract) with the same number of reads but using the options -t wce and no input BED file. As described above, simulated reads were aligned to hg19 using BWA-MEM and duplicates were flagged with Picard.
+We used MACS2 \cite{MACS2} to call peaks on the resulting duplicate-flagged files using whole cell extract reads as a control and with default options except -{}-broad for histone modifications.
+
+We used the bedtools \cite{bedtools} (v2.27.1) intersect command to determine the percentage of input ENCODE peaks overlapping a peak called by MACS2 from the simulated data, using narrowPeak output for transcription factors and broadPeak output for histone modifications.
+
+\subsection*{Analysis of spike in controls}
+We used the bedtools \cite{bedtools} (v2.27.1) random command to generate 10,000 random peaks of size 100 from hg19 chromosome 19 and 20 random peaks of size 100 from Drosophila (dm6) chromosome 4. All peaks were initially given a binding score of 1 (meaning 100\% probability of binding).
+
+We then used the ChIPmunk uitlity script chipmunk-spike-in.sh to generate a mock reference genome consisting of the concatenated dm6 and hg19 references and a peak file consisting of both the hg19 and dm6 peaks. We then generated peak files representing different conditions with overall reduced binding of the human sites by setting thes scores of all peaks to 0.01, 0.1, 0.25, 0.5, or 0.8, representing reduced binding affinity.
+For each condition, we used ChIPmunk's simreads tool with options -p concatenated\_peakds.bed -t bed -c 4 -f mock\_genome.fa -{}-numcopies 100 -{}-noscale -{}-recomputeF -{}-numreads 1000000 and a model file with f: 15, theta: 20, pcr\_rate: 1, and s: 0.4. Note the option -{}-recomputF is a convenience option to recompute the value of $f$ based on the user input set of peaks.
+
+Reads were aligned to the mock reference genome using BWA MEM. Read densities around peaks were visualized using the annotatePeaks.pl script available from HOMER \cite{HOMER} using options -size 1000 -hist 1.
+Because exactly 1 million reads were simulated in each case, mean read counts per bin represent reads per million (RPM).
+To compute reference corrected reads per million (RRPM) based on Orlando, \emph{et al}. \cite{spikein}, we divided each value by the number of reads from the condition mapping to the dm6 genome.
 
 \bibliography{ChIPmunk_OnlineMethods}
 \bibliographystyle{ieeetr}

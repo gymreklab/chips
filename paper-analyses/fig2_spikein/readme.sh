@@ -9,8 +9,8 @@ SCALES="0.01 0.1 0.25 0.5 0.8"
 
 # Get peaks with different scalings
 echo "Generate peaks and reffa"
-./generate_peaks.sh ${REFFA} ${SPIKEFA} ${OUTDIR} "${SCALES}"
-bwa index ${OUTDIR}/chipmunk_spikein_1_1.fa
+#./generate_peaks.sh ${REFFA} ${SPIKEFA} ${OUTDIR} "${SCALES}"
+#bwa index ${OUTDIR}/chipmunk_spikein_1_1.fa
 
 # Run simulation and alignment for each
 echo "Run simulation"

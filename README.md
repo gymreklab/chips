@@ -1,17 +1,16 @@
 # ChIPmunk
 
-** Under construction. Official release coming very soon! **
-
 ChIPmunk is a tool for simulating ChIP-sequencing experiments.
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
 
-[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats)
+[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats) | [FAQ](#faq)
 
 <a name="download"></a>
 ## Download
 
 The latest ChIPmunk release is available on the [releases page](https://github.com/gymreklab/ChIPmunk/releases).
+ChIPmunk is also packaged in a docker container available on the [Gymrek Lab docker hub](https://hub.docker.com/u/gymreklab) under `gymreklab/chipmunk-X.X` where `X.X` is the ChIPmunk version number.
 
 <a name="install"></a>
 ## Basic Install
@@ -23,12 +22,18 @@ If you are installing from the tarball, type the following commands.
 ```
 tar -xzvf chipmunk-X.X.tar.gz
 cd chipmunk-X.X
-./configure [--prefix=$PREFIX]
+./configure
 make
 make install
 ``` 
 
-If you do not have root access, you can set `--prefix=$HOME`, which will install `chipmunk` to `~/bin/chipmunk`.
+If you do not have root access, you can instead run:
+```
+./configure --prefix=$HOME
+make
+make install
+```
+which will install `chipmunk` to `~/bin/chipmunk`.
 If you get a pkg-config error, you may need to set PKG_CONFIG_PATH to a directory where it kind find `htslib.pc`.
 
 Typing `chipmunk --help` should show a help message if ChIPmunk was successfully installed.
@@ -73,7 +78,7 @@ chipmunk learn \
 chipmunk simreads \
   -p <peaks> \
   -f <ref.fa>
-  -t <homer|bed> \
+  -t <homer|bed|wce> \
   -o <outprefix>
 ```
 
@@ -83,19 +88,27 @@ chipmunk simreads \
 ### chipmunk learn
 
 Required parameters:
-* `-b <file.bam>`: BAM file containing aligned reads. Must be sorted, duplicates flagged, and indexed. Paired end or single end data are supported.
+* `-b <file.bam>`: BAM file containing aligned reads. Should be sorted and indexed. To accurately estimate PCR duplicate rate, duplicates must be flagged e.g. using Picard. Both paired-end or single-end data are supported.
 * `-p <peaks>`: file containing peaks. 
 * `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
+* `-c <int>`: The index of the BED file column used to score each peak (index starting from 1)
 * `-o <outprefix>`: Prefix to name output files. Outputs file `<outprefix>.json` with learned model parameters.
 
-Optional parameters:
-* `--skip-frag`: Skip learning fragment parameters. Only learn pulldown and PCR.
+Optional parameters for BAM parsing:
+* `--paired`: Data is paired
+* `--thres <float>`: For estimating fragment length distribution from single end data, only consider peaks with scores above this threshold.
+
+Other optional parameters:
+* `--scale-outliers`: Set all peaks with scores $>$2x median score to have binding prob 1. Recommended with real data.
+* `--noscale`: Don't scale peak scores. Treat given scores as binding probabilities.
+* `--est <int>`: Estimated fragment length. Used as a rough guess to guide inference of fragment length distribution from single end data.
+* `-r <float>`: Ignore peaks with top r% of peak scores.
 
 ### chipmunk simreads
 
 Required parameters:
 * `-p <peaks>`: file containing peaks. 
-* `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
+* `-t <homer|bed|wce>`: Specify the format of the peaks file. Options are "bed" or "homer" when loading peaks. Specify `-t wce` and no peaks input file to simulate whole cell extract control data.
 * `-f <ref.fa>`: Reference genome fasta file. Must be indexed (e.g. `samtools faidx <ref.fa>`)
 * `-o <outprefix>`: Prefix to name output files. Outputs `<outprefix>.fastq` for single-end data or `<outprefix>_1.fastq` and `<outprefix>_2.fastq` for paired-end data.
 
@@ -103,7 +116,7 @@ Experiment parameters:
 * `--numcopies <int>`: Number of copies of the genome to simulate (Default: 100)
 * `--numreads <int>`: Number of reads (or read pairs) to simulate (Default: 1000000)
 * `--readlen <int>`: Read length to generate (Default: 36bp)
-* --paired`: Simulated paired-end reads (by default single-end reads are generated).
+* `--paired`: Simulated paired-end reads (by default single-end reads are generated).
 
 Model parameters: (either user-specified or learned from `chipmunk learn`:
 * `--model <str>`: JSON file with model parameters (e.g. from running learn. Setting parameters with other options overrides anything in the JSON file.
@@ -111,10 +124,13 @@ Model parameters: (either user-specified or learned from `chipmunk learn`:
 * `--spot <float>`: SPOT score (fraction of reads in peaks). Default: 0.18
 * `--frac <float>`: Fraction of the genome that is bound. Default: 0.03
 * `--pcr_rate <float>`: The geometric step size paramters for simulating PCR. Default: 1.0.
+* `--recomputeF`: Recompute `--frac` param based on input peaks. Recommended especially when using model parameters that were not learned on real data.
 
-Peark scoring:
-* `-b <reads.bam>`: Use a provided BAM file to obtain scores for each peak. No BAM is required. If a BAM is not given, scores in the peak files are used.
+Peak scoring:
+* `-b <reads.bam>`: Use a provided BAM file to obtain scores for each peak (optional). If a BAM is not given, scores in the peak files are used.
 * `-c <int>`: The index of the BED file column used to score each peak (index starting from 1). Required if not using `-b`.
+* `--scale-outliers`: Set all peaks with scores $>$2x median score to have binding prob 1. Recommended with real data.
+* `--noscale`: Don't scale peak scores. Treat given scores as binding probabilities.
 
 Other options:
 * `--region <str>`: Only simulate reads from this region chrom:start-end. By default, simulate genome-wide.
@@ -130,11 +146,11 @@ Other options:
 
 ### Peak files
 
-Peak files may be either in Homer or Bed format. For all modules, the option `-t` should specify either "homer" or "bed" appropriately.
+Peak files may be either in BED or HOMER peak format. For all modules, the option `-t` should specify either "bed" or "homer" appropriately.
 
 With `-t bed`, your peak file must be tab-delimited with no header line. The first three columns are chromosome, start, and end. For `chipmunk simreads` if you don't supply a BAM file you'll also need to specify which column contains the peak score using `-c <colnum>`. For example if your file just has four columns, chrom, start, end, and score, set `-c 4`. If your peaks don't have scores you can modify your peak file to set all peaks to have score 1.
 
-With `-t homer`, your peak file should be in the format output by the [Homer peak caller](http://homer.ucsd.edu/homer/ngs/peaks.html). For homer files, set `-c 6` since the peak score intensity is in column 6.
+With `-t homer`, your peak file should be in the format output by the [HOMER peak caller](http://homer.ucsd.edu/homer/ngs/peaks.html). For HOMER files, set `-c 6` since the peak score intensity is in column 6.
 
 ### Model files
 
@@ -154,4 +170,13 @@ Model files are in JSON syntax, and follow the example below. Hundreds of model 
 }
 ```
 
-`chipmunk learn` outputs a JSON model file. `chipmunk simreads` can take in a model file with all or some of these parameters specified. Model parameters set on the command line override those set in the JSON model file.
+`chipmunk learn` outputs a JSON model file. `chipmunk simreads` can take in a model file with all or some of these parameters specified. Model parameters set on the command line override those set in the JSON model file. 
+
+<a name="faq"></a>
+## FAQ
+
+**Q**: What should I set the number of genome copies (`--nc`) parameter to for `simreads`?<br>
+**A**: This number is not directly comparable to the actual number of cells used in an experiment since we do not currently model pulldown inefficiency. We have found in most settings performance starts to plateau after around 25 copies with best performance around `--nc 100`. Note, run time increases linearly with the value set for this parameter.
+<br><br>
+**Q**: I get a `pcr_rate` output from `learn` of 1.0 (no duplicates) but I know there should be duplicates in my data!<br>
+**A**: Make sure duplicates are marked, e.g. using [Picard MarkDuplicates](https://broadinstitute.github.io/picard/command-line-overview.html#MarkDuplicates).

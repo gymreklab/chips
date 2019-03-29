@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Run process encode on 12 example factors
 SCRIPTNAME=process_encode_s3.sh
 while IFS='' read -r line || [[ -n "$line" ]]; do
     bamurl=$(echo $line | cut -f 4 -d',')
@@ -13,11 +12,11 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     rtype=$(echo $line | cut -f 3 -d',')
     # First check if output file exists
     if [ "${rtype}" = "Paired" ]; then
-	outfile=${factor}.paired.json
+	outfile=${factor}.paired-1.9.json
 	echo "Skipping paired end for now"
 	continue # process paired later... most too big and fail on AWS
     elif [ "${rtype}" = "Single" ]; then
-	outfile=${factor}.json
+	outfile=${factor}-1.9.json
     fi
     aws s3 ls s3://chipmunk-encode-models/${outfile} > /dev/null
     if [[ $? -eq 0 ]]; then
@@ -31,5 +30,6 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	--job-definition chipmunk-encode:2 \
         --timeout 'attemptDurationSeconds=3600' \
 	--container-overrides 'command=[\"${SCRIPTNAME}\",\"${bamurl}\",\"${bedurl}\",\"${factor}\",\"${rtype}\"],environment=[{name=\"BATCH_FILE_TYPE\",value=\"script\"},{name=\"BATCH_FILE_S3_URL\",value=\"s3://gymreklab-awsbatch/${SCRIPTNAME}\"}]'"
-    sh -c "${cmd}"
-done < encode_datasets_K562_GM12878_clean.csv
+#    sh -c "${cmd}"
+    echo "${cmd}"
+done < encode_datasets_for_aws.csv
