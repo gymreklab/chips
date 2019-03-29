@@ -24,7 +24,7 @@ bool PeakReader::HomerPeakReader(std::vector<Fragment>& peaks,
       
       std::stringstream linestream(line);
       std::string element;
-      uint32_t elem_idx=0;
+      std::uint32_t elem_idx=0;
       while(!linestream.eof()){
         linestream >> element;
         if (elem_idx == 1){
@@ -83,7 +83,7 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
       
       std::stringstream linestream(line);
       std::string element;
-      uint32_t elem_idx=0;
+      std::uint32_t elem_idx=0;
       while(!linestream.eof()){
         linestream >> element;
         if (elem_idx == 0){
@@ -134,7 +134,7 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
   std::vector<std::string> seq_names = bamheader->seq_names();
   std::vector<uint32_t> seq_lengths = bamheader->seq_lengths();
 
-  uint32_t total_genome_length = 0;
+  std::uint32_t total_genome_length = 0;
   std::vector<Fragment> fragments;
 
   if (region.empty()){
@@ -281,8 +281,8 @@ void PeakReader::Rescale(std::vector<Fragment>& peaks, bool rm_outliers) {
   }
   float threshold = max_score;
   if (rm_outliers) {
-    size_t n = scores.size()/2;
-    nth_element(scores.begin(), scores.begin()+n, scores.end());
+    std::size_t n = scores.size()/2;
+    std::nth_element(scores.begin(), scores.begin()+n, scores.end());
     float median_score = scores[n];
     float max_possible = median_score*3; // TODO what threshold
     if (max_possible<max_score) {
@@ -296,6 +296,7 @@ void PeakReader::Rescale(std::vector<Fragment>& peaks, bool rm_outliers) {
       peaks[peak_index].score /= threshold;
     }
   }
+  return;
 }
 
 bool PeakReader::compare_location(Fragment a, Fragment b){

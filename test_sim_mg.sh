@@ -23,13 +23,13 @@ do
 	--numcopies ${nc} \
 	--numreads 100000 \
 	--readlen 100 \
-	--gamma-frag 14.2142,15.9923 \
-	--spot 0.00172121 --frac 8.43518e-05 \
+	--gamma-frag 15.2896,15.0162 \
+	--spot 0.245845 --frac 0.000179822 \
 	--region chr19:1-40000000 \
 	--binsize 200000 \
     --thread 10 \
     --sequencer ${SEQUENCER}\
-    --pcr_rate 0.8 \
+    --pcr_rate 0.825219 \
 	--paired
     
     bowtie2 -x $(echo $REFFA | cut -d'.' -f 1) -1 ${OUTDIR}/reads_1.fastq -2 ${OUTDIR}/reads_2.fastq > ${OUTDIR}/reads.${nc}.sam
