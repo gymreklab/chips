@@ -29,7 +29,7 @@ if [ "$RTYPE" = "Paired" ]; then
     OPTARGS=" --paired"
 fi
 time $CHIPMUNK simreads \
-    -p ${BED} -b ${BAM} \
+    -p ${BED} \
     -t bed -c 7 --scale-outliers \
     -f ${REFFA} \
     -o ${OUTDIR}/${factor}/${factor}.${nc} \
