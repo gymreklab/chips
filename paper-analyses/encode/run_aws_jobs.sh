@@ -30,6 +30,6 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	--job-definition chipmunk-encode:2 \
         --timeout 'attemptDurationSeconds=3600' \
 	--container-overrides 'command=[\"${SCRIPTNAME}\",\"${bamurl}\",\"${bedurl}\",\"${factor}\",\"${rtype}\"],environment=[{name=\"BATCH_FILE_TYPE\",value=\"script\"},{name=\"BATCH_FILE_S3_URL\",value=\"s3://gymreklab-awsbatch/${SCRIPTNAME}\"}]'"
-#    sh -c "${cmd}"
-    echo "${cmd}"
+    sh -c "${cmd}"
+#    echo "${cmd}"
 done < encode_datasets_for_aws.csv
