@@ -51,3 +51,4 @@ docker run \
 
 # Compile all params from AWS for supp table 2
 ./compile_aws_params.sh | grep -v K562 > ChIPMunk_SuppTable2.csv
+./get_markdown.sh ChIPMunk_SuppTable2.csv
