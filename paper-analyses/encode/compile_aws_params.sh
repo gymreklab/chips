@@ -15,4 +15,4 @@ echo "CellType,Factor,ENCODE_BAM,ENCODE_BED,Model-k,Model-theta,Model-frac,Model
 for f in $(ls $MDIR/*.json)
 do
     ./print_model.py $f
-done | sort -k1,1 -k2,2
+done | grep -v Completed | grep -v download | sort -k1,1 -k2,2
