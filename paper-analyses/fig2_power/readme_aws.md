@@ -77,6 +77,6 @@ factors="GM12878_H3K27ac_ENCFF097SQI_ENCFF465WTH GM12878_H3K4me3_ENCFF398NET_ENC
 for factor in $factors
 do
   ./summ_power_aws.sh ${factor}
-  ./summ_power_broad.sh ${factor}
+  ./summ_power_broad_aws.sh ${factor}
 done
 ```

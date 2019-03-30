@@ -21,12 +21,4 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	rtype=Both
     fi
     echo ./process_encode.sh ${bamurl} ${bedurl} ${OUTDIR} ${factor} ${rtype} ${thresh}
-done < encode_examples_snorlax.csv | xargs -n1 -I% -P4 sh -c "%" 
-
-#encode_paired_example_datasets.csv | xargs -n1 -I% -P4 sh -c "%"
-#encode_paired_example_datasets.csv #| xargs -n1 -I% -P4 sh -c "%"
-#encode_datasets_K562_GM12878_clean_HM.csv
-#encode_H3K27ac_reps.csv | xargs -n1 -I% -P4 sh -c "%"  
-#< encode_datasets_K562_GM12878_clean_HM.csv | grep process | xargs -n1 -I% -P4 sh -c "%"
-#< encode_paired_example_datasets.csv #| xargs -n1 -I% -P4 sh -c "%"
-
+done < encode_examples_snorlax.csv #| xargs -n1 -I% -P4 sh -c "%" 
