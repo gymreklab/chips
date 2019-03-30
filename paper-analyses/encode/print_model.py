@@ -22,6 +22,6 @@ meta = os.path.basename(mfile).split(".")[0].split("_")
 celltype = meta[0]
 fact = meta[1]
 encbam = meta[2]
-encbed = meta[3]
+encbed = meta[3].strip("-1.9")
 
 sys.stdout.write(",".join([celltype, fact, encbam, encbed, k, th, frac, spot, pcr, "s3://chipmunk-encode-models/%s"%os.path.basename(mfile)])+"\n")
