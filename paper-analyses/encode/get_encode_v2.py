@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# https://www.encodeproject.org/report/?type=Experiment&status=released&assay_title=ChIP-seq&award.project=ENCODE&assembly=hg19&biosample_ontology.classification=cell+line&biosample_ontology.term_name=GM12878
 # gm12878_accs.txt
 # chose only gm12878 chipseq from ENCODE data search, hg19
 
@@ -15,8 +16,6 @@ accs = [item.strip() for item in open("gm12878_accs.txt", "r").readlines()]
 # For each acc:
 # get unfiltered bam
 # get peaks file
-
-# GM12878,RCOR1,Single,https://www.encodeproject.org/files/ENCFF489JLD/@@download/ENCFF489JLD.bam,https://www.encodeproject.org/files/ENCFF489ZRF/@@download/ENCFF489ZRF.bed.gz
 
 def FileURL(acc, suffix):
     return "https://www.encodeproject.org/files/%s/@@download/%s.%s"%(acc, acc, suffix)
@@ -39,7 +38,7 @@ for acc in accs:
                 rtype = "Single"
             else: rtype = "unknown"
             bam_accs.append((rtype,fdata["accession"]))
-        if (fdata["output_type"]=="optimal idr thresholded peaks") and \
+        if (fdata["output_type"] in ["replicated peaks", "optimal idr thresholded peaks"]) and \
            fdata["file_type"] in ["bed narrowPeak", "bed broadPeak"]:
             peak_acc = fdata["accession"]
     if peak_acc is not None:

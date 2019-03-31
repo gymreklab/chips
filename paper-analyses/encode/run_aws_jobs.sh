@@ -1,5 +1,7 @@
 #!/bin/bash
 
+INFILE=$1
+
 SCRIPTNAME=process_encode_s3.sh
 while IFS='' read -r line || [[ -n "$line" ]]; do
     bamurl=$(echo $line | cut -f 4 -d',')
@@ -32,4 +34,4 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	--container-overrides 'command=[\"${SCRIPTNAME}\",\"${bamurl}\",\"${bedurl}\",\"${factor}\",\"${rtype}\"],environment=[{name=\"BATCH_FILE_TYPE\",value=\"script\"},{name=\"BATCH_FILE_S3_URL\",value=\"s3://gymreklab-awsbatch/${SCRIPTNAME}\"}]'"
     sh -c "${cmd}"
 #    echo "${cmd}"
-done < encode_datasets_for_aws.csv
+done < $INFILE #encode_datasets_for_aws.csv
