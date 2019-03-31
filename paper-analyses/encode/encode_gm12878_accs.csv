@@ -41,6 +41,8 @@ GM12878,SMAD1,Paired,https://www.encodeproject.org/files/ENCFF445ZWE/@@download/
 GM12878,SMAD1,Paired,https://www.encodeproject.org/files/ENCFF575SRZ/@@download/ENCFF575SRZ.bam,https://www.encodeproject.org/files/ENCFF632MBO/@@download/ENCFF632MBO.bed.gz
 GM12878,CREM,Single,https://www.encodeproject.org/files/ENCFF193PTK/@@download/ENCFF193PTK.bam,https://www.encodeproject.org/files/ENCFF534CKB/@@download/ENCFF534CKB.bed.gz
 GM12878,CREM,Single,https://www.encodeproject.org/files/ENCFF045MGB/@@download/ENCFF045MGB.bam,https://www.encodeproject.org/files/ENCFF534CKB/@@download/ENCFF534CKB.bed.gz
+GM12878,H3K4me3,Single,https://www.encodeproject.org/files/ENCFF651KIN/@@download/ENCFF651KIN.bam,https://www.encodeproject.org/files/ENCFF354MGT/@@download/ENCFF354MGT.bed.gz
+GM12878,H3K4me3,Single,https://www.encodeproject.org/files/ENCFF576LOX/@@download/ENCFF576LOX.bam,https://www.encodeproject.org/files/ENCFF354MGT/@@download/ENCFF354MGT.bed.gz
 GM12878,HCFC1,Single,https://www.encodeproject.org/files/ENCFF664WOZ/@@download/ENCFF664WOZ.bam,https://www.encodeproject.org/files/ENCFF895YBG/@@download/ENCFF895YBG.bed.gz
 GM12878,HCFC1,Single,https://www.encodeproject.org/files/ENCFF102UZW/@@download/ENCFF102UZW.bam,https://www.encodeproject.org/files/ENCFF895YBG/@@download/ENCFF895YBG.bed.gz
 GM12878,KDM1A,Single,https://www.encodeproject.org/files/ENCFF096UHS/@@download/ENCFF096UHS.bam,https://www.encodeproject.org/files/ENCFF996RRT/@@download/ENCFF996RRT.bed.gz
@@ -67,6 +69,8 @@ GM12878,SPI1,Single,https://www.encodeproject.org/files/ENCFF395MZI/@@download/E
 GM12878,SPI1,Single,https://www.encodeproject.org/files/ENCFF829GYW/@@download/ENCFF829GYW.bam,https://www.encodeproject.org/files/ENCFF306SRV/@@download/ENCFF306SRV.bed.gz
 GM12878,EED,Single,https://www.encodeproject.org/files/ENCFF398MUP/@@download/ENCFF398MUP.bam,https://www.encodeproject.org/files/ENCFF242VUO/@@download/ENCFF242VUO.bed.gz
 GM12878,EED,Single,https://www.encodeproject.org/files/ENCFF219DUV/@@download/ENCFF219DUV.bam,https://www.encodeproject.org/files/ENCFF242VUO/@@download/ENCFF242VUO.bed.gz
+GM12878,H4K20me1,Single,https://www.encodeproject.org/files/ENCFF939MHR/@@download/ENCFF939MHR.bam,https://www.encodeproject.org/files/ENCFF308WNH/@@download/ENCFF308WNH.bed.gz
+GM12878,H4K20me1,Single,https://www.encodeproject.org/files/ENCFF379ZAB/@@download/ENCFF379ZAB.bam,https://www.encodeproject.org/files/ENCFF308WNH/@@download/ENCFF308WNH.bed.gz
 GM12878,PKNOX1,Paired,https://www.encodeproject.org/files/ENCFF856WGT/@@download/ENCFF856WGT.bam,https://www.encodeproject.org/files/ENCFF020GMZ/@@download/ENCFF020GMZ.bed.gz
 GM12878,PKNOX1,Paired,https://www.encodeproject.org/files/ENCFF627EOF/@@download/ENCFF627EOF.bam,https://www.encodeproject.org/files/ENCFF020GMZ/@@download/ENCFF020GMZ.bed.gz
 GM12878,TBX21,Paired,https://www.encodeproject.org/files/ENCFF360YAQ/@@download/ENCFF360YAQ.bam,https://www.encodeproject.org/files/ENCFF405NFV/@@download/ENCFF405NFV.bed.gz
@@ -96,6 +100,8 @@ GM12878,FOXM1,Single,https://www.encodeproject.org/files/ENCFF052ESD/@@download/
 GM12878,FOXM1,Single,https://www.encodeproject.org/files/ENCFF077ZJA/@@download/ENCFF077ZJA.bam,https://www.encodeproject.org/files/ENCFF002CGZ/@@download/ENCFF002CGZ.bed.gz
 GM12878,IRF5,Paired,https://www.encodeproject.org/files/ENCFF495FWL/@@download/ENCFF495FWL.bam,https://www.encodeproject.org/files/ENCFF100ERQ/@@download/ENCFF100ERQ.bed.gz
 GM12878,IRF5,Paired,https://www.encodeproject.org/files/ENCFF104XBJ/@@download/ENCFF104XBJ.bam,https://www.encodeproject.org/files/ENCFF100ERQ/@@download/ENCFF100ERQ.bed.gz
+GM12878,H3K4me3,Single,https://www.encodeproject.org/files/ENCFF631UXF/@@download/ENCFF631UXF.bam,https://www.encodeproject.org/files/ENCFF295GNH/@@download/ENCFF295GNH.bed.gz
+GM12878,H3K4me3,Single,https://www.encodeproject.org/files/ENCFF520LYT/@@download/ENCFF520LYT.bam,https://www.encodeproject.org/files/ENCFF295GNH/@@download/ENCFF295GNH.bed.gz
 GM12878,MAZ,Single,https://www.encodeproject.org/files/ENCFF308ZET/@@download/ENCFF308ZET.bam,https://www.encodeproject.org/files/ENCFF066XDW/@@download/ENCFF066XDW.bed.gz
 GM12878,MAZ,Single,https://www.encodeproject.org/files/ENCFF962MLT/@@download/ENCFF962MLT.bam,https://www.encodeproject.org/files/ENCFF066XDW/@@download/ENCFF066XDW.bed.gz
 GM12878,CHD1,Single,https://www.encodeproject.org/files/ENCFF850KRW/@@download/ENCFF850KRW.bam,https://www.encodeproject.org/files/ENCFF273ULT/@@download/ENCFF273ULT.bed.gz
@@ -106,6 +112,8 @@ GM12878,CBX5,Single,https://www.encodeproject.org/files/ENCFF389CJX/@@download/E
 GM12878,CBX5,Single,https://www.encodeproject.org/files/ENCFF669GJB/@@download/ENCFF669GJB.bam,https://www.encodeproject.org/files/ENCFF420YHY/@@download/ENCFF420YHY.bed.gz
 GM12878,ZNF143,Single,https://www.encodeproject.org/files/ENCFF790BKQ/@@download/ENCFF790BKQ.bam,https://www.encodeproject.org/files/ENCFF141SAU/@@download/ENCFF141SAU.bed.gz
 GM12878,ZNF143,Single,https://www.encodeproject.org/files/ENCFF530MSA/@@download/ENCFF530MSA.bam,https://www.encodeproject.org/files/ENCFF141SAU/@@download/ENCFF141SAU.bed.gz
+GM12878,H3K36me3,Single,https://www.encodeproject.org/files/ENCFF191SDM/@@download/ENCFF191SDM.bam,https://www.encodeproject.org/files/ENCFF479XLN/@@download/ENCFF479XLN.bed.gz
+GM12878,H3K36me3,Single,https://www.encodeproject.org/files/ENCFF381BRW/@@download/ENCFF381BRW.bam,https://www.encodeproject.org/files/ENCFF479XLN/@@download/ENCFF479XLN.bed.gz
 GM12878,STAT5A,Single,https://www.encodeproject.org/files/ENCFF983VNV/@@download/ENCFF983VNV.bam,https://www.encodeproject.org/files/ENCFF492YMU/@@download/ENCFF492YMU.bed.gz
 GM12878,STAT5A,Single,https://www.encodeproject.org/files/ENCFF023ZGL/@@download/ENCFF023ZGL.bam,https://www.encodeproject.org/files/ENCFF492YMU/@@download/ENCFF492YMU.bed.gz
 GM12878,FOXK2,Paired,https://www.encodeproject.org/files/ENCFF403HEO/@@download/ENCFF403HEO.bam,https://www.encodeproject.org/files/ENCFF980KSV/@@download/ENCFF980KSV.bed.gz
@@ -190,6 +198,8 @@ GM12878,LARP7,Paired,https://www.encodeproject.org/files/ENCFF129WDL/@@download/
 GM12878,LARP7,Paired,https://www.encodeproject.org/files/ENCFF428TES/@@download/ENCFF428TES.bam,https://www.encodeproject.org/files/ENCFF449CJP/@@download/ENCFF449CJP.bed.gz
 GM12878,ELF1,Paired,https://www.encodeproject.org/files/ENCFF437STA/@@download/ENCFF437STA.bam,https://www.encodeproject.org/files/ENCFF807AKG/@@download/ENCFF807AKG.bed.gz
 GM12878,ELF1,Paired,https://www.encodeproject.org/files/ENCFF723QVM/@@download/ENCFF723QVM.bam,https://www.encodeproject.org/files/ENCFF807AKG/@@download/ENCFF807AKG.bed.gz
+GM12878,H3K4me3,Single,https://www.encodeproject.org/files/ENCFF398NET/@@download/ENCFF398NET.bam,https://www.encodeproject.org/files/ENCFF795URC/@@download/ENCFF795URC.bed.gz
+GM12878,H3K4me3,Single,https://www.encodeproject.org/files/ENCFF478HXG/@@download/ENCFF478HXG.bam,https://www.encodeproject.org/files/ENCFF795URC/@@download/ENCFF795URC.bed.gz
 GM12878,ELK1,Single,https://www.encodeproject.org/files/ENCFF199VLV/@@download/ENCFF199VLV.bam,https://www.encodeproject.org/files/ENCFF556JBS/@@download/ENCFF556JBS.bed.gz
 GM12878,ELK1,Single,https://www.encodeproject.org/files/ENCFF556BST/@@download/ENCFF556BST.bam,https://www.encodeproject.org/files/ENCFF556JBS/@@download/ENCFF556JBS.bed.gz
 GM12878,WRNIP1,Single,https://www.encodeproject.org/files/ENCFF366GBN/@@download/ENCFF366GBN.bam,https://www.encodeproject.org/files/ENCFF277VDY/@@download/ENCFF277VDY.bed.gz
@@ -254,6 +264,8 @@ GM12878,CEBPB,Single,https://www.encodeproject.org/files/ENCFF523VUD/@@download/
 GM12878,CEBPB,Single,https://www.encodeproject.org/files/ENCFF403OCE/@@download/ENCFF403OCE.bam,https://www.encodeproject.org/files/ENCFF761MGJ/@@download/ENCFF761MGJ.bed.gz
 GM12878,CEBPZ,Single,https://www.encodeproject.org/files/ENCFF853XMX/@@download/ENCFF853XMX.bam,https://www.encodeproject.org/files/ENCFF920HDC/@@download/ENCFF920HDC.bed.gz
 GM12878,CEBPZ,Single,https://www.encodeproject.org/files/ENCFF433DBU/@@download/ENCFF433DBU.bam,https://www.encodeproject.org/files/ENCFF920HDC/@@download/ENCFF920HDC.bed.gz
+GM12878,H2AFZ,Single,https://www.encodeproject.org/files/ENCFF929VPV/@@download/ENCFF929VPV.bam,https://www.encodeproject.org/files/ENCFF584NAD/@@download/ENCFF584NAD.bed.gz
+GM12878,H2AFZ,Single,https://www.encodeproject.org/files/ENCFF901PZR/@@download/ENCFF901PZR.bam,https://www.encodeproject.org/files/ENCFF584NAD/@@download/ENCFF584NAD.bed.gz
 GM12878,E4F1,Paired,https://www.encodeproject.org/files/ENCFF259DTT/@@download/ENCFF259DTT.bam,https://www.encodeproject.org/files/ENCFF711OSR/@@download/ENCFF711OSR.bed.gz
 GM12878,E4F1,Paired,https://www.encodeproject.org/files/ENCFF805VTA/@@download/ENCFF805VTA.bam,https://www.encodeproject.org/files/ENCFF711OSR/@@download/ENCFF711OSR.bed.gz
 GM12878,ZNF207,Paired,https://www.encodeproject.org/files/ENCFF962BKF/@@download/ENCFF962BKF.bam,https://www.encodeproject.org/files/ENCFF273BVT/@@download/ENCFF273BVT.bed.gz
@@ -264,6 +276,8 @@ GM12878,ARID3A,Paired,https://www.encodeproject.org/files/ENCFF273SPJ/@@download
 GM12878,ARID3A,Paired,https://www.encodeproject.org/files/ENCFF519PTB/@@download/ENCFF519PTB.bam,https://www.encodeproject.org/files/ENCFF027VZK/@@download/ENCFF027VZK.bed.gz
 GM12878,SRF,Single,https://www.encodeproject.org/files/ENCFF497WHG/@@download/ENCFF497WHG.bam,https://www.encodeproject.org/files/ENCFF199WGD/@@download/ENCFF199WGD.bed.gz
 GM12878,SRF,Single,https://www.encodeproject.org/files/ENCFF351NJK/@@download/ENCFF351NJK.bam,https://www.encodeproject.org/files/ENCFF199WGD/@@download/ENCFF199WGD.bed.gz
+GM12878,H3K27me3,Single,https://www.encodeproject.org/files/ENCFF809FFP/@@download/ENCFF809FFP.bam,https://www.encodeproject.org/files/ENCFF851UKZ/@@download/ENCFF851UKZ.bed.gz
+GM12878,H3K27me3,Single,https://www.encodeproject.org/files/ENCFF879MYE/@@download/ENCFF879MYE.bam,https://www.encodeproject.org/files/ENCFF851UKZ/@@download/ENCFF851UKZ.bed.gz
 GM12878,IRF3,Paired,https://www.encodeproject.org/files/ENCFF938ZZA/@@download/ENCFF938ZZA.bam,https://www.encodeproject.org/files/ENCFF976ZVG/@@download/ENCFF976ZVG.bed.gz
 GM12878,IRF3,Paired,https://www.encodeproject.org/files/ENCFF038JKO/@@download/ENCFF038JKO.bam,https://www.encodeproject.org/files/ENCFF976ZVG/@@download/ENCFF976ZVG.bed.gz
 GM12878,CTCF,Single,https://www.encodeproject.org/files/ENCFF124LLI/@@download/ENCFF124LLI.bam,https://www.encodeproject.org/files/ENCFF710VEH/@@download/ENCFF710VEH.bed.gz
@@ -282,6 +296,8 @@ GM12878,BRCA1,Single,https://www.encodeproject.org/files/ENCFF408BUD/@@download/
 GM12878,BRCA1,Single,https://www.encodeproject.org/files/ENCFF498LKK/@@download/ENCFF498LKK.bam,https://www.encodeproject.org/files/ENCFF082JDH/@@download/ENCFF082JDH.bed.gz
 GM12878,MLLT1,Paired,https://www.encodeproject.org/files/ENCFF858IJQ/@@download/ENCFF858IJQ.bam,https://www.encodeproject.org/files/ENCFF881VZH/@@download/ENCFF881VZH.bed.gz
 GM12878,MLLT1,Paired,https://www.encodeproject.org/files/ENCFF656OGK/@@download/ENCFF656OGK.bam,https://www.encodeproject.org/files/ENCFF881VZH/@@download/ENCFF881VZH.bed.gz
+GM12878,H3K9ac,Single,https://www.encodeproject.org/files/ENCFF456WNJ/@@download/ENCFF456WNJ.bam,https://www.encodeproject.org/files/ENCFF052MHA/@@download/ENCFF052MHA.bed.gz
+GM12878,H3K9ac,Single,https://www.encodeproject.org/files/ENCFF863OXT/@@download/ENCFF863OXT.bam,https://www.encodeproject.org/files/ENCFF052MHA/@@download/ENCFF052MHA.bed.gz
 GM12878,RXRA,Single,https://www.encodeproject.org/files/ENCFF336YAA/@@download/ENCFF336YAA.bam,https://www.encodeproject.org/files/ENCFF461FGJ/@@download/ENCFF461FGJ.bed.gz
 GM12878,RXRA,Single,https://www.encodeproject.org/files/ENCFF532MNB/@@download/ENCFF532MNB.bam,https://www.encodeproject.org/files/ENCFF461FGJ/@@download/ENCFF461FGJ.bed.gz
 GM12878,RAD21,Single,https://www.encodeproject.org/files/ENCFF401LTK/@@download/ENCFF401LTK.bam,https://www.encodeproject.org/files/ENCFF753RGL/@@download/ENCFF753RGL.bed.gz
@@ -296,8 +312,14 @@ GM12878,ATF3,Single,https://www.encodeproject.org/files/ENCFF061SMS/@@download/E
 GM12878,ATF3,Single,https://www.encodeproject.org/files/ENCFF795RHE/@@download/ENCFF795RHE.bam,https://www.encodeproject.org/files/ENCFF002CGP/@@download/ENCFF002CGP.bed.gz
 GM12878,IRF3,Single,https://www.encodeproject.org/files/ENCFF962GER/@@download/ENCFF962GER.bam,https://www.encodeproject.org/files/ENCFF303TVZ/@@download/ENCFF303TVZ.bed.gz
 GM12878,IRF3,Single,https://www.encodeproject.org/files/ENCFF920XYY/@@download/ENCFF920XYY.bam,https://www.encodeproject.org/files/ENCFF303TVZ/@@download/ENCFF303TVZ.bed.gz
+GM12878,H3K27ac,Single,https://www.encodeproject.org/files/ENCFF385RWJ/@@download/ENCFF385RWJ.bam,https://www.encodeproject.org/files/ENCFF816AHV/@@download/ENCFF816AHV.bed.gz
+GM12878,H3K27ac,Single,https://www.encodeproject.org/files/ENCFF097SQI/@@download/ENCFF097SQI.bam,https://www.encodeproject.org/files/ENCFF816AHV/@@download/ENCFF816AHV.bed.gz
 GM12878,GABPA,Single,https://www.encodeproject.org/files/ENCFF084LVF/@@download/ENCFF084LVF.bam,https://www.encodeproject.org/files/ENCFF116EXQ/@@download/ENCFF116EXQ.bed.gz
 GM12878,GABPA,Single,https://www.encodeproject.org/files/ENCFF742KAV/@@download/ENCFF742KAV.bam,https://www.encodeproject.org/files/ENCFF116EXQ/@@download/ENCFF116EXQ.bed.gz
+GM12878,H3K4me1,Single,https://www.encodeproject.org/files/ENCFF252ZII/@@download/ENCFF252ZII.bam,https://www.encodeproject.org/files/ENCFF921LKB/@@download/ENCFF921LKB.bed.gz
+GM12878,H3K4me1,Single,https://www.encodeproject.org/files/ENCFF677IFV/@@download/ENCFF677IFV.bam,https://www.encodeproject.org/files/ENCFF921LKB/@@download/ENCFF921LKB.bed.gz
+GM12878,H3K4me2,Single,https://www.encodeproject.org/files/ENCFF384FAF/@@download/ENCFF384FAF.bam,https://www.encodeproject.org/files/ENCFF983SMS/@@download/ENCFF983SMS.bed.gz
+GM12878,H3K4me2,Single,https://www.encodeproject.org/files/ENCFF636KDX/@@download/ENCFF636KDX.bam,https://www.encodeproject.org/files/ENCFF983SMS/@@download/ENCFF983SMS.bed.gz
 GM12878,MEF2A,Single,https://www.encodeproject.org/files/ENCFF012YAB/@@download/ENCFF012YAB.bam,https://www.encodeproject.org/files/ENCFF328QLX/@@download/ENCFF328QLX.bed.gz
 GM12878,MEF2A,Single,https://www.encodeproject.org/files/ENCFF359HKJ/@@download/ENCFF359HKJ.bam,https://www.encodeproject.org/files/ENCFF328QLX/@@download/ENCFF328QLX.bed.gz
 GM12878,ATF2,Paired,https://www.encodeproject.org/files/ENCFF162ZVX/@@download/ENCFF162ZVX.bam,https://www.encodeproject.org/files/ENCFF127GYQ/@@download/ENCFF127GYQ.bed.gz
@@ -310,8 +332,12 @@ GM12878,TAF1,Single,https://www.encodeproject.org/files/ENCFF686PRS/@@download/E
 GM12878,TAF1,Single,https://www.encodeproject.org/files/ENCFF097OFH/@@download/ENCFF097OFH.bam,https://www.encodeproject.org/files/ENCFF544NRC/@@download/ENCFF544NRC.bed.gz
 GM12878,ARNT,Paired,https://www.encodeproject.org/files/ENCFF499GGU/@@download/ENCFF499GGU.bam,https://www.encodeproject.org/files/ENCFF166OZW/@@download/ENCFF166OZW.bed.gz
 GM12878,ARNT,Paired,https://www.encodeproject.org/files/ENCFF397TMG/@@download/ENCFF397TMG.bam,https://www.encodeproject.org/files/ENCFF166OZW/@@download/ENCFF166OZW.bed.gz
+GM12878,H3K79me2,Single,https://www.encodeproject.org/files/ENCFF270WQA/@@download/ENCFF270WQA.bam,https://www.encodeproject.org/files/ENCFF357HZM/@@download/ENCFF357HZM.bed.gz
+GM12878,H3K79me2,Single,https://www.encodeproject.org/files/ENCFF691PCD/@@download/ENCFF691PCD.bam,https://www.encodeproject.org/files/ENCFF357HZM/@@download/ENCFF357HZM.bed.gz
 GM12878,JUNB,Single,https://www.encodeproject.org/files/ENCFF750SGF/@@download/ENCFF750SGF.bam,https://www.encodeproject.org/files/ENCFF939TZS/@@download/ENCFF939TZS.bed.gz
 GM12878,JUNB,Single,https://www.encodeproject.org/files/ENCFF312NBZ/@@download/ENCFF312NBZ.bam,https://www.encodeproject.org/files/ENCFF939TZS/@@download/ENCFF939TZS.bed.gz
+GM12878,H3K27me3,Single,https://www.encodeproject.org/files/ENCFF244BSW/@@download/ENCFF244BSW.bam,https://www.encodeproject.org/files/ENCFF247VUO/@@download/ENCFF247VUO.bed.gz
+GM12878,H3K27me3,Single,https://www.encodeproject.org/files/ENCFF014HHB/@@download/ENCFF014HHB.bam,https://www.encodeproject.org/files/ENCFF247VUO/@@download/ENCFF247VUO.bed.gz
 GM12878,IKZF2,Paired,https://www.encodeproject.org/files/ENCFF309MTT/@@download/ENCFF309MTT.bam,https://www.encodeproject.org/files/ENCFF339FFC/@@download/ENCFF339FFC.bed.gz
 GM12878,IKZF2,Paired,https://www.encodeproject.org/files/ENCFF293UYK/@@download/ENCFF293UYK.bam,https://www.encodeproject.org/files/ENCFF339FFC/@@download/ENCFF339FFC.bed.gz
 GM12878,SRF,Paired,https://www.encodeproject.org/files/ENCFF767EYL/@@download/ENCFF767EYL.bam,https://www.encodeproject.org/files/ENCFF909FRA/@@download/ENCFF909FRA.bed.gz
