@@ -25,8 +25,8 @@ for acc in accs:
     response = requests.get(URL, headers=HEADERS)
     response_json_dict = response.json()
     target = response_json_dict["target"]["title"].split()[0]
-    bam_accs = []
-    peak_acc = None
+    bam_accs = {} # num rep->acc
+    peak_accs = {} # num rep->acc
     files = response_json_dict["files"]
     for fdata in files:
         if "assembly" not in fdata or not fdata["assembly"] == "hg19": continue
@@ -37,11 +37,13 @@ for acc in accs:
             elif len(fdata["derived_from"])==2: 
                 rtype = "Single"
             else: rtype = "unknown"
-            bam_accs.append((rtype,fdata["accession"]))
-        if (fdata["output_type"] in ["replicated peaks", "optimal idr thresholded peaks"]) and \
-           fdata["file_type"] in ["bed narrowPeak", "bed broadPeak"]:
-            peak_acc = fdata["accession"]
-    if peak_acc is not None:
-        for ba in bam_accs:
+            bam_accs[num_rep] =(rtype,fdata["accession"])
+        if (fdata["output_type"] in ["peaks", "peaks and background as input for IDR"] and \
+           fdata["file_type"] in ["bed narrowPeak", "bed broadPeak"]):
+            peak_accs[num_rep] = fdata["accession"]
+    for repnum in bam_accs.keys():
+        if repnum in peak_accs:
+            ba = bam_accs[repnum]
+            peak_acc = peak_accs[repnum]
             sys.stdout.write(",".join(["GM12878",target, ba[0], FileURL(ba[1], "bam"), FileURL(peak_acc, "bed.gz")])+"\n")
 

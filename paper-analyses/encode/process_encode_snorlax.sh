@@ -1,11 +1,9 @@
 #!/bin/bash
 
-#!/bin/bash
-
 INFILE=$1
 THRESH=$2
 
-OUTDIR=/storage/mgymrek/chipmunk/encode
+OUTDIR=/storage/mgymrek/chipmunk_round2/encode
 
 # Run process encode examples
 while IFS='' read -r line || [[ -n "$line" ]]; do
@@ -20,5 +18,5 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     if [[ "$rtype" == "Paired" ]]; then
 	rtype=Both
     fi
-    echo ./process_encode.sh ${bamurl} ${bedurl} ${OUTDIR} ${factor} ${rtype} ${THRESH}
-done < $INFILE | xargs -n1 -I% -P2 sh -c "%" 
+    ./process_encode.sh ${bamurl} ${bedurl} ${OUTDIR} ${factor} ${rtype} ${THRESH}
+done < $INFILE #| xargs -n1 -I% -P1 sh -c "%" 

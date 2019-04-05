@@ -7,6 +7,7 @@ nc=$2
 READLEN=$3
 NREADS=$4
 RTYPE=$5
+NOBAM=$6
 
 BED=$(ls ${ENCDIR}/${factor}/*.bed | head -n 1)
 BAM=$(ls ${ENCDIR}/${factor}/*.flagged.bam | head -n 1)
@@ -14,8 +15,6 @@ MODEL=$(ls ${ENCDIR}/${factor}/*.json | head -n 1)
 if [ "$RTYPE" = "Paired" ]; then
     MODEL=$(ls ${ENCDIR}/${factor}/*.paired.json | head -n 1)
 fi
-
-mkdir -p ${OUTDIR}/${factor}
 
 # Output params
 echo "Readlen $READLEN"
@@ -28,8 +27,16 @@ if [ "$RTYPE" = "Paired" ]; then
     echo "Adding paired option"
     OPTARGS=" --paired"
 fi
+
+OPTARGS=""
+if [ -z ${NOBAM} ]; then
+    OPTARGS="-b ${BAM}"
+else
+    factor=${factor}_nobam
+fi
+mkdir -p ${OUTDIR}/${factor}
 time $CHIPMUNK simreads \
-    -p ${BED} \
+    -p ${BED} ${OPTARGS} \
     -t bed -c 7 --scale-outliers \
     -f ${REFFA} \
     -o ${OUTDIR}/${factor}/${factor}.${nc} \

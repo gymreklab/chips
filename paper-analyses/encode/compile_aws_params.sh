@@ -8,11 +8,11 @@ aws s3 ls s3://chipmunk-encode-models/ | grep json | awk '{print $4}' | \
     xargs -n1 -P1 -I% sh -c "aws s3 cp s3://chipmunk-encode-models/% ${MDIR}/"
 
 # Get local snorlax results 
-find /storage/mgymrek/chipmunk/encode/ | grep json | grep "1\.9" | \
+find /storage/mgymrek/chipmunk/encode/ | grep json | grep "1\.9" | grep -v old | \
     xargs -n1 -P1 -I% sh -c "cp % ${MDIR}/"
 
 echo "CellType,Factor,ENCODE_BAM,ENCODE_BED,Model-k,Model-theta,Model-frac,Model-spot,Model-pcr,ModelFile"
 for f in $(ls $MDIR/*.json)
 do
     ./print_model.py $f
-done | grep -v Completed | grep -v download | sort -k1,1 -k2,2
+done | sort -k1,1 -k2,2

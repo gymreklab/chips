@@ -37,11 +37,9 @@ power-analysis.py \
     --readnums ${numreads} \
     --out ${OUTDIR} --optargs "${optargs}"
 
-# Upload results to s3. Keep bams for now just in case
+# Upload results to s3.
 aws s3 cp ${OUTDIR}/${factor}.${numreads}.${numreads}_peaks.narrowPeak s3://gymreklab/chipmunk-power/${factor}.${numreads}.${numreads}_peaks.narrowPeak
 aws s3 cp ${OUTDIR}/${factor}.${numreads}.${numreads}.broad_peaks.broadPeak s3://gymreklab/chipmunk-power/${factor}.${numreads}.${numreads}.broad_peaks.broadPeak
-aws s3 cp ${OUTDIR}/${factor}.${numreads}.flagged.bam s3://gymreklab/chipmunk-power/${factor}.${numreads}.flagged.bam
-aws s3 cp ${OUTDIR}/${factor}.${numreads}.wce.flagged.bam s3://gymreklab/chipmunk-power/${factor}.${numreads}.wce.flagged.bam
 
 # Tear down
 rm -rf ${OUTDIR}

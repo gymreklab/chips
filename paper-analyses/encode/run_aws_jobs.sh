@@ -2,6 +2,9 @@
 
 INFILE=$1
 
+aws s3 cp process_encode.sh s3://gymreklab-awsbatch/process_encode.sh
+aws s3 cp process_encode_s3.sh s3://gymreklab-awsbatch/process_encode_s3.sh
+
 SCRIPTNAME=process_encode_s3.sh
 while IFS='' read -r line || [[ -n "$line" ]]; do
     bamurl=$(echo $line | cut -f 4 -d',')

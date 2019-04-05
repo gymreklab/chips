@@ -13,11 +13,11 @@ except:
     sys.stderr.write(__doc__)
 
 m = json.load(open(mfile, "r"))
-k = "%0.3f"%float(m["frag"]["k"])
-th = "%0.3f"%float(m["frag"]["theta"])
-frac = "%0.3f"%float(m["pulldown"]["f"])
-spot = "%0.3f"%float(m["pulldown"]["s"])
-pcr = "%0.3f"%float(m["pcr_rate"])
+k = "%0.2f"%float(m["frag"]["k"])
+th = "%0.2f"%float(m["frag"]["theta"])
+frac = "%0.5f"%float(m["pulldown"]["f"])
+spot = "%0.5f"%float(m["pulldown"]["s"])
+pcr = "%0.2f"%float(m["pcr_rate"])
 meta = os.path.basename(mfile).split(".")[0].split("_")
 celltype = meta[0]
 fact = meta[1]
