@@ -30,7 +30,11 @@ for acc in accs:
     files = response_json_dict["files"]
     for fdata in files:
         if "assembly" not in fdata or not fdata["assembly"] == "hg19": continue
-        num_rep = len(fdata["biological_replicates"])
+        if len(fdata["biological_replicates"]) > 1: continue
+        try:
+            num_rep = fdata["biological_replicates"][0]
+        except:
+            continue
         if (fdata["file_type"] == "bam" and fdata["output_type"]=="unfiltered alignments"):
             if len(fdata["derived_from"])==3:
                 rtype = "Paired"

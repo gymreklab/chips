@@ -20,10 +20,10 @@ rtype=$5
 #numreads=521557
 #rtype=Single
 
+mkdir -p ${OUTDIR}/${factor}/
+
 # Setup windows on chr19
 ./make_windows.sh ${binsize}
-
-mkdir -p ${OUTDIR}/${f}/
 
 # Get genomic bins for sim/real
 echo "Get encode bins"
@@ -50,9 +50,5 @@ do
     bedtools multicov -bams ${OUTDIR}/${factor}/${factor}.${nc}.flagged.bam \
 	-bed ${OUTDIR}/windows/chr19_windows_${binsize}kb.bed > \
 	${OUTDIR}/${factor}/${factor}.${nc}.cov.${binsize}kb.bed
-    ${CHIPMUNK} learn \
-	-b ${OUTDIR}/${factor}/${factor}.${nc}.flagged.bam \
-	-p ${BED} -t bed -c 7 --thres 5 --scale-outliers \
-	-o ${OUTDIR}/${factor}/${factor}.${nc}.json
 done
 

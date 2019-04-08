@@ -33,11 +33,12 @@ if [ -z ${NOBAM} ]; then
     OPTARGS="-b ${BAM}"
 else
     factor=${factor}_nobam
+    OPTARGS="-c 7"
 fi
 mkdir -p ${OUTDIR}/${factor}
 time $CHIPMUNK simreads \
-    -p ${BED} ${OPTARGS} \
-    -t bed -c 7 --scale-outliers \
+    -p ${BED} \
+    -t bed \
     -f ${REFFA} \
     -o ${OUTDIR}/${factor}/${factor}.${nc} \
     --model ${MODEL} \
@@ -50,13 +51,20 @@ time $CHIPMUNK simreads \
 # Map reads
 if [ "$RTYPE" = "Single" ]; then
     echo "Running single end"
-    bwa mem -t 10 ${REFFA} \
-	${OUTDIR}/${factor}/${factor}.${nc}.fastq | \
+    if [ "$READLEN" -lt 36 ]; then
+	bwa aln -t 10 ${REFFA} \
+	    ${OUTDIR}/${factor}/${factor}.${nc}.fastq > ${OUTDIR}/${factor}/${factor}.${nc}.sai
+	bwa samse ${REFFA} ${OUTDIR}/${factor}/${factor}.${nc}.sai ${OUTDIR}/${factor}/${factor}.${nc}.fastq | \
+	    samtools view -bS - > ${OUTDIR}/${factor}/${factor}.${nc}.bam
+    else
+	bwa mem -t 10  ${REFFA} \
+	    ${OUTDIR}/${factor}/${factor}.${nc}.fastq | \
 	samtools view -bS - > ${OUTDIR}/${factor}/${factor}.${nc}.bam
+    fi
 fi
 if [ "$RTYPE" = "Paired" ]; then
     echo "Running paired end"
-    bwa mem -t 10 ${REFFA} \
+    bwa mem -t 10  ${REFFA} \
 	${OUTDIR}/${factor}/${factor}.${nc}_1.fastq \
 	${OUTDIR}/${factor}/${factor}.${nc}_2.fastq | \
 	samtools view -bS - > ${OUTDIR}/${factor}/${factor}.${nc}.bam
