@@ -25,7 +25,7 @@ echo "BAMURL: $BAMURL"
 echo "BEDURL: $BEDURL"
 echo "FACTOR: $FACTOR"
 echo "RTYPE: $RTYPE"
-./process_encode.sh ${BAMURL} ${BEDURL} /scratch ${FACTOR} ${RTYPE} 100 || die "process_encode.sh failed"
+./process_encode.sh ${BAMURL} ${BEDURL} /scratch ${FACTOR} ${RTYPE} 0 || die "process_encode.sh failed"
 
 # Upload results to s3
 if [ "${RTYPE}" = "Single" ] || [ "${RTYPE}" = "Both" ]; then
