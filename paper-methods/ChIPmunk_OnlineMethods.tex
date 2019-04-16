@@ -257,34 +257,37 @@ All analyses were performed using ChIPmunk v1.9.
 \subsection*{Inferring parameters of ENCODE datasets}
 
 We used the ENCODE Project's REST API to write a Python script to automatically identify available ChIP-sequencing for the GM12878 cell line.
-We fetched unfiltered BAM files and narrowPeak or broadPeak peak files for transcription factors and histone modifications, respectively.
-If multiple replicates were available for a factor, we chose the first one as a training example.
-We chose a total of 221 datasets as examples.
+For each replicate of each experiment, we fetched unfiltered BAM files and narrowPeak or broadPeak peak files for transcription factors and histone modifications, respectively (output type=''peaks'' or ``peaks and background as input for IDR".
+We additionally fetched narrowPeak/broadPeak files based on combined replicate information (output type = ``optimal idr thresholded peaks'') for use as ground truth peak sets for power analyses.
 
 We used the Picard \cite{picard} MarkDuplicates tool (v2.18.11) with default parameters to mark duplicates in each BAM file.
 For paired end datasets, we called ChIPmunk's learn module with non-default parameter -{}-paired.
 For single end datasets, we used non-default parameters -c 7 -{}-thres 100 for transcription factors and -c 7 -{}-thres 5 for histone modifications.
-For 12 example paired-end datasets, we called learn in both paired end and single end mode to compare inferred fragment length distributions (\textbf{Supplementary Figure 2}).
+For 6 example paired-end datasets, we called learn in both paired end and single end mode to compare inferred fragment length distributions (\textbf{Supplementary Figure 2}).
 
 Inferred parameters as well as links to JSON model files that can be used as input to the ChIPmunk simreads module are provided in \textbf{Supplementary Table 2}.
 
 \subsection*{Evaluating ChIPmunk using ENCODE datasets}
 
-We performed simulations using an increasing number of genome copies (ChIPmunk argument -{}-nc 1, 5, 10, 25, 50, 100, or 1000) for two factors (the histone modification H3K27ac and the transcription factor BACH1) with ENCODE data available in the GM12878 cell line.(BAM accession ENCFF097SQI and broadPeak [BED] accession ENCFF465WTH for H3K27ac; BAM accession ENCFF518TTP and narrowPeak [BED] accession ENCFF465WTH for BACH1.
-For each copy number in each factor, we ran ChIPmunk's simreads tool on hg19 chromosome 19 (-{}-region chr19:1-59128983) using the corresponding learned ENCODE model (see \textbf{Supplementary Table 2}) and the same sequencing parameters as the ENCODE reads from chromosome 19 for each dataset (-{}-numreads 269113 -{}-readlen 51 for H3Ka7ac; -{}-numreads 665975 -{}-readlen 101 -{}-paired for BACH1). 
-We additionally used options -p ENCODE.bed -t bed -c 7 -{}-scale-outliers, where ENCODE.bed represents the corresponding peak file for each factor with accessions listed above.
+We performed simulations using an increasing number of genome copies (ChIPmunk argument -{}-nc 1, 5, 10, 25, 50, 100, or 1000) for two factors (the histone modification H3K27ac and the transcription factor CTCF) with ENCODE data available in the GM12878 cell line. (BAM accession ENCFF097SQI and broadPeak [BED] accession ENCFF465WTH for H3K27ac; BAM accession TODO and narrowPeak [BED] accession TODO for CTCF.
+For each copy number in each factor, we ran ChIPmunk's simreads tool on hg19 chromosome 19 (-{}-region chr19:1-59128983) using the corresponding learned ENCODE model (see \textbf{Supplementary Table 2}) and the same sequencing parameters as the ENCODE reads from chromosome 19 for each dataset (-{}-numreads 269113 -{}-readlen 51 for H3Ka7ac; -{}-numreads TODO -{}-readlen TODO). 
+We additionally used options -p ENCODE.bed -t bed -c 7, where ENCODE.bed represents the corresponding peak file for each factor with accessions listed above.
 Simulated reads were aligned to the hg19 reference genome using BWA MEM \cite{bwamem} v0.7.12-r1039 with default parameters and converted to sorted and indexed BAM files using samtools \cite{samtools} version 1.5. Duplicates were flagged using the Picard \cite{picard} MarkDuplicates tool (v2.18.11) with default parameters.
 
-We used the bedtools \cite{bedtools} (v2.27.1) makewindows command to generate a list of non-overlapping windows of 5kb across chromosome 19 and the bedtools multicov command to count the number of reads from each BAM file falling in each window. We used the bedtools intersect command to determine the intersection of each bin with the input peak files. For each bin, we determined the Pearson correlation bewteen log10 read counts in each simulated vs. the ENCODE dataset after removing bins with 0 counts in each dataset and adding a pseudocount of 1 read to each bin.
+We used the bedtools \cite{bedtools} (v2.27.1) makewindows command to generate a list of non-overlapping windows cross chromosome 19 and the bedtools multicov command to count the number of reads from each BAM file falling in each window. We used bins of size 5kb to evaluate H3K27ac and 1kb to evaluate CTCF, since HMs tend to have much broader peaks than TFs.
+We used the bedtools intersect command to determine the intersection of each bin with the input peak files. For each bin, we determined the Pearson correlation bewteen log10 read counts in each simulated vs. the ENCODE dataset after removing bins with 0 counts in each dataset and adding a pseudocount of 1 read to each bin.
 
 Timing experiments were performed in a Linux environment running Centos 7.4.1708 on a server with 28 cores (Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} CPU E5-2660 v4 @ 2.00GHz) and 125 GB RAM using the UNIX ``time'' command and are based on the ``sys'' time reported. % TODO should this be sys+user and performed on a single core?
 
 %% TODO chipulate comparison %%
 
 \subsection*{Power analysis}
-We used ChIPmunk's simreads tool to generate genome-wide ChIP-seq datasets for five histone modifications (HMs) (H3K27ac, H3K4me3, H3K4me1, H3K27me3, and H3K36me3) and two transcription facetors (TFs) (BACH1 and CTCF) based on model parameters ($f$ and $s$) learned from available ENCODE datasets (BAM/BED accessions ENCFF097SQI/ENCFF465WTH, ENCFF398NET/ENCFF068UAA, ENCFF252ZII/ENCFF966LMJ, ENCFF014HHB/ENCFF533IKU, ENCFF191SDM/ENCFF695NNX, ENCFF518TTP/ENCFF866OLZ, and ENCFF584BRF/ENCFF559IXF for H3K27ac, H3K4me3, H3K4me1, H3K27me3, H3K36me3, BACH1, and CTCF, respectively. BED accessions are for broadPeak files for the histone modifications and narrowPeak files for the transcription factors.
+We used ChIPmunk's simreads tool to generate genome-wide ChIP-seq datasets for five histone modifications (HMs) (H3K27ac, H3K4me3, H3K4me1, H3K27me3, and H3K36me3) and two transcription facetors (TFs) (BACH1 and CTCF) based on model parameters ($f$ and $s$) learned from available ENCODE datasets
 
-For each HM and TF, we used options -p ENCODE.bed -t bed -c 7 -{}-scale-outliers where ENCODE.bed represents the corresponding peak file for each factor with accessions listed above and set -{}-gamma-frag 10,20 -{}-pcr\_rate 0.85 -{}-nc 100 -{}-readlen 100 to keep these parameters constant across all runs.
+(BAM/BED accssions ENCFF385RWJ/ENCFF816AHV, ENCFF398NET/ENCFF795URC, ENCFF809FFP/ENCFF851UKZ, ENCFF677IFV/ENCFF921LKB, ENCFF191SDM/ENCFF479XLN, ENCFF518TTP/ENCFF012JXJ, and ENCFF406XWF/ENCFF833FTF for
+H3K27ac, H3K4me3, H3K27me3, H3K4me1, H3K36me3, BACH1, and CTCF, respectively. BED accessions are for broadPeak files for the HMs and narrowPeak files for the TFs.
+
+For each HM and TF, we used options -p ENCODE.bed -t bed -c 7 where ENCODE.bed represents the corresponding peak file for each factor with accessions listed above and set -{}-gamma-frag 10,20 -{}-pcr\_rate 0.85 -{}-nc 100 -{}-readlen 100 to keep these parameters constant across all runs.
 We simulated datasets using numbers of reads (-{}-numreads) set to 1, 5, 10, 50, or 100 million reads.
 We additionally simulated a control dataset (whole cell extract) with the same number of reads but using the options -t wce and no input BED file. As described above, simulated reads were aligned to hg19 using BWA-MEM and duplicates were flagged with Picard.
 We used MACS2 \cite{MACS2} to call peaks on the resulting duplicate-flagged files using whole cell extract reads as a control and with default options except -{}-broad for histone modifications.
@@ -295,7 +298,7 @@ We used the bedtools \cite{bedtools} (v2.27.1) intersect command to determine th
 We used the bedtools \cite{bedtools} (v2.27.1) random command to generate 10,000 random peaks of size 100 from hg19 chromosome 19 and 20 random peaks of size 100 from Drosophila (dm6) chromosome 4. All peaks were initially given a binding score of 1 (meaning 100\% probability of binding).
 
 We then used the ChIPmunk uitlity script chipmunk-spike-in.sh to generate a mock reference genome consisting of the concatenated dm6 and hg19 references and a peak file consisting of both the hg19 and dm6 peaks. We then generated peak files representing different conditions with overall reduced binding of the human sites by setting thes scores of all peaks to 0.01, 0.1, 0.25, 0.5, or 0.8, representing reduced binding affinity.
-For each condition, we used ChIPmunk's simreads tool with options -p concatenated\_peakds.bed -t bed -c 4 -f mock\_genome.fa -{}-numcopies 100 -{}-noscale -{}-recomputeF -{}-numreads 1000000 and a model file with f: 15, theta: 20, pcr\_rate: 1, and s: 0.4. Note the option -{}-recomputF is a convenience option to recompute the value of $f$ based on the user input set of peaks.
+For each condition, we used ChIPmunk's simreads tool with options -p concatenated\_peakds.bed -t bed -c 4 -f mock\_genome.fa -{}-numcopies 100 -{}-noscale -{}-recomputeF -{}-numreads 1000000 and a model file with f: 15, theta: 20, pcr\_rate: 1, and s: 0.4. Note the option -{}-recomputeF is a convenience option to recompute the value of $f$ based on the user input set of peaks.
 
 Reads were aligned to the mock reference genome using BWA MEM. Read densities around peaks were visualized using the annotatePeaks.pl script available from HOMER \cite{HOMER} using options -size 1000 -hist 1.
 Because exactly 1 million reads were simulated in each case, mean read counts per bin represent reads per million (RPM).
