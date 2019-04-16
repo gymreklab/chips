@@ -25,9 +25,9 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   std::default_random_engine generator(seed);
   srand(seed);
   std::gamma_distribution<float> fragdist(gamma_k, gamma_theta);
-  int32_t current_pos;
-  int32_t fstart, fend;
-  float fsize;
+  std::int32_t current_pos;
+  std::int32_t fstart, fend;
+  int fsize;
   bool bound;
   float peak_score;
 
@@ -43,7 +43,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   current_pos = start + *start_offset_ptr;
   // Break up into fragment lengths drawn from gamma distribution
   while (current_pos < end) {
-    fsize = fragdist(generator);
+    fsize = (int) std::round(fragdist(generator));
     fstart = current_pos; fend = current_pos+fsize;
     if (fend > end) {
       if (fstart < end){

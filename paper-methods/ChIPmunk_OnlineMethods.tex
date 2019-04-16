@@ -262,6 +262,14 @@ It’s noteworthy that this estimation step requires a BAM file with PCR copies 
 
 % Analyze one bin at a time for computational efficiency (how choose bin size, how deal with boundaries of bins)
 % In practice, need to decide how many reads to generate from each chunk (see Michael's old pulldown text in scratch.tex)
+The major components in the simulation module are organized in the order of shearing, pulldown, PCR, and sequencing. 
+ChIPmunk processes each copy of genomes in an independent thread, and is able to process multiple threads simultaneously. 
+Each copy is further segmented into small fragments with variable lengths sampled from the input gamma distribution. 
+In the pulldown process, these fragments are randomly selected at different rates based on their overlaps with peaks. 
+All selected fragments share the same probabilities of being duplicated, and the number of duplicates follows the geometric distribution of a user’s choice. 
+At last, we convert fragment coordinates into read sequences and output them in the FASTQ format. 
+In practice, instead of processing the whole genomes at once, we split the genomes into bins and process the fragments in each bin individually, 
+so that ChIPmuck can accommodate for personal computers with limited memories. The bin size is customized by users, and typically set as 1 million base pairs.
 
 
 \subsubsection*{C++ implementation details}
