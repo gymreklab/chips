@@ -70,7 +70,7 @@ The mean fragment length is easily computed as $\mu = \dfrac{\sum_{i=1}^{n}X_i}{
 \end{equation}
 
 \paragraph{Inferring fragment lengths from single-end reads}
-To estimate the fragment length distribution from single-end reads, we assume the length distribution follows gamma distribution with the mean $\mu$ and variance $v$, and use reads located inside ChIP-seq peaks (provided as input) to estimate $\mu$ and $v$ which are used to compute $k$ and $\theta$.
+To estimate the fragment length distribution from single-end reads, we assume the length distribution follows a gamma distribution with mean $\mu$ and variance $v$, and use reads located inside ChIP-seq peaks (provided as input) to estimate $\mu$ and $v$ which are used to compute $k$ and $\theta$.
 
 For each peak $peak_i$, we keep track of two lists, $\{start\}_{peak_i}$ and $\{end\}_{peak_i}$.
 For each read overlapping $peak_i$, if the read is on the forward strand we add its start coordinate to $\{start\}_{peak_i}$.
@@ -133,12 +133,12 @@ F(v) = E_v(|S + \frac{L}{2}|) + E_v(|E - \frac{L}{2}|) - E(|S + \frac{\mu}{2} - 
 \subsubsection*{Pulldown}
 In step 2, sheared cross-linked DNA is subject to pulldown, during which an antibody for the protein or modification of interest is used to enrich the pool of fragments for those bound to the epitope recognized by the antibody.
 This process is imperfect: some bound fragments will not be pulled down, and some unbound fragments will be pulled down.
-To model this process, we use quantify the ratio of the probability of pulling down a bound vs. unbound fragment as described below.
+To model this process, we quantify the ratio of the probability of pulling down a bound vs. unbound fragment as described below.
 This value is specific to each ChIP-seq experiment and depends on the antibody specificity as well as the fraction of the genome bound by the factor of interest.
 
-We use $B_i$ to denote that fragment $i$ is bound, $\overline{B_i}$ to denote that fragment $i$ is unbound, and $D_i$ to denote that fragment $i$ is pulled down. For a fragment $i$, the probability of being pulled down can then be written as:
+We use $B_i$ to denote that fragment $i$ is bound, $\overline{B_i}$ to denote that fragment $i$ is unbound, and $D_i$ to denote that fragment $i$ is pulled down. For fragment $i$, the probability of being pulled down can then be written as:
 \begin{equation} \label{eq:pulldown}
-  P(D_i) = P(D, B_i) + P(D, \overline{B_i}) + P(D|B)P(B_i) + P(D|\overline{B})(1-P(B_i))
+  P(D_i) = P(D, B_i) + P(D, \overline{B_i}) = P(D|B)P(B_i) + P(D|\overline{B})(1-P(B_i))
 \end{equation}
 
 where $P(D|B)$ denotes the probability that a given bound fragment will be pulled down and $P(D|\overline{B})$ denotes the probability that a given unbound fragment will be pulled down.
@@ -173,7 +173,7 @@ Instead, we take the ratio which cancels $P(D)$:
 
 % Define f
 $P(B)$, or the probability that a fragment is bound on average, is equal to the fraction of the genome bound by the factor of interest $f$.
-We can approximate $f$ as the sum of the lengths of all peaks $l_k$ weighted by their binding probabilities divided by the total length of the genome $T$:
+We can approximate $f$ as the sum of the lengths of all peaks $l_k$ weighted by their binding probabilities divided by the total length of the genome $G$:
 
 \begin{equation}
   f \approx \frac{1}{G} \sum_{r \in R} S(r)l_r
@@ -182,7 +182,7 @@ We can approximate $f$ as the sum of the lengths of all peaks $l_k$ weighted by 
 where $G$ is the size of the reference genome, $S(r)$ is the probability peak reagion $r$ is bound as described above, and $l_r$ is the length of peak $r$, assuming no overlap between peaks. % TODO hmm what if peaks overlap?
 
 % Define s
-$P(B|D)$, or the average probability that a fragment is bound given that it is pulled down, is a measure of the specificity of the antibody. Assuming the majority of reads falling in peaks are truly bound, we can roughly approximated this as the percent of fragments falling within peaks, which we denote as $s$.
+$P(B|D)$, or the probability that a fragment is bound given that it is pulled down, is a measure of the specificity of the antibody. Assuming the majority of reads falling in peaks are truly bound, we can roughly approximated this as the percent of fragments falling within peaks, which we denote as $s$.
 
 % Ratio
 Using these two metrics, $f$, and $s$ (\textbf{Supplementary Table 1}), we can simplify the ratio $R$ as:
@@ -202,7 +202,6 @@ where $P(B_i)$ is based on peak scores as defined above.
 Note, in reality, $P(D|B)$ is likely to be much less than 1, since the pulldown process is inefficient and many fragments are lost.
 Further, the number is likely to vary largely across different experiments.
 Estimating the absolute value of $P(D|B)$ from real datasets is a topic of future work.
-This issue and its relationship to the number of genome copies simulated is discuseed further in implementation details below.
 
 \subsubsection*{PCR}
 
@@ -220,64 +219,40 @@ We model the per-base pair substitution rate, insertion rate, and deletion rate 
 \subsection*{ChIPmunk implementation}
 
 \subsubsection*{Peak scores}
-% TODO scaling peak scores to be probabilities
-%For any fragment $i$, we assume that the probability of its being bound $P_{ik}(B)$ is directly proportional to the peak score $C_k$ with a coefficient $\alpha$, i.e. $P_{ik}(B) = \alpha*C_k$,
-%and once it is bound, the probability of its being pulled down is 100\%, i.e. $P_{ik}(D|B) = 1$.
-%Based users' choices, peak scores can either be based on peak intensities given in an input peak BED file or determined based on counts of overlapped fragments if a BAM file is specified.
-%If peak intensities are given, $C_k$ is defined as the intensity of peak $k$ divided by the maximum peak intensity.
-%If a BAM file is specified, $C_k$ is defined as the number of fragments overlapping peak $k$ divided by the maximum number of reads overlapping any peak.
+A peak score ($S_r$) is defined for each input peak, where $S_r$ gives the probability that a fragment overlapping the region is bound.
+Note we cannot directly estiamte this probability from bulk ChIP-seq data, but assume variability in intensity across peaks is representative of different relative binding probabilities.
+Based on user input, ChIPmunk computes these binding probabilities either based on peak intensities given in an input BED file or based on read counts from an existing BAM file.
+If peak intensities are provided, $S_r$ is computed as the score of peak $r$ divided by the maximum peak intensity.
+If a BAM file is provided, $S_r$ is defined as the number of reads overlapping peak $r$ divided by the maximum number of reads overlapping any peak.
+In both cases, resulting scores $S_r$ are between 0 and 1.
 
+By specifiying the option -{}-no-scale, users may directly input binding scores that will be treated directly as probabilities and will not be rescaled.
+Users may also specify -{}-scale-outliers to remove peak intensities greater than 3 times the median score before rescaling peak intensities to reduce the effect of outlier peaks. In this case all peaks with scores greater than 3 times the median will be set to 1.
 
 \subsubsection*{Learn implementation}
-% TODO
-% user input bam, bed, single vs. paired
-% shearing for paired or single
-% pulldown learn f or s
-% PCR learn r. Require duplicates marked
-% output as JSON format
-Our learning module models read files, and generates parameters for 
-(1) fragment length distribution, (2) pull-down efficiency, (3) PCR efficiency.
-To estimate the fragment length distribution of an input read file,
-our learning module chooses a modeling function based on the type of the read file (single-end or double-end reads),
-and finds the best fit gamma distribution $Gamma (k, \theta)$.
-To calculate pull-down efficiency, our learning module takes both the read file and the its peak file as input,
-and returns the fraction of the genome bound by the factor of interest $f$ and the SPOT score $s$.
-In the estimation of PCR efficiency, we scan through the read file, 
-identify unique samples and the numbers of their PCR copies,
-and fit them to a geometric distribution $Geo(p)$ with the number of PCR copies (including the original copy)
-as x-axis and the number of samples falling into each bin as y-axis.
-It’s noteworthy that this estimation step requires a BAM file with PCR copies flagged. Lastly, the learning module summarizes up all parameters, including $k$, $theta$, $f$, $s$ and $p$, and writes them into a json file with a user-specified path prefix.
+The ChIPmunk learn module takes a set of input peaks (BED) and aligned reads (BAM) and learns parameters for (1) fragment length distribution ($k$, $\theta$), (2) pull-down efficiency ($f$, $s$), and (3) PCR efficiency ($p$) (\textbf{Supplementary Table 1}).
+BAM files must have PCR duplicates marked using a tool such as Picard \cite{picard} to enable accurate estimation of PCR parameters.
+The learn module  outputs model parameters to a JSON file that can be used as input to the simreads module.
 
 \subsubsection*{Simulation implementation}
-% TODO
-% User inputs bed, optional BAM, model params
 
-% Choose num copies. Separate sim per copy. discuss numcopies issue here
+The simreads module takes in a set of peaks, model parameters (\emph{e.g.}, from the learn module), and experimental parameters (including read length, number of reads) and simulates raw sequencing reads in FASTQ format.
+The user must additionally specify the number of copies of the genome to simulate. This is not directly equivalent to the number of input cells in a real experiment since we do not directly model antibody efficiency. We have found that values of 25-100 copies work well in most settings.
 
-% For each copy:
-% - Generate fragments, walking along chrom and choosing sizes from gamma distr
-% - Decide based on overlap with peak whether to pull down
-% - PCR on the pool of frags
-% - Sequence
+First, each copy of the genome is randomly fragmented based on the specified fragment length gamma distribution.
+Next, we decide whether to pull down each fragment based on its overlap with input peaks based on $P(B_i)$ described above.
+Then, pulled down fragments are subject to PCR based on the specified PCR rate.
+Finally, we generate reads from the resulting pool of fragments based on input parameters (using the specified mode read length, number of reads, and mode [single/paired]).
 
-% Analyze one bin at a time for computational efficiency (how choose bin size, how deal with boundaries of bins)
-% In practice, need to decide how many reads to generate from each chunk (see Michael's old pulldown text in scratch.tex)
-The major components in the simulation module are organized in the order of shearing, pulldown, PCR, and sequencing. 
-ChIPmunk processes each copy of genomes in an independent thread, and is able to process multiple threads simultaneously. 
-Each copy is further segmented into small fragments with variable lengths sampled from the input gamma distribution. 
-In the pulldown process, these fragments are randomly selected at different rates based on their overlaps with peaks. 
-All selected fragments share the same probabilities of being duplicated, and the number of duplicates follows the geometric distribution of a user’s choice. 
-At last, we convert fragment coordinates into read sequences and output them in the FASTQ format. 
-In practice, instead of processing the whole genomes at once, we split the genomes into bins and process the fragments in each bin individually, 
-so that ChIPmuck can accommodate for personal computers with limited memories. The bin size is customized by users, and typically set as 1 million base pairs.
-
+In practice, each copy of the genome is processed in bins (default size 100kb) to avoid storing large fragment pools in memory.
+In a preprocessing step, we determine how many reads to generate from each genome copy based on the target number of output reads.
+ChIPmunk is parallelized by processing different genome copies using separate threads simultaneously.
 
 \subsubsection*{C++ implementation details}
 ChIPmunk is implemented as an open source C++ project with source code publicly available on Github: https://github.com/gymreklab/ChIPmunk.
-It uses the open source libraries htslib (www.htslib.org) for parsing BAM files and POSIX threads for implementing multithreading.
+It uses the open source libraries htslib (www.htslib.org) for parsing BAM files and POSIX threads for multithreading.
 It supports standard file formats including BAM/CRAM for aligned reads, BED for peak files, JSON for model files, and FASTQ for raw reads.
-
-All analyses were performed using ChIPmunk v1.9. % TODO rerun with this one
+All analyses were performed using ChIPmunk v1.9.
 
 \subsection*{Inferring parameters of ENCODE datasets}
 
