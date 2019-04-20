@@ -176,7 +176,7 @@ Model files are in JSON syntax, and follow the example below. Hundreds of model 
 ## FAQ
 
 **Q**: What should I set the number of genome copies (`--nc`) parameter to for `simreads`?<br>
-**A**: This number is not directly comparable to the actual number of cells used in an experiment since we do not currently model pulldown inefficiency. We have found in most settings performance starts to plateau after around 25 copies with best performance around `--nc 100`. Note, run time increases linearly with the value set for this parameter.
+**A**: This number is not directly comparable to the actual number of cells used in an experiment since we do not currently model pulldown inefficiency. We have found that for histone modifications performance starts to plateau after around 25 copies with best performance around `--nc 100`. For transcription factors we recommend setting `--nc 1000`. Note, run time increases linearly with the value set for this parameter.
 <br><br>
 **Q**: I get a `pcr_rate` output from `learn` of 1.0 (no duplicates) but I know there should be duplicates in my data!<br>
 **A**: Make sure duplicates are marked, e.g. using [Picard MarkDuplicates](https://broadinstitute.github.io/picard/command-line-overview.html#MarkDuplicates).
