@@ -56,13 +56,13 @@ if [ "${RTYPE}" = "Paired" ] || [ "${RTYPE}" = "Both" ]; then
 	-b ${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam \
 	-p ${OUTDIR}/${FACTOR}/${FACTOR}.bed \
 	-o ${OUTDIR}/${FACTOR}/${FACTOR}.paired-1.9 \
-	-t bed --scale-outliers \
+	-t bed \
 	--paired --output-frag-lens
 fi
 if [ "${RTYPE}" = "Single" ] || [ "${RTYPE}" = "Both" ]; then
     $CHIPMUNK learn \
 	-b ${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam \
 	-p ${OUTDIR}/${FACTOR}/${FACTOR}.bed \
-	-t bed --scale-outliers \
+	-t bed \
 	-o ${OUTDIR}/${FACTOR}/${FACTOR}-1.9 -c 7 --thres $THRESH
 fi
