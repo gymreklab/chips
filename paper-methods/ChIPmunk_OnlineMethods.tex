@@ -239,16 +239,17 @@ The learn module  outputs model parameters to a JSON file that can be used as in
 \subsubsection*{Simulation implementation}
 
 The simreads module takes in a set of peaks, model parameters (\emph{e.g.}, from the learn module), and experimental parameters (including read length, number of reads) and simulates raw sequencing reads in FASTQ format.
-The user must additionally specify the number of copies of the genome to simulate. This is not directly equivalent to the number of input cells in a real experiment since we do not directly model antibody efficiency. We have found that values of 25-100 copies work well in most settings.
+The user must additionally specify the number of simulation rounds, which denotes the number of times the input reference genome is processed by ChIPmunk. Notably, this number is related to but not directly comparable to the number of experimentally processed cells, since pulldown efficiency is not directly included in our current model
+We have found that values of 25-100 simulation rounds work well in most settings for HMs, and 1,000 rounds works well for TFs.
 
-First, each copy of the genome is randomly fragmented based on the specified fragment length gamma distribution.
+First, each copy of the genome (equivalent to one simulation round) is randomly fragmented based on the specified fragment length gamma distribution.
 Next, we decide whether to pull down each fragment based on its overlap with input peaks based on $P(B_i)$ described above.
 Then, pulled down fragments are subject to PCR based on the specified PCR rate.
 Finally, we generate reads from the resulting pool of fragments based on input parameters (using the specified mode read length, number of reads, and mode [single/paired]).
 
-In practice, each copy of the genome is processed in bins (default size 100kb) to avoid storing large fragment pools in memory.
-In a preprocessing step, we determine how many reads to generate from each genome copy based on the target number of output reads.
-ChIPmunk is parallelized by processing different genome copies using separate threads simultaneously.
+In practice, in each round the genome is processed in bins (default size 100kb) to avoid storing large fragment pools in memory.
+In a preprocessing step, we determine how many reads to generate from each simulation round based on the target number of output reads.
+ChIPmunk is parallelized by performing different simulation rounds on separate threads simultaneously.
 
 \subsubsection*{C++ implementation details}
 ChIPmunk is implemented as an open source C++ project with source code publicly available on Github: https://github.com/gymreklab/ChIPmunk.
@@ -271,8 +272,8 @@ Inferred parameters as well as links to JSON model files that can be used as inp
 
 \subsection*{Evaluating ChIPmunk using ENCODE datasets}
 
-We performed simulations using an increasing number of genome copies (ChIPmunk argument -{}-nc 1, 5, 10, 25, 50, 100, or 1000) for two factors (the histone modification H3K27ac and the transcription factor CTCF) with ENCODE data available in the GM12878 cell line. (BAM accession ENCFF097SQI and broadPeak [BED] accession ENCFF465WTH for H3K27ac; BAM accession ENCFF598OOE and narrowPeak [BED] accession ENCFF706QLS for CTCF.
-For each copy number in each factor, we ran ChIPmunk's simreads tool on hg19 chromosome 19 (-{}-region chr19:1-59128983) using the corresponding learned ENCODE model (see \textbf{Supplementary Table 2}) and the same sequencing parameters as the ENCODE reads from chromosome 19 for each dataset (-{}-numreads 269113 -{}-readlen 51 for H3Ka7ac; -{}-numreads 521557 -{}-readlen 36 for CTCF). 
+We performed simulations using an increasing number of simulation rounds (ChIPmunk argument -{}-numcopies 1, 5, 10, 25, 50, 100, or 1000) for two factors (the histone modification H3K27ac and the transcription factor CTCF) with ENCODE data available in the GM12878 cell line. (BAM accession ENCFF097SQI and broadPeak [BED] accession ENCFF465WTH for H3K27ac; BAM accession ENCFF598OOE and narrowPeak [BED] accession ENCFF706QLS for CTCF.
+For each number of simulations in each factor, we ran ChIPmunk's simreads tool on hg19 chromosome 19 (-{}-region chr19:1-59128983) using the corresponding learned ENCODE model (see \textbf{Supplementary Table 2}) and the same sequencing parameters as the ENCODE reads from chromosome 19 for each dataset (-{}-numreads 269113 -{}-readlen 51 for H3Ka7ac; -{}-numreads 521557 -{}-readlen 36 for CTCF). 
 We additionally used options -p ENCODE.bed -t bed -c 7, where ENCODE.bed represents the corresponding peak file for each factor with accessions listed above.
 Simulated reads were aligned to the hg19 reference genome using BWA MEM \cite{bwamem} v0.7.12-r1039 with default parameters and converted to sorted and indexed BAM files using samtools \cite{samtools} version 1.5. Duplicates were flagged using the Picard \cite{picard} MarkDuplicates tool (v2.18.11) with default parameters.
 
@@ -304,7 +305,7 @@ We used ChIPmunk's simreads tool to generate genome-wide ChIP-seq datasets for f
 BAM/BED accssions ENCFF385RWJ/ENCFF816AHV, ENCFF398NET/ENCFF795URC, \\ENCFF809FFP/ENCFF851UKZ, ENCFF677IFV/ENCFF921LKB, ENCFF191SDM/ENCFF479XLN,\\ ENCFF518TTP/ENCFF012JXJ, and ENCFF406XWF/ENCFF833FTF for
 H3K27ac, H3K4me3, H3K27me3, H3K4me1, H3K36me3, BACH1, and CTCF, respectively. BED accessions are for broadPeak files for the HMs and narrowPeak files for the TFs.
 
-For each HM and TF, we used options -p ENCODE.bed -t bed -c 7 where ENCODE.bed represents the corresponding peak file for each factor with accessions listed above and set -{}-gamma-frag 10,20 -{}-pcr\_rate 0.85 -{}-nc 100 -{}-readlen 100 to keep these parameters constant across all runs.
+For each HM and TF, we used options -p ENCODE.bed -t bed -c 7 where ENCODE.bed represents the corresponding peak file for each factor with accessions listed above and set -{}-gamma-frag 10,20 -{}-pcr\_rate 0.85 -{}-numcopies 100 -{}-readlen 100 to keep these parameters constant across all runs.
 We simulated datasets using numbers of reads (-{}-numreads) set to 1, 5, 10, 50, or 100 million reads.
 We additionally simulated a control dataset (whole cell extract; WCE) with the same number of reads but using the options -t wce and no input BED file. As described above, simulated reads were aligned to hg19 using BWA-MEM and duplicates were flagged with Picard.
 We used MACS2 \cite{MACS2} to call peaks on the resulting duplicate-flagged files using whole cell extract reads as a control and with default options except -{}-broad for histone modifications.
