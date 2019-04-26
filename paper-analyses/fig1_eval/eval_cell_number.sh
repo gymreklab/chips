@@ -42,8 +42,7 @@ intersectBed \
     -a ${OUTDIR}/windows/chr19_windows_${binsize}kb.bed \
     -b ${BED} -wa -v > ${OUTDIR}/${factor}/windows_${binsize}kb_nopeak.bed
 
-#for nc in 1 5 10 25 50 100 1000 5000
-for nc in 100
+for nc in 1 5 10 25 50 100 1000 # 5000
 do
     echo $nc
     cat ${ENCDIR}/${factor}/*.json
