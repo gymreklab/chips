@@ -12,8 +12,8 @@ RTYPE=$5
 THRESH=$6
 
 
-#MAXFILESIZE=4294967296 # 4GB. Skip large files so AWS doesn't run out of space. 
-MAXFILESIZE=4294967296000
+MAXFILESIZE=4294967296 # 4GB. Skip large files so AWS doesn't run out of space. 
+#MAXFILESIZE=4294967296000
 
 CHIPMUNK=chipmunk #/home/mgymrek/workspace/ChIPmunk/src/chipmunk
 

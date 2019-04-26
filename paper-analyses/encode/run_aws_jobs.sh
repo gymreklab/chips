@@ -23,7 +23,7 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     elif [ "${rtype}" = "Single" ]; then
 	outfile=${factor}-1.9.json
     fi
-    aws s3 ls s3://chipmunk-encode-models/${outfile} > /dev/null
+    aws s3 ls s3://chipmunk-encode-models-round2/${outfile} > /dev/null
     if [[ $? -eq 0 ]]; then
 	echo "Found file... skipping ${factor}"
 	continue
@@ -36,5 +36,4 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
         --timeout 'attemptDurationSeconds=3600' \
 	--container-overrides 'command=[\"${SCRIPTNAME}\",\"${bamurl}\",\"${bedurl}\",\"${factor}\",\"${rtype}\"],environment=[{name=\"BATCH_FILE_TYPE\",value=\"script\"},{name=\"BATCH_FILE_S3_URL\",value=\"s3://gymreklab-awsbatch/${SCRIPTNAME}\"}]'"
     sh -c "${cmd}"
-#    echo "${cmd}"
-done < $INFILE #encode_datasets_for_aws.csv
+done < $INFILE

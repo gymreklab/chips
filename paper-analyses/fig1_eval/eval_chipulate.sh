@@ -2,13 +2,9 @@
 
 source params.sh
 
-#binsize=1 # kb
-#factor=GM12878_CTCF_ENCFF406XWF_ENCFF833FTF
-#fqname="/storage/yuq005/Chipmunk-eval/chipulate/run0331_CTCF/GM12878_CTCF_ENCFF406XWF_ENCFF833FTF_NUMCELLS.chip_reads.fastq"
-
-binsize=5
-factor=GM12878_H3K27ac_ENCFF385RWJ_ENCFF816AHV
-fqname="/storage/yuq005/Chipmunk-eval/chipulate/run0331_K27ac/GM12878_H3K27ac_ENCFF385RWJ_ENCFF816AHV_NUMCELLS.chip_reads.fastq"
+factor=$1
+fqname=$2
+binsize=$3
 
 # Setup windows on chr19
 ./make_windows.sh ${binsize}
