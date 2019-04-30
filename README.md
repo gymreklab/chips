@@ -113,7 +113,7 @@ Required parameters:
 * `-o <outprefix>`: Prefix to name output files. Outputs `<outprefix>.fastq` for single-end data or `<outprefix>_1.fastq` and `<outprefix>_2.fastq` for paired-end data.
 
 Experiment parameters:
-* `--numcopies <int>`: Number of copies of the genome to simulate (Default: 100)
+* `--numcopies <int>`: Number of simulation rounds (copies of the reference genome) to simulate (Default: 100). Note, this is not directly comparable to the number of input cells.
 * `--numreads <int>`: Number of reads (or read pairs) to simulate (Default: 1000000)
 * `--readlen <int>`: Read length to generate (Default: 36bp)
 * `--paired`: Simulated paired-end reads (by default single-end reads are generated).
@@ -175,8 +175,8 @@ Model files are in JSON syntax, and follow the example below. Hundreds of model 
 <a name="faq"></a>
 ## FAQ
 
-**Q**: What should I set the number of genome copies (`--nc`) parameter to for `simreads`?<br>
-**A**: This number is not directly comparable to the actual number of cells used in an experiment since we do not currently model pulldown inefficiency. We have found in most settings performance starts to plateau after around 25 copies with best performance around `--nc 100`. Note, run time increases linearly with the value set for this parameter.
+**Q**: What should I set the number of genome copies (`--numcopies`) parameter to for `simreads`?<br>
+**A**: This gives the number of simulation rounds to perform. This number is not directly comparable to the actual number of cells used in an experiment since we do not currently model pulldown inefficiency. We have found that for histone modifications performance starts to plateau after around 25 copies (`--numcopies 25`). For transcription factors we recommend setting `--numcopies 1000`. Note, run time increases linearly with the value set for this parameter.
 <br><br>
 **Q**: I get a `pcr_rate` output from `learn` of 1.0 (no duplicates) but I know there should be duplicates in my data!<br>
 **A**: Make sure duplicates are marked, e.g. using [Picard MarkDuplicates](https://broadinstitute.github.io/picard/command-line-overview.html#MarkDuplicates).

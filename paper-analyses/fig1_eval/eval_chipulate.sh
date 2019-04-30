@@ -1,17 +1,26 @@
 #!/bin/bash
 
 source params.sh
-binsize=5 # number of kb
-factor=GM12878_H3K27ac_ENCFF097SQI_ENCFF465WTH
+
+factor=$1
+fqname=$2
+binsize=$3
 
 # Setup windows on chr19
 ./make_windows.sh ${binsize}
 
-BED=/storage/mgymrek/chipmunk/encode/GM12878_H3K27ac_ENCFF097SQI_ENCFF465WTH/GM12878_H3K27ac_ENCFF097SQI_ENCFF465WTH.bed
+# Compare to chipmunk
+nc=25
+./run_factor.sh ${factor} ${nc} 36 521557 Single nobam
+bedtools multicov -bams ${OUTDIR}/${factor}_nobam/${factor}_nobam.${nc}.flagged.bam \
+    -bed ${OUTDIR}/windows/chr19_windows_${binsize}kb.bed > \
+    ${OUTDIR}/${factor}_nobam/${factor}_nobam.${nc}.cov.${binsize}kb.bed
+
+BED=/storage/mgymrek/chipmunk/encode/${factor}/${factor}.bed
 for nc in 1 2 5 10 100 1000 1000000
 do
     echo $nc
-    fq=/storage/yuq005/Chipmunk-eval/chipulate/run0327/reads_corrected/K27ac_chr19_${nc}.chip_reads.fastq.gz
+    fq=$(echo $fqname | sed "s/NUMCELLS/${nc}/")
     bwa mem -t 10 ${REFFA} ${fq} | samtools view -bS - > \
 	${OUTDIR}/${factor}/${factor}.${nc}.chipulate.bam
     samtools sort -o ${OUTDIR}/${factor}/${factor}.${nc}.chipulate.sorted.bam ${OUTDIR}/${factor}/${factor}.${nc}.chipulate.bam

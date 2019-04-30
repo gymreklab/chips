@@ -3,9 +3,17 @@
 source params.sh
 
 ######### Sim examples #########
+#./eval_cell_number.sh 1 GM12878_CTCF_ENCFF598OOE_ENCFF706QLS 36 317497 Single
+#./eval_cell_number.sh 5 GM12878_H3K27ac_ENCFF097SQI_ENCFF465WTH 51 269113 Single
 
-# Simulate examples
-# ./sim_examples.sh
+./eval_cell_number.sh 5 GM12878_H3K27me3_ENCFF244BSW_ENCFF973OTZ 51 167000 Single
+./eval_cell_number.sh 5 GM12878_H3K36me3_ENCFF191SDM_ENCFF695NNX 36 603228 Single
+./eval_cell_number.sh 1 GM12878_BCLAF1_ENCFF671NSO_ENCFF222GJV 101 1943369 Single
+./eval_cell_number.sh 1 GM12878_BACH1_ENCFF518TTP_ENCFF866OLZ 101 1331951 Single
 
-# Evaluate cell number
-#./eval_cell_number.sh
+######### Chipulate #########
+#./compare_chipulate.sh ENCFF406XWF ENCFF833FTF GM12878_CTCF_ENCFF406XWF_ENCFF833FTF 100 1000 36 521557 1
+#./compare_chipulate.sh ENCFF385RWJ ENCFF816AHV GM12878_H3K27ac_ENCFF385RWJ_ENCFF816AHV 5 100 51 269113 5
+#./compare_chipulate.sh ENCFF385RWJ ENCFF816AHV GM12878_H3K27ac_ENCFF385RWJ_ENCFF816AHV 5 25 51 269113 5
+#./eval_chipulate.sh GM12878_CTCF_ENCFF406XWF_ENCFF833FTF /storage/yuq005/Chipmunk-eval/chipulate/run0331_CTCF/GM12878_CTCF_ENCFF406XWF_ENCFF833FTF_NUMCELLS.chip_reads.fastq 1
+#./eval_chipulate.sh GM12878_H3K27ac_ENCFF385RWJ_ENCFF816AHV /storage/yuq005/Chipmunk-eval/chipulate/run0331_K27ac/GM12878_H3K27ac_ENCFF385RWJ_ENCFF816AHV_NUMCELLS.chip_reads.fastq 1

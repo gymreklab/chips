@@ -8,14 +8,14 @@ READLEN=$3
 NREADS=$4
 RTYPE=$5
 
+mkdir -p ${OUTDIR}/${factor}
+
 BED=$(ls ${ENCDIR}/${factor}/*.bed | head -n 1)
 BAM=$(ls ${ENCDIR}/${factor}/*.flagged.bam | head -n 1)
 MODEL=$(ls ${ENCDIR}/${factor}/*.json | head -n 1)
 if [ "$RTYPE" = "Paired" ]; then
     MODEL=$(ls ${ENCDIR}/${factor}/*.paired.json | head -n 1)
 fi
-
-mkdir -p ${OUTDIR}/${factor}
 
 # Output params
 echo "Readlen $READLEN"
@@ -28,9 +28,10 @@ if [ "$RTYPE" = "Paired" ]; then
     echo "Adding paired option"
     OPTARGS=" --paired"
 fi
-time $CHIPMUNK simreads \
-    -p ${BED} \
-    -t bed -c 7 --scale-outliers \
+
+echo ${factor} ${nc} $(time $CHIPMUNK simreads \
+    -p ${BED} -b ${BAM} \
+    -t bed \
     -f ${REFFA} \
     -o ${OUTDIR}/${factor}/${factor}.${nc} \
     --model ${MODEL} \
@@ -38,18 +39,25 @@ time $CHIPMUNK simreads \
     --numreads ${NREADS} \
     --readlen ${READLEN} \
     --thread 10 \
-    --region chr19:1-59128983 ${OPTARGS}
+    --region chr19:1-59128983 ${OPTARGS})
 
 # Map reads
 if [ "$RTYPE" = "Single" ]; then
     echo "Running single end"
-    bwa mem -t 10 ${REFFA} \
-	${OUTDIR}/${factor}/${factor}.${nc}.fastq | \
+    if [ "$READLEN" -lt 36 ]; then
+	bwa aln -t 10 ${REFFA} \
+	    ${OUTDIR}/${factor}/${factor}.${nc}.fastq > ${OUTDIR}/${factor}/${factor}.${nc}.sai
+	bwa samse ${REFFA} ${OUTDIR}/${factor}/${factor}.${nc}.sai ${OUTDIR}/${factor}/${factor}.${nc}.fastq | \
+	    samtools view -bS - > ${OUTDIR}/${factor}/${factor}.${nc}.bam
+    else
+	bwa mem -t 10  ${REFFA} \
+	    ${OUTDIR}/${factor}/${factor}.${nc}.fastq | \
 	samtools view -bS - > ${OUTDIR}/${factor}/${factor}.${nc}.bam
+    fi
 fi
 if [ "$RTYPE" = "Paired" ]; then
     echo "Running paired end"
-    bwa mem -t 10 ${REFFA} \
+    bwa mem -t 10  ${REFFA} \
 	${OUTDIR}/${factor}/${factor}.${nc}_1.fastq \
 	${OUTDIR}/${factor}/${factor}.${nc}_2.fastq | \
 	samtools view -bS - > ${OUTDIR}/${factor}/${factor}.${nc}.bam

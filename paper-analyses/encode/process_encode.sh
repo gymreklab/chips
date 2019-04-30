@@ -11,7 +11,9 @@ FACTOR=$4
 RTYPE=$5
 THRESH=$6
 
-MAXFILESIZE=4294967296 # 4GB. Skip large files so AWS doesn't run out of space. TODO set bigger for PE
+
+MAXFILESIZE=4294967296 # 4GB. Skip large files so AWS doesn't run out of space. 
+#MAXFILESIZE=4294967296000
 
 CHIPMUNK=chipmunk #/home/mgymrek/workspace/ChIPmunk/src/chipmunk
 
@@ -54,13 +56,13 @@ if [ "${RTYPE}" = "Paired" ] || [ "${RTYPE}" = "Both" ]; then
 	-b ${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam \
 	-p ${OUTDIR}/${FACTOR}/${FACTOR}.bed \
 	-o ${OUTDIR}/${FACTOR}/${FACTOR}.paired-1.9 \
-	-t bed --scale-outliers \
-	--paired 
+	-t bed \
+	--paired --output-frag-lens
 fi
 if [ "${RTYPE}" = "Single" ] || [ "${RTYPE}" = "Both" ]; then
     $CHIPMUNK learn \
 	-b ${OUTDIR}/${FACTOR}/${FACTOR}.flagged.bam \
 	-p ${OUTDIR}/${FACTOR}/${FACTOR}.bed \
-	-t bed --scale-outliers \
+	-t bed \
 	-o ${OUTDIR}/${FACTOR}/${FACTOR}-1.9 -c 7 --thres $THRESH
 fi

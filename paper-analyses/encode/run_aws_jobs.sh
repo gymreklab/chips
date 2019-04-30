@@ -1,5 +1,10 @@
 #!/bin/bash
 
+INFILE=$1
+
+aws s3 cp process_encode.sh s3://gymreklab-awsbatch/process_encode.sh
+aws s3 cp process_encode_s3.sh s3://gymreklab-awsbatch/process_encode_s3.sh
+
 SCRIPTNAME=process_encode_s3.sh
 while IFS='' read -r line || [[ -n "$line" ]]; do
     bamurl=$(echo $line | cut -f 4 -d',')
@@ -18,7 +23,7 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     elif [ "${rtype}" = "Single" ]; then
 	outfile=${factor}-1.9.json
     fi
-    aws s3 ls s3://chipmunk-encode-models/${outfile} > /dev/null
+    aws s3 ls s3://chipmunk-encode-models-round2/${outfile} > /dev/null
     if [[ $? -eq 0 ]]; then
 	echo "Found file... skipping ${factor}"
 	continue
@@ -30,6 +35,5 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	--job-definition chipmunk-encode:2 \
         --timeout 'attemptDurationSeconds=3600' \
 	--container-overrides 'command=[\"${SCRIPTNAME}\",\"${bamurl}\",\"${bedurl}\",\"${factor}\",\"${rtype}\"],environment=[{name=\"BATCH_FILE_TYPE\",value=\"script\"},{name=\"BATCH_FILE_S3_URL\",value=\"s3://gymreklab-awsbatch/${SCRIPTNAME}\"}]'"
-#    sh -c "${cmd}"
-    echo "${cmd}"
-done < encode_datasets_for_aws.csv
+    sh -c "${cmd}"
+done < $INFILE

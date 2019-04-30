@@ -1,32 +1,25 @@
 #!/bin/bash
 
-OUTDIR=/storage/mgymrek/chipmunk/encode
+# Get list of ENCODE accessions
+./get_encode_v2.py > encode_gm12878_accs.csv
 
-# Run process encode examples
-while IFS='' read -r line || [[ -n "$line" ]]; do
-    ct=$(echo $line | cut -f 1 -d',')
-    f=$(echo $line | cut -f 2 -d',')
-    rtype=$(echo $line | cut -f 3 -d',')
-    bamurl=$(echo $line | cut -f 4 -d',')
-    bedurl=$(echo $line | cut -f 5 -d',')
-    bamacc=$(echo $bamurl | cut -d'/' -f 5)
-    bedacc=$(echo $bedurl | cut -d'/' -f 5)
-    factor=${ct}_${f}_${bamacc}_${bedacc}
-    if [[ "$factor" == *"H3"* ]]; then
-	thresh=5 # For HMs
-    else
-	thresh=100 # For TFs
-    fi
-    if [[ "$rtype" == "Paired" ]]; then
-	rtype=Both
-    fi
-    echo ./process_encode.sh ${bamurl} ${bedurl} ${OUTDIR} ${factor} ${rtype} ${thresh}
-done < encode_examples_snorlax.csv | xargs -n1 -I% -P4 sh -c "%" 
+# Process histone mods on snorlax
+grep H3 encode_gm12878_accs.csv > encode_gm12878_accs_HM.csv
+nohup ./process_encode_snorlax.sh encode_gm12878_accs_HM.csv 5 &
 
-#encode_paired_example_datasets.csv | xargs -n1 -I% -P4 sh -c "%"
-#encode_paired_example_datasets.csv #| xargs -n1 -I% -P4 sh -c "%"
-#encode_datasets_K562_GM12878_clean_HM.csv
-#encode_H3K27ac_reps.csv | xargs -n1 -I% -P4 sh -c "%"  
-#< encode_datasets_K562_GM12878_clean_HM.csv | grep process | xargs -n1 -I% -P4 sh -c "%"
-#< encode_paired_example_datasets.csv #| xargs -n1 -I% -P4 sh -c "%"
+# Process other example TFs
+grep "BACH1\|BCLAF1\|CTCF\|ETV6\|IKZF1\|MEF2A||RELB\|SRF\|TARDBP\|CTCF" encode_gm12878_accs.csv | grep Paired > encode_gm12878_accs_TFs.csv
+nohup ./process_encode_snorlax.sh encode_gm12878_accs_TFs.csv 100 &
+
+# Process CTCF for supp fig 3
+grep CTCF encode_gm12878_accs.csv > encode_gm12878_accs_TFs_CTCF.csv
+./process_encode_snorlax.sh encode_gm12878_accs_TFs_CTCF.csv 100
+
+### TODO rerun below ###
+# Process all on AWS - see readme_aws.sh for setup
+cat encode_gm12878_accs.csv | grep -v H3 | grep -v BACH1 | grep -v BCLAF1 | grep -v CTCF | grep -v ETV6 | grep -v IKZF1 | grep -v MEF2A | grep -v RELB | grep -v SRF | grep -v TARDBP | grep -v Paired > encode_gm12878_accs_foraws.csv
+./run_aws_jobs.sh encode_gm12878_accs_foraws.csv
+./compile_aws_params.sh
+./get_markdown.sh ChIPMunk_SuppTable2.csv
+
 
