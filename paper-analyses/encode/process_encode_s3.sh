@@ -25,15 +25,15 @@ echo "BAMURL: $BAMURL"
 echo "BEDURL: $BEDURL"
 echo "FACTOR: $FACTOR"
 echo "RTYPE: $RTYPE"
-./process_encode.sh ${BAMURL} ${BEDURL} /scratch ${FACTOR} ${RTYPE} 0 || die "process_encode.sh failed"
+./process_encode.sh ${BAMURL} ${BEDURL} /scratch ${FACTOR} ${RTYPE} 100 || die "process_encode.sh failed"
 
 # Upload results to s3
 if [ "${RTYPE}" = "Single" ] || [ "${RTYPE}" = "Both" ]; then
-    aws s3 cp /scratch/${FACTOR}/${FACTOR}-1.9.json s3://chipmunk-encode-models/${FACTOR}-1.9.json || die "Error writing results to s3"
+    aws s3 cp /scratch/${FACTOR}/${FACTOR}-1.9.json s3://chipmunk-encode-models-round2/${FACTOR}-1.9.json || die "Error writing results to s3"
 fi
 
 if [ "${RTYPE}" = "Paired" ] || [ "${RTYPE}" = "Both" ]; then
-    aws s3 cp /scratch/${FACTOR}/${FACTOR}.paired-1.9.json s3://chipmunk-encode-models/${FACTOR}.paired-1.9.json || die "Error writing results to s3"
+    aws s3 cp /scratch/${FACTOR}/${FACTOR}.paired-1.9.json s3://chipmunk-encode-models-round2/${FACTOR}.paired-1.9.json || die "Error writing results to s3"
 fi
 
 # Remove the BAM file

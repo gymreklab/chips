@@ -7,7 +7,8 @@ nc=$2
 READLEN=$3
 NREADS=$4
 RTYPE=$5
-NOBAM=$6
+
+mkdir -p ${OUTDIR}/${factor}
 
 BED=$(ls ${ENCDIR}/${factor}/*.bed | head -n 1)
 BAM=$(ls ${ENCDIR}/${factor}/*.flagged.bam | head -n 1)
@@ -28,16 +29,8 @@ if [ "$RTYPE" = "Paired" ]; then
     OPTARGS=" --paired"
 fi
 
-OPTARGS=""
-if [ -z ${NOBAM} ]; then
-    OPTARGS="-b ${BAM}"
-else
-    factor=${factor}_nobam
-    OPTARGS="-c 7"
-fi
-mkdir -p ${OUTDIR}/${factor}
-time $CHIPMUNK simreads \
-    -p ${BED} \
+echo ${factor} ${nc} $(time $CHIPMUNK simreads \
+    -p ${BED} -b ${BAM} \
     -t bed \
     -f ${REFFA} \
     -o ${OUTDIR}/${factor}/${factor}.${nc} \
@@ -46,7 +39,7 @@ time $CHIPMUNK simreads \
     --numreads ${NREADS} \
     --readlen ${READLEN} \
     --thread 10 \
-    --region chr19:1-59128983 ${OPTARGS}
+    --region chr19:1-59128983 ${OPTARGS})
 
 # Map reads
 if [ "$RTYPE" = "Single" ]; then

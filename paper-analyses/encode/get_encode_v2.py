@@ -27,9 +27,13 @@ for acc in accs:
     target = response_json_dict["target"]["title"].split()[0]
     bam_accs = {} # num rep->acc
     peak_accs = {} # num rep->acc
+    combined_peaks = None
     files = response_json_dict["files"]
     for fdata in files:
         if "assembly" not in fdata or not fdata["assembly"] == "hg19": continue
+        if (fdata["output_type"]=="optimal idr thresholded peaks") and \
+           fdata["file_type"] in ["bed narrowPeak", "bed broadPeak"]:
+            combined_peaks = fdata["accession"]
         if len(fdata["biological_replicates"]) > 1: continue
         try:
             num_rep = fdata["biological_replicates"][0]
@@ -49,5 +53,8 @@ for acc in accs:
         if repnum in peak_accs:
             ba = bam_accs[repnum]
             peak_acc = peak_accs[repnum]
-            sys.stdout.write(",".join(["GM12878",target, ba[0], FileURL(ba[1], "bam"), FileURL(peak_acc, "bed.gz")])+"\n")
+            if combined_peaks is not None:
+                combined_url = FileURL(combined_peaks, "bed.gz")
+            else: combined_url = "NA"
+            sys.stdout.write(",".join(["GM12878",target, ba[0], FileURL(ba[1], "bam"), FileURL(peak_acc, "bed.gz"), combined_url])+"\n")
 
