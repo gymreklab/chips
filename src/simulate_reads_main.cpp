@@ -402,7 +402,7 @@ void merge_files(std::string ifilename, std::string ofilename){
 
 void simulate_reads_help(void) {
   Options options;
-  cerr << "\nTool:    chipmunk simreads" << endl;
+  cerr << "\nTool:    tulip simreads" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
   cerr << "Summary: Simulate ChIP-seq reads for a set of peaks." << endl << endl;
   cerr << "Usage:   " << PROGRAM_NAME << " simreads -p peaks.bed -f ref.fa -o outprefix [OPTIONS] " << endl;
