@@ -10,7 +10,7 @@ die()
 ./configure || die "./configure failed"
 
 GITID=$(./config/git-version-gen .tarball-version) || die "Failed to get GIT ID"
-TARBALL=chipmunk-${GITID}.tar.gz
+TARBALL=tulib-${GITID}.tar.gz
 rm -f "$TARBALL"
 
 make distcheck || die "make distcheck failed"
