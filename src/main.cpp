@@ -5,13 +5,13 @@
 using namespace std;
 
 // Function declarations
-int chipmunk_help(void);
+int tulip_help(void);
 int simulate_reads_main(int argc, char* argv[1]);
 int learn_main(int argc, char* argv[1]);
 
 int main(int argc, char* argv[]) {
   // make sure the user at least entered a sub_command
-  if (argc < 2) return chipmunk_help();
+  if (argc < 2) return tulip_help();
 
   std::string sub_cmd = argv[1];
 
@@ -21,9 +21,9 @@ int main(int argc, char* argv[]) {
     return learn_main(argc-1, argv+1);
   } else if (sub_cmd == "-h" || sub_cmd == "--help" ||
 	   sub_cmd == "-help") {
-    return chipmunk_help();
+    return tulip_help();
   } else if (sub_cmd == "-version" || sub_cmd == "--version") {
-    cout << "chipmunk " << _GIT_VERSION << endl;
+    cout << "tulip " << _GIT_VERSION << endl;
   } else {
     cerr << "error: unrecognized command: " << argv[1] << endl << endl;
     return 1;
@@ -31,10 +31,10 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-int chipmunk_help(void) {
+int tulip_help(void) {
   cout << PROGRAM_NAME << ": Simulator for ChIP-seq and other -seq experiments.\n";
-  cout << "usage:   chipmunk <subcommand> [options]" << endl << endl;
-  cout << "The chipmunk sub-commands include:"<<endl;
+  cout << "usage:   tulip <subcommand> [options]" << endl << endl;
+  cout << "The tulip sub-commands include:"<<endl;
   cout << "     simreads      " << "Simulate ChIP-seq reads given a set of intervals.\n";
   cout << "     learn         " << "Learn model from real ChIP data.\n";
   cout  << endl;

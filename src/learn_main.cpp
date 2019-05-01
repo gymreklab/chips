@@ -695,7 +695,7 @@ int learn_main(int argc, char* argv[]) {
 
 void learn_help(void) {
   Options options;
-  cerr << "\nTool:    chipmunk learn" << endl;
+  cerr << "\nTool:    tulip learn" << endl;
   cerr << "Version: " << _GIT_VERSION << "\n";    
   cerr << "Summary: Learn parameters from a ChIP dataset." << endl << endl;
   cerr << "Usage:   " << PROGRAM_NAME << " learn -b reads.bam -p peak.bed -o outprefix [OPTIONS] " << endl << endl;
