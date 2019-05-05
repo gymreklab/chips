@@ -1,7 +1,7 @@
-AC_INIT([chipmunk],
+AC_INIT([tulip],
 	[m4_esyscmd([config/git-version-gen .tarball-version])], 
 	[Melissa Gymrek mgymrek@eng.ucsd.edu],
-	[chipmunk])
+	[tulip])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADER(config.h)
@@ -31,14 +31,14 @@ AC_SUBST(MACHTYPE)
 #COMPILER_WARNINGS="-Wextra -Wswitch-default -Wno-strict-aliasing"
 
 # Check for PTHREADS
-AX_PTHREAD([],[AC_MSG_ERROR([Pthread support required for chipmunk])])
+AX_PTHREAD([],[AC_MSG_ERROR([Pthread support required for tulip])])
 
 # Custom Flags to add to CFLAGS/CXXFLAGS
-CHIPMUNK_CFLAGS="-D_GIT_VERSION=\"\\\"${GIT_VERSION}\\\"\" -D_MACHTYPE=\"\\\"${MACHTYPE}\\\"\" -std=gnu++11"
+TULIP_CFLAGS="-D_GIT_VERSION=\"\\\"${GIT_VERSION}\\\"\" -D_MACHTYPE=\"\\\"${MACHTYPE}\\\"\" -std=gnu++11"
 
 # Set the final value for CFLAGS/CXXFLAGS
-CFLAGS="$CFLAGS $COMPILER_WARNINGS $PTHREAD_CFLAGS $CHIPMUNK_CFLAGS"
-CXXFLAGS="$CXXFLAGS $COMPILER_WARNINGS $PTHREAD_CFLAGS $CHIPMUNK_CFLAGS"
+CFLAGS="$CFLAGS $COMPILER_WARNINGS $PTHREAD_CFLAGS $TULIP_CFLAGS"
+CXXFLAGS="$CXXFLAGS $COMPILER_WARNINGS $PTHREAD_CFLAGS $TULIP_CFLAGS"
 
 AC_CONFIG_FILES([
    m4/Makefile
@@ -58,7 +58,7 @@ AC_MSG_RESULT([    HTSLIB_LIBS:  $HTSLIB_LIBS])
 AC_MSG_RESULT([    HTSLIB_CFLAGS: $HTSLIB_CFLAGS])
 AC_MSG_RESULT([    PTHREAD_LIBS:  $PTHREAD_LIBS])
 AC_MSG_RESULT([    PTHREAD_CFLAGS: $PTHREAD_CFLAGS])
-AC_MSG_RESULT([    CHIPMUNK_CFLAGS: $CHIPMUNK_CFLAGS])
+AC_MSG_RESULT([    TULIP_CFLAGS: $TULIP_CFLAGS])
 AC_MSG_RESULT([])
 AC_MSG_RESULT([ Default installtion directories:])
 AC_MSG_RESULT([    programs: ${prefix}/bin/ ])
