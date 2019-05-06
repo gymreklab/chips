@@ -13,8 +13,8 @@ The latest Tulip release is available on the [releases page](https://github.com/
 Tulip is also packaged in a docker container available on the [Gymrek Lab docker hub](https://hub.docker.com/u/gymreklab) under `gymreklab/tulip-X.X` where `X.X` is the Tulip version number.
 
 <a name="install"></a>
-## Basic Install
-
+## Installation
+# Install from Tarball
 Tulip requires the third party package [htslib](http://www.htslib.org/).
 
 If you are installing from the tarball, type the following commands.
@@ -38,7 +38,7 @@ If you get a pkg-config error, you may need to set PKG_CONFIG_PATH to a director
 
 Typing `tulip --help` should show a help message if Tulip was successfully installed.
 
-## Compiling from git source
+# Install from git source
 
 To compile from git source, first make sure htslib is installed. Then run:
 ```
