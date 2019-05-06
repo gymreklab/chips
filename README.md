@@ -36,7 +36,7 @@ which installs `Tulip` to `$YOUR_PATH/bin/tulip`.
 
 Typing `tulip --help` should show a help message if Tulip is successfully installed.
 
-If you get a pkg-config error, you may need to set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. If you do not have htslib installed in your machine, you need to install htslib first. You can download the package from https://github.com/samtools/htslib, and install htslib with the commands:
+If you get a pkg-config error, you may need to set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. If you do not have htslib installed in your machine, you have to install htslib first. You can download the package from https://github.com/samtools/htslib, and install htslib with the commands:
 ```
 autoheader
 autoconf
@@ -44,7 +44,7 @@ autoconf
 make
 make install
 ```
-Once you succussfully install the htslib, you need to set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. (You should be able to find it at `$YOUR_PATH_HTS/lib/pkgconfig/`)
+Once you succussfully install the htslib, you need to set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. (It is probably at `$YOUR_PATH_HTS/lib/pkgconfig/`)
 ```
 export PKG_CONFIG_PATH=$HTSLIB_PC_DIR
 ```
