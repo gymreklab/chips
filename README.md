@@ -140,7 +140,7 @@ Model parameters: (either user-specified or learned from `tulip learn`:
 Peak scoring:
 * `-b <reads.bam>`: Use a provided BAM file to obtain scores for each peak (optional). If a BAM is not given, scores in the peak files are used.
 * `-c <int>`: The index of the BED file column used to score each peak (index starting from 1). Required if not using `-b`.
-* `--scale-outliers`: Set all peaks with scores $>$2x median score to have binding prob 1. Recommended with real data.
+* `--scale-outliers`: Set all peaks with scores >2x median score to have binding prob 1. Recommended with real data.
 * `--noscale`: Don't scale peak scores. Treat given scores as binding probabilities.
 
 Other options:
