@@ -14,7 +14,7 @@ Tulip is also packaged in a docker container available on the [Gymrek Lab docker
 
 <a name="install"></a>
 ## Installation
-# Install from Tarball
+### Install from Tarball
 Tulip requires the third party package [htslib](http://www.htslib.org/).
 
 If you are installing from the tarball, type the following commands.
@@ -38,7 +38,7 @@ If you get a pkg-config error, you may need to set PKG_CONFIG_PATH to a director
 
 Typing `tulip --help` should show a help message if Tulip was successfully installed.
 
-# Install from git source
+### Install from git source
 
 To compile from git source, first make sure htslib is installed. Then run:
 ```
