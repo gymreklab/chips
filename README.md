@@ -15,7 +15,7 @@ Tulip is also packaged in a docker container available on the [Gymrek Lab docker
 <a name="install"></a>
 ## Installation
 ### Install from Tarball
-Note: Tulip requires the third party package [htslib](http://www.htslib.org/).
+Note: Tulip requires a third party package [htslib](http://www.htslib.org/).
 
 To install Tulip from the tarball file, you need to type the following commands:
 ```
