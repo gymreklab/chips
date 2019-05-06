@@ -15,10 +15,9 @@ Tulip is also packaged in a docker container available on the [Gymrek Lab docker
 <a name="install"></a>
 ## Installation
 ### Install from Tarball
-Tulip requires the third party package [htslib](http://www.htslib.org/).
+Note: Tulip requires the third party package [htslib](http://www.htslib.org/).
 
-If you are installing from the tarball, type the following commands.
-
+To install Tulip from the tarball file, you need to type the following commands:
 ```
 tar -xzvf tulip-X.X.tar.gz
 cd tulip-X.X
@@ -27,16 +26,28 @@ make
 make install
 ``` 
 
-If you do not have root access, you can instead run:
+If you do not have root access, you can install Tulip locally with the commands:
 ```
-./configure --prefix=$HOME
+./configure --prefix=$YOUR_PATH
 make
 make install
 ```
-which will install `tulip` to `~/bin/tulip`.
-If you get a pkg-config error, you may need to set PKG_CONFIG_PATH to a directory where it kind find `htslib.pc`.
+which installs `Tulip` to `$YOUR_PATH/bin/tulip`.
 
-Typing `tulip --help` should show a help message if Tulip was successfully installed.
+Typing `tulip --help` should show a help message if Tulip is successfully installed.
+
+If you get a pkg-config error, you may need to set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. If you do not have htslib installed in your machine, you need to install htslib first. You can download the package from https://github.com/samtools/htslib, and install htslib with the commands:
+```
+autoheader
+autoconf
+./configure --disable-lzma --disable-bz2 --prefix=$YOUR_PATH_HTS
+make
+make install
+```
+Once you succussfully install the htslib, you need to set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. (You should be able to find it at `$YOUR_PATH_HTS/lib/pkgconfig/`)
+```
+export PKG_CONFIG_PATH=$HTSLIB_PC_DIR
+```
 
 ### Install from git source
 
