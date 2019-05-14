@@ -1,6 +1,7 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <functional>
 #include <stdlib.h>
 #include <vector>
 #include <stdio.h>
