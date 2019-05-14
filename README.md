@@ -91,7 +91,7 @@ Required parameters:
 * `-b <file.bam>`: BAM file containing aligned reads. Should be sorted and indexed. To accurately estimate PCR duplicate rate, duplicates must be flagged e.g. using Picard. Both paired-end or single-end data are supported.
 * `-p <peaks>`: file containing peaks. 
 * `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
-* `-c <int>`: The index of the BED file column used to score each peak (index starting from 1)
+* `-c <int>`: The index of the BED or homer peak file column used to score each peak (index starting from 1)
 * `-o <outprefix>`: Prefix to name output files. Outputs file `<outprefix>.json` with learned model parameters.
 
 Optional parameters for BAM parsing:
