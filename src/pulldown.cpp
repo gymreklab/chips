@@ -31,6 +31,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   bool bound;
   float peak_score;
 
+
   // update the start index of peaks
   if (chrom != prev_chrom){
     peakIndexStart = 0;

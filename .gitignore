@@ -17,8 +17,7 @@ sanity-checks/
 src/.deps/
 src/.libs/
 src/.*
-src/asimon
-src/chipmunk
+src/tulip
 *.o
 *.a
 src/*.a
