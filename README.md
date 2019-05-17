@@ -61,6 +61,11 @@ make
 make install
 ```
 
+If installing from source on OSX, you will need to have autotools and related packages installed (ideally using Homebrew):
+```
+brew install autoconf automake autoconf-archive libtool pkg-config
+```
+
 <a name="docker"></a>
 ## From docker
 
