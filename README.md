@@ -13,12 +13,11 @@ The latest Tulip release is available on the [releases page](https://github.com/
 Tulip is also packaged in a docker container available on the [Gymrek Lab docker hub](https://hub.docker.com/u/gymreklab) under `gymreklab/tulip-X.X` where `X.X` is the Tulip version number.
 
 <a name="install"></a>
-## Basic Install
+## Installation
+### Install from Tarball
+Note: Tulip uses a helper tool "pkg-config" in compilation, and requires a third party package [htslib](http://www.htslib.org/).
 
-Tulip requires the third party package [htslib](http://www.htslib.org/).
-
-If you are installing from the tarball, type the following commands.
-
+You can use the following commands to install Tulip from the tarball file:
 ```
 tar -xzvf tulip-X.X.tar.gz
 cd tulip-X.X
@@ -27,18 +26,30 @@ make
 make install
 ``` 
 
-If you do not have root access, you can instead run:
+If you do not have root access, you can install Tulip in a local directory with the commands:
 ```
-./configure --prefix=$HOME
+./configure --prefix=$YOUR_PATH
 make
 make install
 ```
-which will install `tulip` to `~/bin/tulip`.
-If you get a pkg-config error, you may need to set PKG_CONFIG_PATH to a directory where it kind find `htslib.pc`.
+which installs `Tulip` to `$YOUR_PATH/bin/tulip`.
 
-Typing `tulip --help` should show a help message if Tulip was successfully installed.
+Typing `tulip --help` should show a help message if Tulip is successfully installed.
 
-## Compiling from git source
+If you get a pkg-config error, you may need to set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. If you do not have htslib installed in your machine, you need to install htslib first. You can download the package from https://github.com/samtools/htslib, and install htslib with the commands:
+```
+autoheader
+autoconf
+./configure --disable-lzma --disable-bz2 --prefix=$YOUR_PATH_HTS
+make
+make install
+```
+Once you succussfully install the htslib, you should set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. (It is probably at `$YOUR_PATH_HTS/lib/pkgconfig/`)
+```
+export PKG_CONFIG_PATH=$HTSLIB_PC_DIR
+```
+
+### Install from git source
 
 To compile from git source, first make sure htslib is installed. Then run:
 ```
@@ -91,7 +102,7 @@ Required parameters:
 * `-b <file.bam>`: BAM file containing aligned reads. Should be sorted and indexed. To accurately estimate PCR duplicate rate, duplicates must be flagged e.g. using Picard. Both paired-end or single-end data are supported.
 * `-p <peaks>`: file containing peaks. 
 * `-t <homer|bed>`: Specify the format of the peaks file. Options are "bed" or "homer".
-* `-c <int>`: The index of the BED file column used to score each peak (index starting from 1)
+* `-c <int>`: The index of the BED or homer peak file column used to score each peak (index starting from 1)
 * `-o <outprefix>`: Prefix to name output files. Outputs file `<outprefix>.json` with learned model parameters.
 
 Optional parameters for BAM parsing:
@@ -128,8 +139,8 @@ Model parameters: (either user-specified or learned from `tulip learn`:
 
 Peak scoring:
 * `-b <reads.bam>`: Use a provided BAM file to obtain scores for each peak (optional). If a BAM is not given, scores in the peak files are used.
-* `-c <int>`: The index of the BED file column used to score each peak (index starting from 1). Required if not using `-b`.
-* `--scale-outliers`: Set all peaks with scores $>$2x median score to have binding prob 1. Recommended with real data.
+* `-c <int>`: The index of the BED or homer peak file column used to score each peak (index starting from 1). Required if not using `-b`.
+* `--scale-outliers`: Set all peaks with scores >2x median score to have binding prob 1. Recommended with real data.
 * `--noscale`: Don't scale peak scores. Treat given scores as binding probabilities.
 
 Other options:
