@@ -30,13 +30,15 @@ RUN tar -xjf samtools-1.9.tar.bz2
 WORKDIR samtools-1.9
 RUN ./configure --without-curses && make && make install
 
-# Install ChIPmunk
+# Install Tulip
 WORKDIR /dependencies
-COPY chipmunk-1.9.tar.gz /dependencies/chipmunk-1.9.tar.gz
-RUN tar -xzvf chipmunk-1.9.tar.gz
-WORKDIR /dependencies/chipmunk-1.9
+COPY tulip-1.10.1.tar.gz /dependencies/tulip-1.10.1.tar.gz
+RUN tar -xzvf tulip-1.10.1.tar.gz
+WORKDIR /dependencies/tulip-1.10.1
 RUN ./configure && make && make install
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib"
 
 # Install Picard
 RUN wget -O /dependencies/picard.jar https://github.com/broadinstitute/picard/releases/download/2.18.27/picard.jar
 ENV PICARD=/dependencies/picard.jar
+

@@ -4,13 +4,12 @@ Tulip is a tool for simulating ChIP-sequencing experiments.
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
 
-[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats) | [FAQ](#faq)
+[Download](#download) | [Install](#install) | [From Docker](#docker) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats) | [FAQ](#faq)
 
 <a name="download"></a>
 ## Download
 
 The latest Tulip release is available on the [releases page](https://github.com/gymreklab/tulip/releases).
-Tulip is also packaged in a docker container available on the [Gymrek Lab docker hub](https://hub.docker.com/u/gymreklab) under `gymreklab/tulip-X.X` where `X.X` is the Tulip version number.
 
 <a name="install"></a>
 ## Installation
@@ -36,17 +35,18 @@ which installs `Tulip` to `$YOUR_PATH/bin/tulip`.
 
 Typing `tulip --help` should show a help message if Tulip is successfully installed.
 
-If you get a pkg-config error, you may need to set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. If you do not have htslib installed in your machine, you need to install htslib first. You can download the package from https://github.com/samtools/htslib, and install htslib with the commands:
+If you get a pkg-config error, you may need to set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. If you do not have htslib installed in your machine, you need to install htslib first. You can download the package from https://github.com/samtools/htslib/releases/, and install htslib with the following commands:
 ```
-autoheader
-autoconf
-./configure --disable-lzma --disable-bz2 --prefix=$YOUR_PATH_HTS
+tar -xjvf htslib-1.8.tar.bz2
+cd htslib-1.8
+./configure --disable-lzma --disable-bz2 --prefix=$YOUR_PATH
 make
 make install
 ```
-Once you succussfully install the htslib, you should set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. (It is probably at `$YOUR_PATH_HTS/lib/pkgconfig/`)
+Once you succussfully install the htslib, you should set the environment variables `PKG_CONFIG_PATH` to the directory containing `htslib.pc` and `LD_LIBRARY_PATH` to the directory containing the `libhts.so*` files. e.g.:
 ```
-export PKG_CONFIG_PATH=$HTSLIB_PC_DIR
+export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:$YOUR_PATH/lib/pkgconfig
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$YOUR_PATH/lib
 ```
 
 ### Install from git source
@@ -59,6 +59,23 @@ cd tulip/
 ./configure
 make
 make install
+```
+
+If installing from source on OSX, you will need to have autotools and related packages installed (ideally using Homebrew):
+```
+brew install autoconf automake autoconf-archive libtool pkg-config
+```
+
+<a name="docker"></a>
+## From docker
+
+Tulip is also packaged in a docker container available on the [Gymrek Lab docker hub](https://hub.docker.com/u/gymreklab). The latest release can be found at `gymreklab/tulip-1.10.1` built from the `Dockerfile` in this repo. Example usage below:
+
+```
+# Pull the image
+docker pull gymreklab/tulip-1.10.1
+# Test that it works
+docker run gymreklab/tulip-1.10.1 tulip learn --help
 ```
 
 <a name="usage"></a>
