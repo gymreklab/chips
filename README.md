@@ -211,5 +211,5 @@ Model files are in JSON syntax, and follow the example below. Hundreds of model 
 **A**: Make sure duplicates are marked, e.g. using [Picard MarkDuplicates](https://broadinstitute.github.io/picard/command-line-overview.html#MarkDuplicates).
 <br><br>
 **Q**: What should I do if I want to replicate my simulation experiment?<br>
-**A**: Each time you run Tulip, it prints in your console the random seed being used. If you want to replicate this simulation experiment, you can simply set up "--seed" option in the simreads module with that random seed. Note: if you are using multi-threads in your work, the order of output reads in the fastq file may be different in each repeated experiment, because threads claim their jobs in an arbitrary manner during run-time. The total contents, however, stay the same in different runs.
+**A**: Each time you run Tulip, it prints in your console the random seed being used. If you want to replicate this simulation experiment, you can simply set up `--seed` option in the simreads module with that random seed. Note: if you are using multi-threads in your work, the order of output reads in the fastq file may be different in each repeated experiment, because threads claim their jobs in an arbitrary manner during run-time. The total contents, however, stay the same in different runs.
 
