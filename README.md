@@ -161,6 +161,7 @@ Peak scoring:
 * `--noscale`: Don't scale peak scores. Treat given scores as binding probabilities.
 
 Other options:
+* `--seed <unsigned>`: The random seed used for initiating randomization opertions. By default or 0, use wall-clock time.
 * `--region <str>`: Only simulate reads from this region chrom:start-end. By default, simulate genome-wide.
 * `--binsize <int>`: Consider bins of this size when simulating. Default: 100000.
 * `--thread <int>`: Number of threads to use. Default: 1.
@@ -208,3 +209,7 @@ Model files are in JSON syntax, and follow the example below. Hundreds of model 
 <br><br>
 **Q**: I get a `pcr_rate` output from `learn` of 1.0 (no duplicates) but I know there should be duplicates in my data!<br>
 **A**: Make sure duplicates are marked, e.g. using [Picard MarkDuplicates](https://broadinstitute.github.io/picard/command-line-overview.html#MarkDuplicates).
+<br><br>
+**Q**: What should I do if I want to replicate my simulation experiment?<br>
+**A**: Each time you run Tulip, it prints in your console the random seed being used. If you want to replicate this simulation experiment, you can simply set up `--seed` option in the simreads module with that random seed. Note: if you are using multi-threads in your work, the order of output reads in the fastq file may be different in each repeated experiment, because threads claim their jobs in an arbitrary manner during run-time. The total contents, however, stay the same in different runs.
+
