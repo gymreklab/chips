@@ -35,6 +35,9 @@ Options::Options() {
   model_file = "";
   recompute_f = false;
 
+  // random seed
+  seed = 0;
+
   // Additional simulation parameters
   region = "";
   binsize = 100000;

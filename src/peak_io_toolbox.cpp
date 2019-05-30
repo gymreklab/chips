@@ -139,8 +139,8 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
 
   if (region.empty()){
     for (int seq_index=0; seq_index<seq_names.size(); seq_index++){
-      // only chr1-chr22, chrX, chrY are kept. The others are abandoned.
-      if ((seq_names[seq_index].find("_") == std::string::npos) && (seq_names[seq_index] != "chrM")){
+      // [deprecated] only chr1-chr22, chrX, chrY are kept. The others are abandoned.
+      //if ((seq_names[seq_index].find("_") == std::string::npos) && (seq_names[seq_index] != "chrM")){
         bamreader.SetRegion(seq_names[seq_index], 0, seq_lengths[seq_index]);
         BamAlignment aln;
         float count = 0;
@@ -160,7 +160,7 @@ bool PeakReader::UpdateTagCount(std::vector<Fragment>& peaks, const std::string 
         }
 
         total_genome_length += seq_lengths[seq_index];
-      }
+      //}
     }
   }else{
     std::int32_t region_start;

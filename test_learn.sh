@@ -9,15 +9,15 @@ PEAKS=/storage/pandaman/project/asimon-data/ENCFF878DLA.bed
 #BAM=/storage/mlamkin/projects/asimon-chip-sim/power-analysis/data/MCF-7/FOXA1/ENCFF287PVI.flagged.bam
 #PEAKS=/storage/mlamkin/projects/asimon-chip-sim/power-analysis/data/MCF-7/FOXA1/ENCFF017WRM.bed
 TYPE=bed
-OUTDIR=/home/pandaman/projects/asimon/asimon-chip-sim/test/
+OUTPREFIX=/home/pandaman/projects/tulip/tulip/test/param
 THRES=250
 COLUMN=7
 
-./src/chipmunk learn \
+./src/tulip learn \
     -p ${PEAKS} \
     -b ${BAM} \
     -t ${TYPE} \
-    -o ${OUTDIR}\
+    -o ${OUTPREFIX}\
     -c ${COLUMN}\
     --thres ${THRES}\
     --paired

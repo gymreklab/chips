@@ -45,7 +45,7 @@ Sequencer::Sequencer(const Options& options) {
 
 void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
 			 const int& numreads,
-			 int& fastq_index, int thread_index, int copy_index) {
+			 int& fastq_index, int thread_index, int copy_index, std::mt19937& rng) {
   std::string frag_seq;
   std::string read_seq;
   std::string read_seq_rc;
@@ -69,7 +69,8 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
   ss << "Sequencing total reads " << numreads << " for copy " << copy_index;
   //PrintMessageDieOnError(ss.str(), M_PROGRESS);
   while (true) {
-    std::random_shuffle(frag_indices.begin(), frag_indices.end());
+    // TODO
+    std::shuffle(frag_indices.begin(), frag_indices.end(), rng);
     for (size_t fg=0; fg<frag_indices.size(); fg++) {
       frag_index = frag_indices[fg];
       if(!ref_genome->GetSequence(input_fragments[frag_index].chrom,
@@ -81,8 +82,8 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
 	
       // generate reads from both strands
       read_pair.clear();
-      if (Fragment2Read(frag_seq, read_seq) &&
-	  Fragment2Read(ReverseComplement(frag_seq), read_seq_rc)){
+      if (Fragment2Read(frag_seq, read_seq, rng) &&
+	  Fragment2Read(ReverseComplement(frag_seq), read_seq_rc, rng)){
 	read_pair.push_back(read_seq);
 	read_pair.push_back(read_seq_rc);
 	std::stringstream ss;
@@ -90,7 +91,7 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
 	   << input_fragments[frag_index].start << ":"
 	   << input_fragments[frag_index].length;
 	ids.push_back(ss.str());
-	std::random_shuffle(read_pair.begin(), read_pair.end());
+	std::shuffle(read_pair.begin(), read_pair.end(), rng);
       }else{
 	continue;
       }
@@ -122,7 +123,7 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
   }
 }
 
-bool Sequencer::Fragment2Read(const std::string frag, std::string& read){
+bool Sequencer::Fragment2Read(const std::string frag, std::string& read, std::mt19937& rng){
   try{
     //read = frag.substr(0, readlen);
     //if (frag.length() < readlen){ return false;}
@@ -130,10 +131,10 @@ bool Sequencer::Fragment2Read(const std::string frag, std::string& read){
     double dice;
     int elem_index = 0;
     while (read.size() < readlen){
-      dice = (rand()/double(RAND_MAX));
+      dice = (((float) rng()/(float) rng.max()));
       if (dice <= ins_rate){
         // randomly insert a nucleotide
-        int ins_index = rand() % 4;
+        int ins_index = rng() % 4;
         read += NucleotideTypesUpper[ins_index];
       }else if (dice <= (ins_rate + del_rate)){
         // skip this nucleotide
@@ -150,7 +151,7 @@ bool Sequencer::Fragment2Read(const std::string frag, std::string& read){
           if ((nuc_to_mut == 'N') || (nuc_to_mut == 'n')){
             read += frag[elem_index];
           }else{
-            int sub_index = rand() % 3;
+            int sub_index = rng() % 3;
             read += (SubMap.at(nuc_to_mut))[sub_index];
           }
           elem_index += 1;

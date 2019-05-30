@@ -19,6 +19,9 @@ class Options {
   bool noscale;
   bool scale_outliers;
 
+  // random seed
+  unsigned seed;
+
   // Required learn inputs
   std::string chipbam;
   float remove_pct;

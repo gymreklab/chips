@@ -15,7 +15,7 @@ class Sequencer {
   virtual ~Sequencer();
 
   void Sequence(const std::vector<Fragment>& input_fragments, const int& numreads,  \
-                    int& fastq_index, int thread_index, int copy_index);
+                    int& fastq_index, int thread_index, int copy_index, std::mt19937& rng);
  private:
   RefGenome* ref_genome;
   bool paired;
@@ -31,7 +31,7 @@ class Sequencer {
   static const char NucleotideTypesLower[];
   static const std::map<char, std::vector<char> > SubMap;
 
-  bool Fragment2Read(const std::string frag, std::string& read);
+  bool Fragment2Read(const std::string frag, std::string& read, std::mt19937& rng);
   std::string ReverseComplement(const std::string seq);
   bool save_into_fastq(const std::vector<std::string> reads,
 		       const std::vector<std::string> ids,

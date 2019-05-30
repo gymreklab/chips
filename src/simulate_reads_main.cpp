@@ -6,6 +6,7 @@
 #include <vector>
 #include <stdio.h>
 #include <random>
+#include <chrono>
 
 #include "src/bingenerator.h"
 #include "src/common.h"
@@ -27,9 +28,10 @@ const bool DEBUG_SIM=true;
 // Function declarations
 void simulate_reads_help(void);
 void merge_files(std::string ifilename, std::string ofilename);
-void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, const std::vector<int>& reads_per_copy, int thread_index);
+void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, 
+                const std::vector<int>& reads_per_copy, const vector<unsigned>& seeds_list, int thread_index);
 void fill_queue(const int numcopies, TaskQueue<int> & q);
-void GetReadsPerCopy(std::vector<int>* reads_per_copy, const Options& options);
+void GetReadsPerCopy(std::vector<int>* reads_per_copy, const Options& options, const unsigned seed);
 
 int simulate_reads_main(int argc, char* argv[]) {
   bool showHelp = false;
@@ -113,6 +115,11 @@ int simulate_reads_main(int argc, char* argv[]) {
       if ((i+1) < argc) {
 	options.model_file = argv[i+1];
 	model.ReadFromJSON(options.model_file);
+	i++;
+      }
+    } else if (PARAMETER_CHECK("--seed", 6, parameterLength)) {
+      if ((i+1) < argc) {
+	options.seed = atoi(argv[i+1]);
 	i++;
       }
     } else if (PARAMETER_CHECK("--region", 8, parameterLength)) {
@@ -210,13 +217,27 @@ int simulate_reads_main(int argc, char* argv[]) {
     PrintMessageDieOnError("Running simulate with the following model", M_PROGRESS);
     model.PrintModel();
 
+    // set up random seed
+    unsigned rand_seed;
+    if (options.seed == 0){
+      rand_seed = std::chrono::system_clock::now().time_since_epoch().count();
+    }else{
+      rand_seed = options.seed;
+    }
+    std::cout << "Current random seed: " << rand_seed << std::endl;
+
     // Set up jobs
     TaskQueue<int> task_queue;
     fill_queue(options.numcopies, task_queue);
 
     // Determine number of reads per copy
     std::vector<int> reads_per_copy;
-    GetReadsPerCopy(&reads_per_copy, options);
+    GetReadsPerCopy(&reads_per_copy, options, rand_seed);
+
+    // random seeds for individual threads
+    vector<unsigned> seeds_list;
+    std::mt19937 rng_seed(rand_seed);
+    for (int copy_index=0; copy_index<options.numcopies; copy_index++) seeds_list.push_back(rng_seed());
 
     // Remove previous existing fastqs
     if (options.paired){
@@ -269,7 +290,7 @@ int simulate_reads_main(int argc, char* argv[]) {
     PrintMessageDieOnError("Simulating reads based on the input profile", M_PROGRESS);
     std::vector<std::thread> consumers;
     for (int thread_index=0; thread_index<options.n_threads; thread_index++){
-      std::thread cnsmr(std::bind(consume, std::ref(task_queue), options, pintervals, reads_per_copy, thread_index));
+      std::thread cnsmr(std::bind(consume, std::ref(task_queue), options, pintervals, reads_per_copy, seeds_list, thread_index));
       consumers.push_back(std::move(cnsmr));
     }
 
@@ -312,15 +333,15 @@ int simulate_reads_main(int argc, char* argv[]) {
 /*
  * Determine the number of reads per genome copy
  * */
-void GetReadsPerCopy(std::vector<int>* reads_per_copy, const Options& options) {
+void GetReadsPerCopy(std::vector<int>* reads_per_copy, const Options& options, const unsigned seed) {
   // Initialize vector
   reads_per_copy->clear();
   for (size_t i=0; i<options.numcopies; i++) {
     reads_per_copy->push_back(0);
   }
   // Assign each read to a copy
-  std::random_device rd;
-  std::mt19937 rng(rd());
+  //std::random_device rd;
+  std::mt19937 rng(seed);
   std::uniform_int_distribution<int> uni(0, options.numcopies-1);
   int copynum;
   for (size_t i=0; i<options.numreads; i++) {
@@ -342,13 +363,14 @@ void fill_queue(const int numcopies, TaskQueue<int> & q){
 /*
  * A thread that operate on a single genome copy
  * */
-void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, const std::vector<int>& reads_per_copy, int thread_index){
+void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals,
+                    const std::vector<int>& reads_per_copy, const vector<unsigned>& seeds_list, int thread_index){
   while (true){
     int copy_index = -1;
     try{
       copy_index = q.pop();
     } catch (std::out_of_range e){
-      //cerr << e.what() << endl;
+      //cerr << thread_index << endl;
       break;
     }
 
@@ -360,6 +382,8 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, co
     if (reads_per_copy[copy_index] == 0) {
       continue; // If we're not going to get any reads, don't bother simulating
     }
+
+    std::mt19937 rng(seeds_list[copy_index]);
     int total_reads = 0;
     int peakIndexStart = 0;
     int start_offset = 0;
@@ -377,18 +401,18 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals, co
       /*** Step 1/2: Shearing + Pulldown ***/
       Pulldown pulldown(options, bingenerator.GetCurrentBin(),\
 			prev_chrom, peakIndexStart, start_offset);
-      pulldown.Perform(&pulldown_fragments, pintervals);
+      pulldown.Perform(&pulldown_fragments, pintervals, rng);
 
       /*** Step 3: Library construction ***/
       LibraryConstructor lc(options);
-      lc.Perform(pulldown_fragments, &lib_fragments);
+      lc.Perform(pulldown_fragments, &lib_fragments, rng);
 
       /*** Cleanup for next bin ***/
       pulldown_fragments.clear();
     }
     /*** Step 4: Sequencing ***/
     Sequencer seq(options);
-    seq.Sequence(lib_fragments, reads_per_copy[copy_index], total_reads, thread_index, copy_index);
+    seq.Sequence(lib_fragments, reads_per_copy[copy_index], total_reads, thread_index, copy_index, rng);
   }
 }
 
@@ -442,6 +466,8 @@ void simulate_reads_help(void) {
   cerr << "     --noscale                   : Don't scale peak scores by the max score.\n";                   
   cerr << "     --scale-outliers            : Set all peaks with scores >2*median score to have binding prob 1. Recommended with real peak files\n";
   cerr << "\n[Other options]: " << "\n";
+  cerr << "     --seed <unsigned>           : the seed for initiating randomization opertions\n"
+       << "                                   Default or 0: current time \n";
   cerr << "     --region <str>              : Only simulate reads from this region chrom:start-end\n"
        << "                                   Default: genome-wide \n";
   cerr << "     --binsize <int>             : Consider bins of this size when simulating\n"
