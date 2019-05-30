@@ -20,3 +20,10 @@ void TaskQueue <T> ::push(const T& item){
   mlock.unlock();
 }
 
+template <typename T>
+void TaskVector <T> ::push_back(const T& item){
+  std::unique_lock<std::mutex> mlock(_mutex);
+  _vec.push_back(std::move(item));
+  mlock.unlock();
+}
+

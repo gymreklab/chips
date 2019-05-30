@@ -13,7 +13,7 @@ class Pulldown {
  public:
   Pulldown(const Options& options, const GenomeBin& gbin,
             std::string& _prev_chrom, int& _peakIndexStart, int& _start_offset);
-  void Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals);
+  void Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals, std::mt19937& rng);
 
  private:
   std::string chrom;
@@ -27,5 +27,6 @@ class Pulldown {
   int peakIndexStart;
   std::string prev_chrom;
   int* start_offset_ptr;
+  unsigned seed;
 };
 #endif  // SRC_PULLDOWN_H__

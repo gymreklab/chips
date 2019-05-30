@@ -92,7 +92,7 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
       int chrom = rand() % seq_names.size();
       int start = rand() % seq_lengths[chrom];
       
-      if ((seq_names[chrom].find("_") != std::string::npos) || (seq_names[chrom] == "chrM")){continue;}
+      //if ((seq_names[chrom].find("_") != std::string::npos) || (seq_names[chrom] == "chrM")){continue;}
       bamreader.SetRegion(seq_names[chrom], start, seq_lengths[chrom]);
 
       if (!bamreader.GetNextAlignment(aln)) {continue;}
@@ -492,7 +492,7 @@ bool learn_pcr(const std::string& bamfile, float* geo_rate){
   std::map<std::string, int> duplicated_reads;
   int count_unmapped = 0;
   for (int seq_index=0; seq_index<seq_names.size(); seq_index++){
-    if ((seq_names[seq_index].find("_") == std::string::npos) && (seq_names[seq_index] != "chrM")){
+    //if ((seq_names[seq_index].find("_") == std::string::npos) && (seq_names[seq_index] != "chrM")){
       bamreader.SetRegion(seq_names[seq_index], 0, seq_lengths[seq_index]);
       BamAlignment aln;
       while (bamreader.GetNextAlignment(aln)){
@@ -508,7 +508,7 @@ bool learn_pcr(const std::string& bamfile, float* geo_rate){
         n_pcr_copies[1] += 1;
        }
       }
-    }
+    //}
   }
 
   //for (std::map<Fragment, int, bool(*)(Fragment, Fragment)>::iterator it=duplicated_reads.begin();

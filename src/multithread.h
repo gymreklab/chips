@@ -22,4 +22,16 @@ class TaskQueue{
     std::mutex _mutex;
 };
 
+
+template <typename T>
+class TaskVector{
+  public:
+    void push_back(const T& item);
+
+  private:
+    std::vector<T> _vec;
+    std::mutex _mutex;
+};
+
+
 #endif

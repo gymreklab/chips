@@ -6,11 +6,11 @@ LibraryConstructor::LibraryConstructor(const Options& options) {
 
 // Apply PCR
 void LibraryConstructor::Perform(const vector<Fragment>& input_fragments,
-				 vector<Fragment>* output_fragments) {
+				 vector<Fragment>* output_fragments, std::mt19937& rng) {
   for (int frag_index=0; frag_index<input_fragments.size(); frag_index++){
     while (true) {
       output_fragments->push_back(input_fragments[frag_index]);
-      if (rand()/double(RAND_MAX) < pcr_rate) break;
+      if ( ((float) rng()/(float) rng.max()) < pcr_rate) break;
     }
   }
 }

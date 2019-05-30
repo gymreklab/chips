@@ -19,11 +19,10 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
   start_offset_ptr = & _start_offset;
 }
 
-void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals) {
+void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals, std::mt19937& rng) {
   // Set up
-  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-  std::default_random_engine generator(seed);
-  srand(seed);
+  //unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  //std::default_random_engine generator(seed);
   std::gamma_distribution<float> fragdist(gamma_k, gamma_theta);
   std::int32_t current_pos;
   std::int32_t fstart, fend;
@@ -44,7 +43,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   current_pos = start + *start_offset_ptr;
   // Break up into fragment lengths drawn from gamma distribution
   while (current_pos < end) {
-    fsize = (int) std::round(fragdist(generator));
+    fsize = (int) std::round(fragdist(rng));
     fstart = current_pos; fend = current_pos+fsize;
     if (fend > end) {
       if (fstart < end){
@@ -56,11 +55,11 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
     Fragment frag(chrom, current_pos, fsize);
     peak_score = pintervals->GetOverlap(frag, peakIndex);
 
-    bound = (rand()/double(RAND_MAX) < peak_score);
+    bound = ( ((float) rng()/(float) rng.max()) < peak_score);
     if (bound) {
       output_fragments->push_back(frag);
     } else{
-      if (rand()/double(RAND_MAX) < ratio_beta) {
+      if ( ((float) rng()/(float) rng.max()) < ratio_beta) {
           output_fragments->push_back(frag);
       }
     }
