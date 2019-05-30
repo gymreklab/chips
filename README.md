@@ -161,6 +161,7 @@ Peak scoring:
 * `--noscale`: Don't scale peak scores. Treat given scores as binding probabilities.
 
 Other options:
+* `--seed <unsigned>`: The random seed used for initiating randomization opertions. By default or 0, use wall-clock time.
 * `--region <str>`: Only simulate reads from this region chrom:start-end. By default, simulate genome-wide.
 * `--binsize <int>`: Consider bins of this size when simulating. Default: 100000.
 * `--thread <int>`: Number of threads to use. Default: 1.
