@@ -14,10 +14,8 @@ PeakIntervals::~PeakIntervals() {}
 /*
   Inputs:
   - string peakfile: filename of peaks. tab-separated with chrom, start, end, score
-
   Outputs:
   - bool: return true if successful, false if error loading peaks
-
   This function puts the peaks into a searachable data structure
  */
 bool PeakIntervals::LoadPeaks(const Options& options,
@@ -69,8 +67,8 @@ float PeakIntervals::SearchList(const Fragment& frag, int& peakIndexStart){
       }else if(frag_start >= peak_end){
         peakIndexStart += 1; // move to the next peak
       }else{
-        overlap = (float) (std::min(peak_end,frag_end) - std::max(peak_start, frag_start)) / (float)(frag_end-frag_start);
-        probBoundList.push_back(overlap*peaks[peakIndex].score);
+        /*overlap = (float) (std::min(peak_end,frag_end) - std::max(peak_start, frag_start)) / (float)(frag_end-frag_start);*/
+        probBoundList.push_back(peaks[peakIndex].score);
       }
     }else{
         std::cerr << "****** ERROR: Unexpected errors in PeakInterval/SearchList ******" << std::endl;
@@ -84,9 +82,8 @@ float PeakIntervals::SearchList(const Fragment& frag, int& peakIndexStart){
     //std::cout<<"found"<<std::endl;
     float probBound = 1;
     for (int peakIndex=0; peakIndex < probBoundList.size(); peakIndex++){
-       probBound *= (1-probBoundList[peakIndex]);
+       probBound *= probBoundList[peakIndex];
     }
-    probBound = 1-probBound;
     return probBound;
   }else{
     return 0;
@@ -96,10 +93,8 @@ float PeakIntervals::SearchList(const Fragment& frag, int& peakIndexStart){
 /*
   Inputs:
   - Fragment frag: has chrom, start, and length of a fragment
-
   Outputs:
   - float: probability that the fragment is bound
-
   If the fragment doesn't overlap a peak, return 0
   If it overlaps one ore more peak, return the max score across all peaks
  */
@@ -107,4 +102,3 @@ float PeakIntervals::GetOverlap(const Fragment& frag, int& peakIndexStart) {
   float score = SearchList(frag, peakIndexStart);
   return score;
 }
-
