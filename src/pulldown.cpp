@@ -19,6 +19,10 @@ Pulldown::Pulldown(const Options& options, const GenomeBin& gbin,\
   start_offset_ptr = & _start_offset;
 }
 
+double randScore() {
+  return double(rand()) / (double(RAND_MAX) + 1.0);
+}
+
 void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pintervals) {
   // Set up
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -30,6 +34,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   int fsize;
   bool bound;
   float peak_score;
+  float random_score;
 
   // update the start index of peaks
   if (chrom != prev_chrom){
@@ -38,7 +43,7 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
   }
 
   // Perform separate shearing for each copy of the genome
-  // pintervals->resetSearchScope(peakIndexStart); 
+  // pintervals->resetSearchScope(peakIndexStart);
   int peakIndex = peakIndexStart;
   current_pos = start + *start_offset_ptr;
   // Break up into fragment lengths drawn from gamma distribution
@@ -54,18 +59,22 @@ void Pulldown::Perform(vector<Fragment>* output_fragments, PeakIntervals* pinter
     }
     Fragment frag(chrom, current_pos, fsize);
     peak_score = pintervals->GetOverlap(frag, peakIndex);
+    /*new peak score, see peak_intervals for changes on how score is calculated
+    * the score is directly taken from bed file for comparsion
+    */
+    random_score = randScore():
 
-    bound = (rand()/double(RAND_MAX) < peak_score);
-    if (bound) {
+    /*bound = (rand()/double(RAND_MAX) < peak_score);*/
+    replicate = (random_score<peak_score);
+    if (replicate) {
       output_fragments->push_back(frag);
-    } else{
-      if (rand()/double(RAND_MAX) < ratio_beta) {
-          output_fragments->push_back(frag);
-      }
-    }
-    current_pos += fsize;
-  }
+      output_fragments->push_back(frag);
 
+    } else {
+        output_fragments->push_back(frag);
+    }
+    current_pos += 5000; /* need to skip to next bin of 5k in size*/
+  }
   peakIndexStart = peakIndex;
 }
 
