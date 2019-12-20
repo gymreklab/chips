@@ -224,7 +224,7 @@ int simulate_reads_main(int argc, char* argv[]) {
     }else{
       rand_seed = options.seed;
     }
-    std::cout << "Current random seed: " << rand_seed << std::endl;
+    std::cerr << "Current random seed: " << rand_seed << std::endl;
 
     // Set up jobs
     TaskQueue<int> task_queue;

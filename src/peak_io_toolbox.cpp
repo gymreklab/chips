@@ -107,7 +107,6 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
         std::int32_t region_end;
         std::string region_chrom;
         RegionParser(region, region_chrom, region_start, region_end);
-
         if (region_chrom == chr){
           std::int32_t overlap = std::min(end, region_end) - std::max(start, region_start);
           overlap = std::max(0, overlap);
@@ -118,11 +117,20 @@ bool PeakReader::BedPeakReader(std::vector<Fragment>& peaks,
         }
       }
   }
+
+  std::stringstream ss;
+  ss << "Loaded " << peaks.size() << " peaks";
+  PrintMessageDieOnError(ss.str(), M_PROGRESS);
+
+  if (peaks.empty()) {
+    PrintMessageDieOnError("No peaks found", M_ERROR);
+  }
+
   // sort peaks
   std::sort(peaks.begin(), peaks.end(), compare_location);
   // if peak scores have been loaded from the bed file,
   // then normalize peak scores and rescale them to 0-1
-  if((count_colidx > 0) && (!noscale)) Rescale(peaks, scale_outliers);
+  if((count_colidx > 0) && (!noscale) && !peaks.empty()) Rescale(peaks, scale_outliers);
   return 0;
 }
 
