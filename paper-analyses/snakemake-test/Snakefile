@@ -1,7 +1,6 @@
 # TODO paired end. make a config arg?
 # TODO specify range of params files
-# TODO make a tdf of encode input
-# TODO is there a way we can get timing/mem of each step?
+# TODO is there a way we can get timing/mem of each step? https://snakemake.readthedocs.io/en/stable/tutorial/additional_features.html
 # TODO include encode name in output
 
 configfile: "chips.json"
@@ -10,7 +9,7 @@ rule all:
     input:
         "tdfs/test.tdf",
         "tdfs/test_wce.tdf",
-	"tdfs/{config[ENCODE]}.tdf",
+	"tdfs/test_encode.tdf",
         "metrics/test.narrow.metrics",
         "metrics/test.broad.metrics"
 
@@ -19,8 +18,10 @@ rule sim:
         "params/{sample}.params"
     output:
         "fastqs/{sample}.fastq"
+    benchmark:
+        "metrics/{sample}.sim_metrics"
     shell:
-        "/storage/mgymrek/workspace/tulip/src/tulip simreads -p {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed -t bed --model {config[ENCDIR]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]}"
+        "/storage/mgymrek/workspace/tulip/src/tulip simreads -p {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed -t bed --model {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]}"
 
 rule simwce:
     input:
@@ -28,7 +29,7 @@ rule simwce:
     output:
         "fastqs/{sample}_wce.fastq"
     shell:
-        "/storage/mgymrek/workspace/tulip/src/tulip simreads -t wce --model {config[ENCDIR]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample}_wce $(cat {input}) --region {config[REGION]}"
+        "/storage/mgymrek/workspace/tulip/src/tulip simreads -t wce --model {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample}_wce $(cat {input}) --region {config[REGION]}"
 
 rule bwa:
     input:
@@ -70,7 +71,7 @@ rule tdf:
 rule tdf_encode:
     input:
     output:
-        "tdfs/{config[ENCODE]}.tdf"
+        "tdfs/{sample}_encode.tdf"
     shell:
         "igvtools count -z 5 -w 25 -e 0 {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.flagged.bam {output} {config[REF]}"
 
@@ -103,7 +104,7 @@ rule metrics_broad:
     output:
         "metrics/{sample}.broad.metrics"
     shell:
-        "/storage/mgymrek/workspace/tulip/peak_metrics.sh {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed {input.simpeaks} {input.simbam} > {output}"
+        "/storage/mgymrek/workspace/tulip/scripts/peak_metrics.sh {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed {input.simpeaks} {input.simbam} > {output}"
 
 rule metrics_narrow:
     input:
