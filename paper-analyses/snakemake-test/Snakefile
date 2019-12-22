@@ -1,0 +1,61 @@
+REF = "/storage/resources/dbase/human/hg19/hg19.fa"
+PEAKS = "/storage/mgymrek/chipmunk_round2/encode/GM12878_CTCF_ENCFF124LLI_ENCFF256QBB/GM12878_CTCF_ENCFF124LLI_ENCFF256QBB.bed"
+MODEL = "/storage/mgymrek/chipmunk_round2/encode/GM12878_CTCF_ENCFF124LLI_ENCFF256QBB/GM12878_CTCF_ENCFF124LLI_ENCFF256QBB-1.9.json"
+
+rule all:
+    input:
+        "tdfs/test.tdf",
+        "tdfs/test_wce.tdf"
+
+rule sim:
+    input:
+        "params/{sample}.params"
+    output:
+        "fastqs/{sample}.fastq"
+    shell:
+        "/storage/mgymrek/workspace/tulip/src/tulip simreads -p {PEAKS} -t bed --model {MODEL} -f {REF} -o fastqs/{wildcards.sample} $(cat {input})"
+
+rule simwce:
+    input:
+        "params/{sample}.params"
+    output:
+        "fastqs/{sample}_wce.fastq"
+    shell:
+        "/storage/mgymrek/workspace/tulip/src/tulip simreads -t wce --model {MODEL} -f {REF} -o fastqs/{wildcards.sample}_wce $(cat {input})"
+
+rule bwa:
+    input:
+        "fastqs/{sample}.fastq"
+    output:
+        "bams/{sample}.bam"
+    threads: 8
+    shell:
+        "bwa mem -t {threads} {REF} {input} | samtools view -Sb -  > {output}"
+
+rule sort_index:
+    input:
+        "bams/{sample}.bam"
+    output:
+        bam="bams/{sample}.sorted.bam",
+        bai="bams/{sample}.sorted.bam.bai"
+    shell:
+        "samtools sort -o {output.bam} {input} && samtools index {output.bam}"
+
+rule markdups:
+    input:
+        bam="bams/{sample}.sorted.bam",
+	bai="bams/{sample}.sorted.bam.bai"
+    output:
+        bam="bams/{sample}.flagged.bam",
+        metrics="bams/{sample}.metrics",
+	bai="bams/{sample}.flagged.bam.bai"
+    shell:
+        "java -jar -Xmx12G -Djava.io.tmpdir=bams/ $PICARD MarkDuplicates VALIDATION_STRINGENCY=SILENT VERBOSITY=WARNING I={input.bam} M={output.metrics} O={output.bam} && samtools index {output.bam}"
+
+rule tdf:
+    input:
+        "bams/{sample}.flagged.bam"
+    output:
+        "tdfs/{sample}.tdf"
+    shell:
+        "igvtools count -z 5 -w 25 -e 0 {input} {output} {REF}"
