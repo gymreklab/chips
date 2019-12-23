@@ -1,44 +1,55 @@
-# TODO paired end. make a config arg?
 # TODO specify range of params files
-# TODO is there a way we can get timing/mem of each step? https://snakemake.readthedocs.io/en/stable/tutorial/additional_features.html
-# TODO include encode name in output
 
 configfile: "chips.json"
 
 rule all:
     input:
-        "tdfs/test.tdf",
-        "tdfs/test_wce.tdf",
-	"tdfs/test_encode.tdf",
-        "metrics/test.narrow.metrics",
-        "metrics/test.broad.metrics"
+        "metrics/test.final_log"
 
+# Note, create all three output files.
+# For paired end, {sample}.fastq will be empty
+# For single end, {sample}_[1|2].fastq will be empty
 rule sim:
     input:
         "params/{sample}.params"
     output:
-        "fastqs/{sample}.fastq"
+        "fastqs/{sample}.fastq",
+	"fastqs/{sample}_1.fastq",
+	"fastqs/{sample}_2.fastq"
     benchmark:
         "metrics/{sample}.sim_metrics"
-    shell:
-        "/storage/mgymrek/workspace/tulip/src/tulip simreads -p {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed -t bed --model {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]}"
+    run:
+        if config["LAYOUT"] == 'single':
+            shell("/storage/mgymrek/workspace/tulip/src/tulip simreads -p {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed -t bed --model {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]} && touch {output[1]} && touch {output[2]}")
+        else:
+            shell("/storage/mgymrek/workspace/tulip/src/tulip simreads -p {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed -t bed --model {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]} --paired && touch {output[0]}")
 
 rule simwce:
     input:
         "params/{sample}.params"
     output:
-        "fastqs/{sample}_wce.fastq"
-    shell:
-        "/storage/mgymrek/workspace/tulip/src/tulip simreads -t wce --model {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample}_wce $(cat {input}) --region {config[REGION]}"
+        "fastqs/{sample}_wce.fastq",
+	"fastqs/{sample}_wce_1.fastq",
+        "fastqs/{sample}_wce_2.fastq"
+    run:
+        if config["LAYOUT"] == 'single':
+            shell("/storage/mgymrek/workspace/tulip/src/tulip simreads -t wce --model {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample}_wce $(cat {input}) --region {config[REGION]} && touch {output[1]} {output[2]}")
+        else:
+            shell("/storage/mgymrek/workspace/tulip/src/tulip simreads -t wce --model {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample}_wce $(cat {input}) --region {config[REGION]} --paired && touch {output[0]}")
 
 rule bwa:
     input:
-        "fastqs/{sample}.fastq"
+        "fastqs/{sample}.fastq",
+        "fastqs/{sample}_1.fastq",
+        "fastqs/{sample}_2.fastq"
     output:
         "bams/{sample}.bam"
     threads: 8
-    shell:
-        "bwa mem -t {threads} {config[REF]} {input} | samtools view -Sb -  > {output}"
+    run:
+        if config["LAYOUT"] == 'single':
+            shell("bwa mem -t {threads} {config[REF]} {input[0]} | samtools view -Sb -  > {output}")
+        else:
+            shell("bwa mem -t {threads} {config[REF]} {input[1]} {input[2]} | samtools view -Sb -  > {output}")
 
 rule sort_index:
     input:
@@ -114,3 +125,17 @@ rule metrics_narrow:
         "metrics/{sample}.narrow.metrics"
     shell:
         "/storage/mgymrek/workspace/tulip/scripts/peak_metrics.sh {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed {input.simpeaks} {input.simbam} {config[REGION]} > {output}"
+
+# This is primarily just to simplify the "all" rule, which now
+# only needs to look for the final_log file
+rule summarize:
+    input:
+        "tdfs/{sample}.tdf",
+        "tdfs/{sample}_wce.tdf",
+	"tdfs/{sample}_encode.tdf",
+        "metrics/{sample}.narrow.metrics",
+        "metrics/{sample}.broad.metrics"
+    output:
+        "metrics/{sample}.final_log"
+    shell:
+        "echo See output in {input[0]} {input[1]} {input[2]} {input[3]} {input[4]} > {output}"
