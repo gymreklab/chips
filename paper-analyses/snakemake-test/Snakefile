@@ -1,130 +1,17 @@
-# TODO specify range of params files
+# Import most functionality from top level snakefile
+# Here we just define the parameters that change and generate the params files
 
-configfile: "chips.json"
+include: "/storage/mgymrek/workspace/tulip/paper-analyses/workflows/Snakefile"
 
 rule all:
     input:
-        "metrics/test.final_log"
+        expand("metrics/readlen{readlen}.numcopies{numcopies}.numreads{numreads}.final_log", readlen=[101], numcopies=[100], numreads=[10000])
 
-# Note, create all three output files.
-# For paired end, {sample}.fastq will be empty
-# For single end, {sample}_[1|2].fastq will be empty
-rule sim:
-    input:
-        "params/{sample}.params"
+rule create_params_file:
     output:
-        "fastqs/{sample}.fastq",
-	"fastqs/{sample}_1.fastq",
-	"fastqs/{sample}_2.fastq"
-    benchmark:
-        "metrics/{sample}.sim_metrics"
-    run:
-        if config["LAYOUT"] == 'single':
-            shell("/storage/mgymrek/workspace/tulip/src/tulip simreads -p {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed -t bed --model {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]} && touch {output[1]} && touch {output[2]}")
-        else:
-            shell("/storage/mgymrek/workspace/tulip/src/tulip simreads -p {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed -t bed --model {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]} --paired && touch {output[0]}")
-
-rule simwce:
-    input:
-        "params/{sample}.params"
-    output:
-        "fastqs/{sample}_wce.fastq",
-	"fastqs/{sample}_wce_1.fastq",
-        "fastqs/{sample}_wce_2.fastq"
-    run:
-        if config["LAYOUT"] == 'single':
-            shell("/storage/mgymrek/workspace/tulip/src/tulip simreads -t wce --model {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample}_wce $(cat {input}) --region {config[REGION]} && touch {output[1]} {output[2]}")
-        else:
-            shell("/storage/mgymrek/workspace/tulip/src/tulip simreads -t wce --model {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}-1.9.json -f {config[REF]} -o fastqs/{wildcards.sample}_wce $(cat {input}) --region {config[REGION]} --paired && touch {output[0]}")
-
-rule bwa:
-    input:
-        "fastqs/{sample}.fastq",
-        "fastqs/{sample}_1.fastq",
-        "fastqs/{sample}_2.fastq"
-    output:
-        "bams/{sample}.bam"
-    threads: 8
-    run:
-        if config["LAYOUT"] == 'single':
-            shell("bwa mem -t {threads} {config[REF]} {input[0]} | samtools view -Sb -  > {output}")
-        else:
-            shell("bwa mem -t {threads} {config[REF]} {input[1]} {input[2]} | samtools view -Sb -  > {output}")
-
-rule sort_index:
-    input:
-        "bams/{sample}.bam"
-    output:
-        bam="bams/{sample}.sorted.bam",
-        bai="bams/{sample}.sorted.bam.bai"
+        "params/readlen{readlen,\d+}.numcopies{numcopies,\d+}.numreads{numreads,\d+}.params"
     shell:
-        "samtools sort -o {output.bam} {input} && samtools index {output.bam}"
-
-rule markdups:
-    input:
-        bam="bams/{sample}.sorted.bam",
-	bai="bams/{sample}.sorted.bam.bai"
-    output:
-        bam="bams/{sample}.flagged.bam",
-        metrics="bams/{sample}.metrics",
-	bai="bams/{sample}.flagged.bam.bai"
-    shell:
-        "java -jar -Xmx12G -Djava.io.tmpdir=bams/ $PICARD MarkDuplicates VALIDATION_STRINGENCY=SILENT VERBOSITY=WARNING I={input.bam} M={output.metrics} O={output.bam} && samtools index {output.bam}"
-
-rule tdf:
-    input:
-        "bams/{sample}.flagged.bam"
-    output:
-        "tdfs/{sample}.tdf"
-    shell:
-        "igvtools count -z 5 -w 25 -e 0 {input} {output} {config[REF]}"
-
-rule tdf_encode:
-    input:
-    output:
-        "tdfs/{sample}_encode.tdf"
-    shell:
-        "igvtools count -z 5 -w 25 -e 0 {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.flagged.bam {output} {config[REF]}"
-
-rule peaks_narrow:
-    input:
-        bamfg="bams/{sample}.flagged.bam",
-        bambg="bams/{sample}_wce.flagged.bam",
-        bamfgbai="bams/{sample}.flagged.bam.bai",
-        bambgbai="bams/{sample}_wce.flagged.bam.bai"
-    output:
-        "peaks/{sample}_narrow_peaks.narrowPeak"
-    shell:
-        "macs2 callpeak --tempdir peaks/ -t {input.bamfg} -c {input.bambg} --name {wildcards.sample}_narrow --nomodel --outdir peaks/"
-
-rule peaks_broad:
-    input:
-        bamfg="bams/{sample}.flagged.bam",
-        bambg="bams/{sample}_wce.flagged.bam",
-        bamfgbai="bams/{sample}.flagged.bam.bai",
-        bambgbai="bams/{sample}_wce.flagged.bam.bai"
-    output:
-        "peaks/{sample}_broad_peaks.broadPeak"
-    shell:
-        "macs2 callpeak --broad --tempdir peaks/ -t {input.bamfg} -c {input.bambg} --name {wildcards.sample}_broad --nomodel --outdir peaks/"
-
-rule metrics_broad:
-    input:
-        simpeaks="peaks/{sample}_broad_peaks.broadPeak",
-	simbam="bams/{sample}.flagged.bam"
-    output:
-        "metrics/{sample}.broad.metrics"
-    shell:
-        "/storage/mgymrek/workspace/tulip/scripts/peak_metrics.sh {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed {input.simpeaks} {input.simbam} > {output}"
-
-rule metrics_narrow:
-    input:
-        simpeaks="peaks/{sample}_narrow_peaks.narrowPeak",
-	simbam="bams/{sample}.flagged.bam"
-    output:
-        "metrics/{sample}.narrow.metrics"
-    shell:
-        "/storage/mgymrek/workspace/tulip/scripts/peak_metrics.sh {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed {input.simpeaks} {input.simbam} {config[REGION]} > {output}"
+        "echo --scale-outliers -c {config[C]} --numcopies {wildcards.numcopies} --numreads {wildcards.numreads} --readlen {wildcards.readlen} > {output}"
 
 # This is primarily just to simplify the "all" rule, which now
 # only needs to look for the final_log file
@@ -132,10 +19,9 @@ rule summarize:
     input:
         "tdfs/{sample}.tdf",
         "tdfs/{sample}_wce.tdf",
-	"tdfs/{sample}_encode.tdf",
         "metrics/{sample}.narrow.metrics",
         "metrics/{sample}.broad.metrics"
     output:
         "metrics/{sample}.final_log"
     shell:
-        "echo See output in {input[0]} {input[1]} {input[2]} {input[3]} {input[4]} > {output}"
+        "echo See output in {input[0]} {input[1]} {input[2]} {input[3]} > {output}"

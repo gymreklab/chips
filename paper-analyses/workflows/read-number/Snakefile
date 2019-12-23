@@ -1,0 +1,26 @@
+# TODO make tab delim file of results for easy visualization
+
+# Import most functionality from top level snakefile
+# Here we just define the parameters that change and generate the params files
+
+config["LAYOUT"] = "single"
+config["REF"] = "/storage/resources/dbase/human/hg19/hg19.fa"
+config["ENCODE"] = "GM12878_CTCF_ENCFF124LLI_ENCFF256QBB"
+config["ENCDIR"] = "/storage/mgymrek/chipmunk_round2/encode/"
+config["REGION"] = "chr22:1-51304566"
+config["PEAKFILE"] = ""
+config["MODELFILE"] = ""
+config["C"] = 7
+
+include: "/storage/mgymrek/workspace/tulip/paper-analyses/workflows/Snakefile"
+
+rule all:
+    input:
+        expand("numreads{numreads}.final.tab", numreads=[1000, 10000, 100000, 1000000])
+
+rule create_params_file:
+    output:
+        "params/numreads{numreads,\d+}.params"
+    shell:
+        "echo --scale-outliers -c {config[C]} --numcopies 1000 --numreads {wildcards.numreads} --readlen 36 > {output}"
+

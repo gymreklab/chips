@@ -3,5 +3,8 @@
     "ENCDIR": "/storage/mgymrek/chipmunk_round2/encode/",
     "ENCODE": "GM12878_CTCF_ENCFF124LLI_ENCFF256QBB",
     "REGION": "chr22:1-51304566",
-    "LAYOUT": "single"
+    "LAYOUT": "single",
+    "PEAKFILE": "",
+    "MODELFILE": "",
+    "C": 7
 }
