@@ -124,11 +124,11 @@ rule metrics_narrow:
 rule summarize_sample:
     input:
         "metrics/{sample}.narrow.metrics",
-        "metrics/{sample}.broad.metrics"
+        "metrics/{sample}.broad.metrics",
         "metrics/{sample}.sim_metrics",
         "tdfs/{sample}.tdf",
         "tdfs/{sample}_wce.tdf"
     output:
-        "{sample}.final.tab"
+        "metrics/{sample}.final.tab"
     shell:
         "/storage/mgymrek/workspace/tulip/paper-analyses/workflows/gather_stats.sh {input[0]} {input[1]} {input[2]} > {output}"

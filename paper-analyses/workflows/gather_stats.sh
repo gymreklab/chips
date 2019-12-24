@@ -8,8 +8,7 @@ SIM=$3
 echo "narrow-recall,narrow-fpr,narrow-medpeaksize,narrow-spot,broad-recall,broad-fpr,broad-medpeaksize,broad-spot,time_s,mem_MB" | \
     sed 's/,/\t/g'
 
-output=""
-output=$output,$(cat $NARROW | grep recall | cut -d',' -f 2)
+output=$(cat $NARROW | grep recall | cut -d',' -f 2)
 output=$output,$(cat $NARROW | grep fpr | cut -d',' -f 2)
 output=$output,$(cat $NARROW | grep peaksize | cut -d',' -f 2)
 output=$output,$(cat $NARROW | grep splot | cut -d',' -f 2)

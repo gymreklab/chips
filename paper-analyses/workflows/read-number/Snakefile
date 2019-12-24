@@ -1,5 +1,3 @@
-# TODO make tab delim file of results for easy visualization
-
 # Import most functionality from top level snakefile
 # Here we just define the parameters that change and generate the params files
 
@@ -14,9 +12,11 @@ config["C"] = 7
 
 include: "/storage/mgymrek/workspace/tulip/paper-analyses/workflows/Snakefile"
 
+NUMREADS = [1000, 10000, 100000, 1000000]
+
 rule all:
     input:
-        expand("numreads{numreads}.final.tab", numreads=[1000, 10000, 100000, 1000000])
+        "summary_stats_readnum.tab"
 
 rule create_params_file:
     output:
@@ -24,3 +24,12 @@ rule create_params_file:
     shell:
         "echo --scale-outliers -c {config[C]} --numcopies 1000 --numreads {wildcards.numreads} --readlen 36 > {output}"
 
+rule summarize_all:
+    input:
+        expand("metrics/numreads{numreads}.final.tab", numreads=NUMREADS)
+    output:
+        "summary_stats_readnum.tab"
+    run:
+       shell("head -n 1 {input[0]} | awk '{{print \"numreads\\t\" $0}}'> {output}")
+       for nr in NUMREADS:
+           shell("tail -n 1 metrics/numreads%s.final.tab | awk '{{print \"%s\\t\" $0}}' >> {output}"%(nr, nr))
