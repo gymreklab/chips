@@ -30,6 +30,6 @@ rule summarize_all:
     output:
         "summary_stats_readnum.tab"
     run:
-       shell("head -n 1 {input[0]} | awk '{{print \"numreads\\t\" $0}}'> {output}")
+       shell("head -n 1 {input[0]} | awk '{{print \"numreads\\t\" $0}}' >> {output}")
        for nr in NUMREADS:
            shell("tail -n 1 metrics/numreads%s.final.tab | awk '{{print \"%s\\t\" $0}}' >> {output}"%(nr, nr))
