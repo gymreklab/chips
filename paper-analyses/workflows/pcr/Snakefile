@@ -1,0 +1,35 @@
+# Import most functionality from top level snakefile
+# Here we just define the parameters that change and generate the params files
+
+config["LAYOUT"] = "single"
+config["REF"] = "/storage/resources/dbase/human/hg19/hg19.fa"
+config["ENCODE"] = ""
+config["ENCDIR"] = ""
+config["REGION"] = "chr22:1-51304566"
+config["PEAKFILE"] = "params/GM12878_CTCF_ENCFF124LLI_ENCFF256QBB_uniform_peaks_chr22.bed"
+config["MODELFILE"] = "params/GM12878_CTCF_ENCFF124LLI_ENCFF256QBB-1.9.json"
+config["C"] = 7
+
+include: "/storage/mlamkin/projects/tulip/paper-analyses/workflows/Snakefile"
+
+PCR = [0.50, 0.625, 0.75, 0.875, 1.0]
+
+rule all:
+    input:
+        "summary_stats_pcr.tab"
+
+rule create_params_file:
+    output:
+        "params/pcr.{pcr,[\d.]+}.params"
+    shell:
+        "echo --scale-outliers -c {config[C]} --numcopies 1000 --numreads 100000 --readlen 36 --pcr_rate {wildcards.pcr} > {output}"
+
+rule summarize_all:
+    input:
+        expand("metrics/pcr.{pcr}.final.tab", pcr=PCR)
+    output:
+        "summary_stats_pcr.tab"
+    run:
+       shell("head -n 1 {input[0]} | awk '{{print \"pcr\\t\" $0}}' >> {output}")
+       for pp in PCR:
+           shell("tail -n 1 metrics/pcr.%s.final.tab | awk '{{print \"%s\\t\" $0}}' >> {output}"%(pp, pp))

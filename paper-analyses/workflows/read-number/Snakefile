@@ -10,7 +10,7 @@ config["PEAKFILE"] = ""
 config["MODELFILE"] = ""
 config["C"] = 7
 
-include: "/storage/mgymrek/workspace/tulip/paper-analyses/workflows/Snakefile"
+include: "/storage/mlamkin/projects/tulip/paper-analyses/workflows/Snakefile"
 
 NUMREADS = [100, 1000, 10000, 100000, 1000000]
 

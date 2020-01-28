@@ -1,0 +1,35 @@
+# Import most functionality from top level snakefile
+# Here we just define the parameters that change and generate the params files
+
+config["LAYOUT"] = "single"
+config["REF"] = "/storage/resources/dbase/human/hg19/hg19.fa"
+config["ENCODE"] = ""
+config["ENCDIR"] = ""
+config["REGION"] = "chr22:1-51304566"
+config["PEAKFILE"] = "params/GM12878_CTCF_ENCFF124LLI_ENCFF256QBB_uniform_peaks_chr22.bed"
+config["MODELFILE"] = "params/GM12878_CTCF_ENCFF124LLI_ENCFF256QBB-1.9.json"
+config["C"] = 7
+
+include: "/storage/mlamkin/projects/tulip/paper-analyses/workflows/Snakefile"
+
+READLEN = [36, 100, 150, 250, 500]
+
+rule all:
+    input:
+        "summary_stats_readlen.tab"
+
+rule create_params_file:
+    output:
+        "params/readlen{readlen,\d+}.params"
+    shell:
+        "echo --scale-outliers -c {config[C]} --numcopies 1000 --numreads 100000 --readlen {wildcards.readlen} > {output}"
+
+rule summarize_all:
+    input:
+        expand("metrics/readlen{readlen}.final.tab", readlen=READLEN)
+    output:
+        "summary_stats_readlen.tab"
+    run:
+       shell("head -n 1 {input[0]} | awk '{{print \"readlen\\t\" $0}}' >> {output}")
+       for rl in READLEN:
+           shell("tail -n 1 metrics/readlen%s.final.tab | awk '{{print \"%s\\t\" $0}}' >> {output}"%(rl, rl))
