@@ -5,7 +5,7 @@
 #include <vector>
 
 // define our program name
-#define PROGRAM_NAME "tulip"
+#define PROGRAM_NAME "chips"
 
 // Print msg, exit if error
 enum MSGTYPE {

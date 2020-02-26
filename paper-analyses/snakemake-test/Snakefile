@@ -1,7 +1,7 @@
 # Import most functionality from top level snakefile
 # Here we just define the parameters that change and generate the params files
 
-include: "/storage/mgymrek/workspace/tulip/paper-analyses/workflows/Snakefile"
+include: "/storage/mgymrek/workspace/chips/paper-analyses/workflows/Snakefile"
 
 rule all:
     input:
