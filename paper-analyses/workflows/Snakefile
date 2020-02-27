@@ -112,7 +112,7 @@ rule metrics_broad:
     output:
         "metrics/{sample}.broad.metrics"
     shell:
-        "/storage/mgymrek/workspace/chips/paper-analyses/workflows/peak_metrics.sh {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed {input.simpeaks} {input.simbam} > {output}"
+        "/storage/mgymrek/workspace/chips/paper-analyses/workflows/peak_metrics.sh {PEAKFILE} {input.simpeaks} {input.simbam} {config[REGION]} > {output}"
 
 rule metrics_narrow:
     input:
@@ -121,7 +121,7 @@ rule metrics_narrow:
     output:
         "metrics/{sample}.narrow.metrics"
     shell:
-        "/storage/mgymrek/workspace/chips/paper-analyses/workflows/peak_metrics.sh {config[ENCDIR]}/{config[ENCODE]}/{config[ENCODE]}.bed {input.simpeaks} {input.simbam} {config[REGION]} > {output}"
+        "/storage/mgymrek/workspace/chips/paper-analyses/workflows/peak_metrics.sh {PEAKFILE} {input.simpeaks} {input.simbam} {config[REGION]} > {output}"
 
 # Final summary of each sample
 rule summarize_sample:

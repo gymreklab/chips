@@ -17,7 +17,7 @@ rule create_params_file:
      output:	
         "params/"+config["OUTPREFIX"]+"-numcopies{numcopies}.params"
      shell:
-        "echo --scale-outliers -c {config[C]} --numcopies {wildcards.numcopies} > {output}"
+        "echo --scale-outliers -c {config[C]} --numcopies {wildcards.numcopies} --numreads 156885 > {output}"
 
 rule get_window_peak_overlap:
      output:
