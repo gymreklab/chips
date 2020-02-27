@@ -1,0 +1,41 @@
+# Import most functionality from top level snakefile
+# Here we just define the parameters that change and generate the params files
+#
+# Simulated Peak files to use for evaluation
+#/storage/pandaman/project/ChIPs-experiments/data/TF-SP1-sim.bed
+#/storage/pandaman/project/ChIPs-experiments/data/HM-H3K27ac-sim.bed
+
+config["LAYOUT"] = "paired"
+config["REF"] = "/storage/resources/dbase/human/hg19/hg19.fa"
+config["ENCODE"] = ""
+config["ENCDIR"] = ""
+config["REGION"] = "chr10:1-135534747"
+config["PEAKFILE"] = "/storage/pandaman/project/ChIPs-experiments/data/TF-SP1-sim.bed"
+#config["PEAKFILE"] = "/storage/pandaman/project/ChIPs-experiments/data/HM-H3K27ac-sim.bed"
+#config["MODELFILE"] = "params/simplified_GM12878_H3K4me3.json"
+config["MODELFILE"] = "params/simplified_GM12878_CTCF.json"
+config["C"] = 4
+
+include: "/storage/mlamkin/projects/tulip/paper-analyses/workflows/Snakefile"
+
+FRAGMEANLEN_WRITE = ["10_13.77", "21_9.5", "40_6.8", "90_4.59", "200_3.08"]
+
+rule all:
+    input:
+        "summary_stats_fragmeanlen.tab"
+
+rule create_params_file:
+    output:
+        fragmean="params/fragmeanlen.{fragmeanlen,[\d_.]+}.params"
+    shell:
+        "echo --scale-outliers -c {config[C]} --numcopies 1000 --numreads 100000 --thread 4 --readlen 36 --gamma-frag {wildcards.fragmeanlen} | sed 's/_/,/' > {output}"
+
+rule summarize_all:
+    input:
+        expand("metrics/fragmeanlen.{fragmeanlen}.final.tab", fragmeanlen=FRAGMEANLEN_WRITE)
+    output:
+        "summary_stats_fragmeanlen.tab"
+    run:
+       shell("head -n 1 {input[0]} | awk '{{print \"fragmeanlen\\t\" $0}}' >> {output}")
+       for fm in FRAGMEANLEN_WRITE:
+           shell("tail -n 1 metrics/fragmeanlen.%s.final.tab | awk '{{print \"%s\\t\" $0}}' >> {output}"%(fm, fm))
