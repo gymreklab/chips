@@ -9,33 +9,33 @@ config["LAYOUT"] = "paired"
 config["REF"] = "/storage/resources/dbase/human/hg19/hg19.fa"
 config["ENCODE"] = ""
 config["ENCDIR"] = ""
-config["REGION"] = "chr21:1-48129895"
+config["REGION"] = "chr10:1-135534747"
 #config["PEAKFILE"] = "/storage/pandaman/project/ChIPs-experiments/data/TF-SP1-sim.bed"
 config["PEAKFILE"] = "/storage/pandaman/project/ChIPs-experiments/data/HM-H3K27ac-sim.bed"
 config["MODELFILE"] = "params/simplified_GM12878_H3K27ac.json"
 #config["MODELFILE"] = "params/simplified_GM12878_CTCF.json"
 config["C"] = 4
 
-include: "../Snakefile"
+include: "/storage/mlamkin/projects/tulip/paper-analyses/workflows/Snakefile"
 
-NUMREADS = [100, 1000, 10000, 100000, 1000000]
+PCR = [0.50, 0.625, 0.75, 0.875, 1.0]
 
 rule all:
     input:
-        "summary_stats_readnum.tab"
+        "summary_stats_pcr.tab"
 
 rule create_params_file:
     output:
-        "params/numreads{numreads,\d+}.params"
+        "params/pcr.{pcr,[\d.]+}.params"
     shell:
-        "echo --scale-outliers -c {config[C]} --numcopies 1000 --thread 4 --numreads {wildcards.numreads} --readlen 36 > {output}"
+        "echo --scale-outliers -c {config[C]} --numcopies 1000 --numreads 100000 --thread 4 --readlen 36 --pcr_rate {wildcards.pcr} > {output}"
 
 rule summarize_all:
     input:
-        expand("metrics/numreads{numreads}.final.tab", numreads=NUMREADS)
+        expand("metrics/pcr.{pcr}.final.tab", pcr=PCR)
     output:
-        "summary_stats_readnum.tab"
+        "summary_stats_pcr.tab"
     run:
-       shell("head -n 1 {input[0]} | awk '{{print \"numreads\\t\" $0}}' >> {output}")
-       for nr in NUMREADS:
-           shell("tail -n 1 metrics/numreads%s.final.tab | awk '{{print \"%s\\t\" $0}}' >> {output}"%(nr, nr))
+       shell("head -n 1 {input[0]} | awk '{{print \"pcr\\t\" $0}}' >> {output}")
+       for pp in PCR:
+           shell("tail -n 1 metrics/pcr.%s.final.tab | awk '{{print \"%s\\t\" $0}}' >> {output}"%(pp, pp))
