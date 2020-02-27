@@ -27,10 +27,10 @@ rule get_window_peak_overlap:
         "windows/"+config["OUTPREFIX"]+"-5kb.nopeak"
      shell:
         """
-        intersectBed -a chr21_windows_1kb.bed -b {config[PEAKFILE]} -wa -u > {output[0]}
-        intersectBed -a chr21_windows_5kb.bed -b {config[PEAKFILE]} -wa -u > {output[1]}
-        intersectBed -a chr21_windows_1kb.bed -b {config[PEAKFILE]} -wa -v > {output[2]}
-        intersectBed -a chr21_windows_5kb.bed -b {config[PEAKFILE]} -wa -v > {output[3]}
+        intersectBed -a chr22_windows_1kb.bed -b {config[PEAKFILE]} -wa -u > {output[0]}
+        intersectBed -a chr22_windows_5kb.bed -b {config[PEAKFILE]} -wa -u > {output[1]}
+        intersectBed -a chr22_windows_1kb.bed -b {config[PEAKFILE]} -wa -v > {output[2]}
+        intersectBed -a chr22_windows_5kb.bed -b {config[PEAKFILE]} -wa -v > {output[3]}
         """
 
 rule get_window_counts:
@@ -44,11 +44,15 @@ rule get_window_counts:
         "windows/"+config["OUTPREFIX"]+"-1kb.peak.numcopies{numcopies}.counts",
         "windows/"+config["OUTPREFIX"]+"-5kb.peak.numcopies{numcopies}.counts",
         "windows/"+config["OUTPREFIX"]+"-1kb.nopeak.numcopies{numcopies}.counts",
-        "windows/"+config["OUTPREFIX"]+"-5kb.nopeak.numcopies{numcopies}.counts"
+        "windows/"+config["OUTPREFIX"]+"-5kb.nopeak.numcopies{numcopies}.counts",
     shell:
         """
         bedtools multicov -bams {input[4]} -bed {input[0]} > {output[0]}
         bedtools multicov -bams {input[4]} -bed {input[1]} > {output[1]}
         bedtools multicov -bams {input[4]} -bed {input[2]} > {output[2]}
         bedtools multicov -bams {input[4]} -bed {input[3]} > {output[3]}
+        bedtools multicov -bams {config[BAMFILE]} -bed {input[0]} > windows/{config[OUTPREFIX]}-1kb.peak.encode.counts
+        bedtools multicov -bams {config[BAMFILE]} -bed {input[1]} > windows/{config[OUTPREFIX]}-5kb.peak.encode.counts
+        bedtools multicov -bams {config[BAMFILE]} -bed {input[2]} > windows/{config[OUTPREFIX]}-1kb.nopeak.encode.counts
+        bedtools multicov -bams {config[BAMFILE]} -bed {input[3]} > windows/{config[OUTPREFIX]}-5kb.nopeak.encode.counts
         """
