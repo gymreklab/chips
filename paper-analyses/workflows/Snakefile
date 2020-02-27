@@ -1,5 +1,8 @@
 # This file contains reuseable modules that can be imported into other Snakemake workflows
 
+wildcard_constraints:
+    sample="[^.]*"  #"(.+[^.].*)|(.*[^.].+)"
+
 if config["ENCDIR"].strip() != "" and config["ENCODE"].strip() != "":
     PEAKFILE = "%s/%s/%s.bed"%(config["ENCDIR"], config["ENCODE"], config["ENCODE"])
     MODELFILE = "%s/%s/%s-1.9.json"%(config["ENCDIR"], config["ENCODE"], config["ENCODE"])

@@ -1,0 +1,54 @@
+# Import most functionality from top level snakefile
+# Here we just define the parameters that change and generate the params files
+
+include: "/storage/mgymrek/workspace/chips/paper-analyses/workflows/Snakefile"
+
+NUMCOPIES = [1, 50, 100, 500, 1000, 5000, 10000]
+
+rule all:
+     input:
+        ["tdfs/{outprefix}-numcopies{numcopies}.tdf".format(outprefix=config["OUTPREFIX"], numcopies=nc) for nc in NUMCOPIES],
+        ["windows/{outprefix}-1kb.peak.numcopies{numcopies}.counts".format(outprefix=config["OUTPREFIX"], numcopies=nc) for nc in NUMCOPIES],
+        ["windows/{outprefix}-5kb.peak.numcopies{numcopies}.counts".format(outprefix=config["OUTPREFIX"], numcopies=nc) for nc in NUMCOPIES],
+        ["windows/{outprefix}-1kb.nopeak.numcopies{numcopies}.counts".format(outprefix=config["OUTPREFIX"], numcopies=nc) for nc in NUMCOPIES],
+        ["windows/{outprefix}-5kb.nopeak.numcopies{numcopies}.counts".format(outprefix=config["OUTPREFIX"], numcopies=nc) for nc in NUMCOPIES]
+
+rule create_params_file:
+     output:	
+        "params/"+config["OUTPREFIX"]+"-numcopies{numcopies}.params"
+     shell:
+        "echo --scale-outliers -c {config[C]} --numcopies {wildcards.numcopies} > {output}"
+
+rule get_window_peak_overlap:
+     output:
+        "windows/"+config["OUTPREFIX"]+"-1kb.peak",
+        "windows/"+config["OUTPREFIX"]+"-5kb.peak",
+        "windows/"+config["OUTPREFIX"]+"-1kb.nopeak",
+        "windows/"+config["OUTPREFIX"]+"-5kb.nopeak"
+     shell:
+        """
+        intersectBed -a chr21_windows_1kb.bed -b {config[PEAKFILE]} -wa -u > {output[0]}
+        intersectBed -a chr21_windows_5kb.bed -b {config[PEAKFILE]} -wa -u > {output[1]}
+        intersectBed -a chr21_windows_1kb.bed -b {config[PEAKFILE]} -wa -v > {output[2]}
+        intersectBed -a chr21_windows_5kb.bed -b {config[PEAKFILE]} -wa -v > {output[3]}
+        """
+
+rule get_window_counts:
+    input:       
+        "windows/"+config["OUTPREFIX"]+"-1kb.peak",
+        "windows/"+config["OUTPREFIX"]+"-5kb.peak",
+        "windows/"+config["OUTPREFIX"]+"-1kb.nopeak",
+        "windows/"+config["OUTPREFIX"]+"-5kb.nopeak",
+        "bams/"+config["OUTPREFIX"]+"-numcopies{numcopies}.flagged.bam"
+    output:
+        "windows/"+config["OUTPREFIX"]+"-1kb.peak.numcopies{numcopies}.counts",
+        "windows/"+config["OUTPREFIX"]+"-5kb.peak.numcopies{numcopies}.counts",
+        "windows/"+config["OUTPREFIX"]+"-1kb.nopeak.numcopies{numcopies}.counts",
+        "windows/"+config["OUTPREFIX"]+"-5kb.nopeak.numcopies{numcopies}.counts"
+    shell:
+        """
+        bedtools multicov -bams {input[4]} -bed {input[0]} > {output[0]}
+        bedtools multicov -bams {input[4]} -bed {input[1]} > {output[1]}
+        bedtools multicov -bams {input[4]} -bed {input[2]} > {output[2]}
+        bedtools multicov -bams {input[4]} -bed {input[3]} > {output[3]}
+        """
