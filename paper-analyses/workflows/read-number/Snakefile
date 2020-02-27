@@ -16,7 +16,7 @@ config["MODELFILE"] = "params/simplified_GM12878_H3K27ac.json"
 #config["MODELFILE"] = "params/simplified_GM12878_CTCF.json"
 config["C"] = 4
 
-include: "/storage/mlamkin/projects/tulip/paper-analyses/workflows/Snakefile"
+include: "../Snakefile"
 
 NUMREADS = [100, 1000, 10000, 100000, 1000000]
 
