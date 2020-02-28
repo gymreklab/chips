@@ -28,6 +28,11 @@ wrong=$(intersectBed -a $SIMPEAKS -b $TRUEPEAKS -v | wc -l)
 fpr=$(echo "${wrong}/${numpeaks_sim}" | bc -l)
 echo "fpr,${fpr}"
 
+# Precision
+total_pos=$(echo "${overlap} + ${wrong}" | bc -l)
+precision=$(echo "${overlap}/${total_pos}" | bc -l)
+echo "precision,${precision}"
+
 # Peak size
 size=$(cat ${SIMPEAKS} | awk '{print $3-$2}' | datamash median 1)
 echo "medpeaksize,${size}"

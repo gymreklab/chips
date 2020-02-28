@@ -54,7 +54,8 @@ ChIPmunk_OnlineMethods.pdf
 *.ipynb_checkpoints*
 *.pos
 paper-analyses/workflows/*/*
-!paper-analyses/workflows/*/Snakefile
+!paper-analyses/workflows/fig2-params/Params-analysis.ipynb
+!paper-analyses/workflows/fig2-params/*/Snakefile
 
 # Releases
 *.tar.gz

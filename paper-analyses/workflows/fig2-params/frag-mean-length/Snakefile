@@ -12,7 +12,7 @@ config["ENCDIR"] = ""
 config["REGION"] = "chr10:1-135534747"
 config["PEAKFILE"] = "/storage/pandaman/project/ChIPs-experiments/data/TF-SP1-sim.bed"
 #config["PEAKFILE"] = "/storage/pandaman/project/ChIPs-experiments/data/HM-H3K27ac-sim.bed"
-#config["MODELFILE"] = "params/simplified_GM12878_H3K4me3.json"
+#config["MODELFILE"] = "params/simplified_GM12878_H3K27ac.json"
 config["MODELFILE"] = "params/simplified_GM12878_CTCF.json"
 config["C"] = 4
 
