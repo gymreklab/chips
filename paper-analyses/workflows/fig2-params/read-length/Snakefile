@@ -5,37 +5,32 @@
 #/storage/pandaman/project/ChIPs-experiments/data/TF-SP1-sim.bed
 #/storage/pandaman/project/ChIPs-experiments/data/HM-H3K27ac-sim.bed
 
-config["LAYOUT"] = "paired"
 config["REF"] = "/storage/resources/dbase/human/hg19/hg19.fa"
 config["ENCODE"] = ""
 config["ENCDIR"] = ""
-config["REGION"] = "chr10:1-135534747"
-config["PEAKFILE"] = "/storage/pandaman/project/ChIPs-experiments/data/TF-SP1-sim.bed"
-#config["PEAKFILE"] = "/storage/pandaman/project/ChIPs-experiments/data/HM-H3K27ac-sim.bed"
-#config["MODELFILE"] = "params/simplified_GM12878_H3K27ac.json"
-config["MODELFILE"] = "params/simplified_GM12878_CTCF.json"
+config["REGION"] = "chr21:1-48129895"
 config["C"] = 4
 
-include: "/storage/mlamkin/projects/tulip/paper-analyses/workflows/Snakefile"
+include: "../../Snakefile"
 
-READLEN = [36, 100, 125, 150, 200]
+READLEN = [36, 75, 100, 125, 150, 200, 250]
 
 rule all:
     input:
-        "summary_stats_readlen.tab"
+        "{outprefix}.summary_stats_readlen.tab".format(outprefix=config["OUTPREFIX"])
 
 rule create_params_file:
     output:
-        "params/readlen{readlen,\d+}.params"
+        "params/" + config["OUTPREFIX"] + "-readlen{readlen,\d+}.params"
     shell:
-        "echo --scale-outliers -c {config[C]} --thread 4 --numcopies 1000 --numreads 100000 --readlen {wildcards.readlen} > {output}"
+        "echo --scale-outliers -c {config[C]} --numcopies 100 --numreads 100000 --readlen {wildcards.readlen} > {output}"
 
 rule summarize_all:
     input:
-        expand("metrics/readlen{readlen}.final.tab", readlen=READLEN)
+        expand("metrics/"+config["OUTPREFIX"]+"-readlen{readlen}.final.tab", readlen=READLEN)
     output:
-        "summary_stats_readlen.tab"
+        "{outprefix}.summary_stats_readlen.tab".format(outprefix=config["OUTPREFIX"])
     run:
        shell("head -n 1 {input[0]} | awk '{{print \"readlen\\t\" $0}}' >> {output}")
        for rl in READLEN:
-           shell("tail -n 1 metrics/readlen%s.final.tab | awk '{{print \"%s\\t\" $0}}' >> {output}"%(rl, rl))
+           shell("tail -n 1 metrics/{config[OUTPREFIX]}-readlen%s.final.tab | awk '{{print \"%s\\t\" $0}}' >> {output}"%(rl, rl))
