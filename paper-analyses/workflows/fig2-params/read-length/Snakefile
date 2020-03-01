@@ -13,7 +13,7 @@ config["C"] = 4
 
 include: "../../Snakefile"
 
-READLEN = [36, 75, 100, 125, 150, 200, 250]
+READLEN = [36, 75, 100, 125, 150, 200]
 
 rule all:
     input:
