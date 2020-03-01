@@ -1,7 +1,7 @@
 # This file contains reuseable modules that can be imported into other Snakemake workflows
 
 wildcard_constraints:
-    sample="[^.]*"  #"(.+[^.].*)|(.*[^.].+)"
+    sample="[^.]*"
 
 if config["ENCDIR"].strip() != "" and config["ENCODE"].strip() != "":
     PEAKFILE = "%s/%s/%s.bed"%(config["ENCDIR"], config["ENCODE"], config["ENCODE"])
@@ -51,9 +51,9 @@ rule bwa:
     threads: 8
     run:
         if config["LAYOUT"] == 'single':
-            shell("bwa mem -t {threads} {config[REF]} {input[0]} | samtools view -Sb -  > {output}")
+            shell("bwa mem -t {threads} {config[REF]} {input[0]} | samtools view -q 10 -Sb -  > {output}")
         else:
-            shell("bwa mem -t {threads} {config[REF]} {input[1]} {input[2]} | samtools view -Sb -  > {output}")
+            shell("bwa mem -t {threads} {config[REF]} {input[1]} {input[2]} | samtools view -q 10 -Sb -  > {output}")
 
 rule sort_index:
     input:
@@ -112,7 +112,7 @@ rule metrics_broad:
     output:
         "metrics/{sample}.broad.metrics"
     shell:
-        "/storage/mlamkin/projects/tulip/paper-analyses/workflows/peak_metrics.sh {PEAKFILE} {input.simpeaks} {input.simbam} {config[REGION]} > {output}"
+        "/storage/mgymrek/workspace/chips/paper-analyses/workflows/peak_metrics.sh {PEAKFILE} {input.simpeaks} {input.simbam} {config[REGION]} > {output}"
 
 rule metrics_narrow:
     input:
@@ -121,7 +121,7 @@ rule metrics_narrow:
     output:
         "metrics/{sample}.narrow.metrics"
     shell:
-        "/storage/mlamkin/projects/tulip/paper-analyses/workflows/peak_metrics.sh {PEAKFILE} {input.simpeaks} {input.simbam} {config[REGION]} > {output}"
+        "/storage/mgymrek/workspace/chips/paper-analyses/workflows/peak_metrics.sh {PEAKFILE} {input.simpeaks} {input.simbam} {config[REGION]} > {output}"
 
 # Final summary of each sample
 rule summarize_sample:
@@ -134,4 +134,4 @@ rule summarize_sample:
     output:
         "metrics/{sample}.final.tab"
     shell:
-        "/storage/mlamkin/projects/tulip/paper-analyses/workflows/gather_stats.sh {input[0]} {input[1]} {input[2]} > {output}"
+        "/storage/mgymrek/workspace/chips/paper-analyses/workflows/gather_stats.sh {input[0]} {input[1]} {input[2]} > {output}"

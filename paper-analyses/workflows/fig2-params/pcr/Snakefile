@@ -5,37 +5,32 @@
 #/storage/pandaman/project/ChIPs-experiments/data/TF-SP1-sim.bed
 #/storage/pandaman/project/ChIPs-experiments/data/HM-H3K27ac-sim.bed
 
-config["LAYOUT"] = "paired"
 config["REF"] = "/storage/resources/dbase/human/hg19/hg19.fa"
 config["ENCODE"] = ""
 config["ENCDIR"] = ""
-config["REGION"] = "chr10:1-135534747"
-config["PEAKFILE"] = "/storage/pandaman/project/ChIPs-experiments/data/TF-SP1-sim.bed"
-#config["PEAKFILE"] = "/storage/pandaman/project/ChIPs-experiments/data/HM-H3K27ac-sim.bed"
-#config["MODELFILE"] = "params/simplified_GM12878_H3K27ac.json"
-config["MODELFILE"] = "params/simplified_GM12878_CTCF.json"
+config["REGION"] = "chr21:1-48129895"
 config["C"] = 4
 
-include: "/storage/mlamkin/projects/tulip/paper-analyses/workflows/Snakefile"
+include: "../../Snakefile"
 
-PCR = [0.50, 0.625, 0.75, 0.875, 1.0]
+PCR = ["0+10","0+25","0+50", "0+625", "0+75", "0+875", "1+0"]
 
 rule all:
     input:
-        "summary_stats_pcr.tab"
+        "{outprefix}.summary_stats_pcr.tab".format(outprefix=config["OUTPREFIX"])
 
 rule create_params_file:
     output:
-        "params/pcr.{pcr,[\d.]+}.params"
+        "params/" + config["OUTPREFIX"] + "-pcr{pcr,\d+\+\d+}.params"
     shell:
-        "echo --scale-outliers -c {config[C]} --numcopies 1000 --numreads 100000 --thread 4 --readlen 36 --pcr_rate {wildcards.pcr} > {output}"
+        "echo --scale-outliers -c {config[C]} --numcopies 100 --numreads 100000 --readlen 36 --pcr_rate {wildcards.pcr} |sed 's/+/./g' > {output}"
 
 rule summarize_all:
     input:
-        expand("metrics/pcr.{pcr}.final.tab", pcr=PCR)
+        expand("metrics/"+config["OUTPREFIX"]+"-pcr{pcr}.final.tab", pcr=PCR)
     output:
-        "summary_stats_pcr.tab"
+        "{outprefix}.summary_stats_pcr.tab".format(outprefix=config["OUTPREFIX"])
     run:
        shell("head -n 1 {input[0]} | awk '{{print \"pcr\\t\" $0}}' >> {output}")
        for pp in PCR:
-           shell("tail -n 1 metrics/pcr.%s.final.tab | awk '{{print \"%s\\t\" $0}}' >> {output}"%(pp, pp))
+           shell("tail -n 1 metrics/{config[OUTPREFIX]}-pcr%s.final.tab | awk '{{print \"%s\\t\" $0}}' >> {output}"%(pp, pp.replace("+",".")))
