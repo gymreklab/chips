@@ -2,12 +2,17 @@
 
 set -e
 
+USEDIR=$1 # run snakemake in this directory
+EXTRAARGS=$2 # e.g. --delete-all-output 
+
 # Run tests for varying read numbers for TF/HM
 
 TFPEAKS=/storage/pandaman/project/ChIPs-experiments/data/TF-SP1-sim.bed
 HMPEAKS=/storage/pandaman/project/ChIPs-experiments/data/HM-H3K27ac-sim.bed
-TFMODEL=simplified_GM12878_CTCF.json
-HMMODEL=simplified_GM12878_H3K27ac.json
+TFMODEL=$(pwd)/simplified_TF.json
+HMMODEL=$(pwd)/simplified_HM.json
+
+cd $USEDIR
 
 for layout in single paired
 do
@@ -25,7 +30,6 @@ do
 	    --config MODELFILE=$MODELFILE \
 	    PEAKFILE=$PEAKFILE \
 	    OUTPREFIX=${style}-${layout} \
-	    LAYOUT=${layout} #--delete-all-output
+	    LAYOUT=${layout} ${EXTRAARGS}
     done
 done
-    
