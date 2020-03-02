@@ -1,6 +1,8 @@
-# Tulip
+# ChIPs
 
-Tulip is a tool for simulating ChIP-sequencing experiments.
+**UNDER CONSTRUCTION**
+
+ChIPs is a tool for simulating ChIP-sequencing experiments.
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
 
@@ -9,31 +11,31 @@ For questions on installation or usage, please open an issue, submit a pull requ
 <a name="download"></a>
 ## Download
 
-The latest Tulip release is available on the [releases page](https://github.com/gymreklab/tulip/releases).
+The latest ChIPs release is available on the [releases page](https://github.com/gymreklab/chips/releases).
 
 <a name="install"></a>
 ## Installation
 ### Install from Tarball
-Note: Tulip uses a helper tool "pkg-config" in compilation, and requires a third party package [htslib](http://www.htslib.org/).
+Note: ChIPs uses a helper tool "pkg-config" in compilation, and requires a third party package [htslib](http://www.htslib.org/).
 
-You can use the following commands to install Tulip from the tarball file:
+You can use the following commands to install ChPs from the tarball file:
 ```
-tar -xzvf tulip-X.X.tar.gz
-cd tulip-X.X
+tar -xzvf chips-X.X.tar.gz
+cd chips-X.X
 ./configure
 make
 make install
 ``` 
 
-If you do not have root access, you can install Tulip in a local directory with the commands:
+If you do not have root access, you can install ChIPs in a local directory with the commands:
 ```
 ./configure --prefix=$YOUR_PATH
 make
 make install
 ```
-which installs `Tulip` to `$YOUR_PATH/bin/tulip`.
+which installs `chips` to `$YOUR_PATH/bin/chips`.
 
-Typing `tulip --help` should show a help message if Tulip is successfully installed.
+Typing `chips --help` should show a help message if ChIPs is successfully installed.
 
 If you get a pkg-config error, you may need to set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. If you do not have htslib installed in your machine, you need to install htslib first. You can download the package from https://github.com/samtools/htslib/releases/, and install htslib with the following commands:
 ```
@@ -53,8 +55,8 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$YOUR_PATH/lib
 
 To compile from git source, first make sure htslib is installed. Then run:
 ```
-git clone https://github.com/gymreklab/tulip
-cd tulip/
+git clone https://github.com/gymreklab/chips
+cd chips/
 ./reconf
 ./configure
 make
@@ -66,25 +68,13 @@ If installing from source on OSX, you will need to have autotools and related pa
 brew install autoconf automake autoconf-archive libtool pkg-config
 ```
 
-<a name="docker"></a>
-## From docker
-
-Tulip is also packaged in a docker container available on the [Gymrek Lab docker hub](https://hub.docker.com/u/gymreklab). The latest release can be found at `gymreklab/tulip-1.10.1` built from the `Dockerfile` in this repo. Example usage below:
-
-```
-# Pull the image
-docker pull gymreklab/tulip-1.10.1
-# Test that it works
-docker run gymreklab/tulip-1.10.1 tulip learn --help
-```
-
 <a name="usage"></a>
 ## Basic usage
 
-Tulip is a single command line tool that contains several modules. To see available modules type:
+ChIPs is a single command line tool that contains several modules. To see available modules type:
 
 ```
-tulip
+chips
 ```
 
 The following modules are available:
@@ -95,7 +85,7 @@ The following modules are available:
 Basic usage is shown below. See [detailed usage](#detailed) below for more info.
 
 ```
-tulip learn \
+chips learn \
   -b <reads.bam> \
   -p <peaks> \
   -t <homer|bed>
@@ -103,7 +93,7 @@ tulip learn \
 ```
 
 ```
-tulip simreads \
+chips simreads \
   -p <peaks> \
   -f <ref.fa>
   -t <homer|bed|wce> \
@@ -113,7 +103,7 @@ tulip simreads \
 <a name="detailed"></a>
 ## Detailed usage
 
-### tulip learn
+### chips learn
 
 Required parameters:
 * `-b <file.bam>`: BAM file containing aligned reads. Should be sorted and indexed. To accurately estimate PCR duplicate rate, duplicates must be flagged e.g. using Picard. Both paired-end or single-end data are supported.
@@ -132,7 +122,7 @@ Other optional parameters:
 * `--est <int>`: Estimated fragment length. Used as a rough guess to guide inference of fragment length distribution from single end data.
 * `-r <float>`: Ignore peaks with top r% of peak scores.
 
-### tulip simreads
+### chips simreads
 
 Required parameters:
 * `-p <peaks>`: file containing peaks. 
@@ -146,7 +136,7 @@ Experiment parameters:
 * `--readlen <int>`: Read length to generate (Default: 36bp)
 * `--paired`: Simulated paired-end reads (by default single-end reads are generated).
 
-Model parameters: (either user-specified or learned from `tulip learn`:
+Model parameters: (either user-specified or learned from `chips learn`:
 * `--model <str>`: JSON file with model parameters (e.g. from running learn. Setting parameters with other options overrides anything in the JSON file.
 * `--gamma-frag <float>,<float>`: Parameters for fragment length distribution (k, theta for Gamma distribution). Default: 15.67,15,49
 * `--spot <float>`: SPOT score (fraction of reads in peaks). Default: 0.18
@@ -177,13 +167,13 @@ Other options:
 
 Peak files may be either in BED or HOMER peak format. For all modules, the option `-t` should specify either "bed" or "homer" appropriately.
 
-With `-t bed`, your peak file must be tab-delimited with no header line. The first three columns are chromosome, start, and end. For `tulip simreads` if you don't supply a BAM file you'll also need to specify which column contains the peak score using `-c <colnum>`. For example if your file just has four columns, chrom, start, end, and score, set `-c 4`. If your peaks don't have scores you can modify your peak file to set all peaks to have score 1.
+With `-t bed`, your peak file must be tab-delimited with no header line. The first three columns are chromosome, start, and end. For `chips simreads` if you don't supply a BAM file you'll also need to specify which column contains the peak score using `-c <colnum>`. For example if your file just has four columns, chrom, start, end, and score, set `-c 4`. If your peaks don't have scores you can modify your peak file to set all peaks to have score 1.
 
 With `-t homer`, your peak file should be in the format output by the [HOMER peak caller](http://homer.ucsd.edu/homer/ngs/peaks.html). For HOMER files, set `-c 6` since the peak score intensity is in column 6.
 
 ### Model files
 
-Model files are in JSON syntax, and follow the example below. Hundreds of model files trained on ENCODE ChIP-seq datasets for GM12878 are available for download on the [Tulip wiki](https://github.com/gymreklab/tulip/wiki/Tulip-model-files-for-GM12878-ENCODE-Datasets).
+Model files are in JSON syntax, and follow the example below. 
 
 ```
 {
@@ -199,7 +189,7 @@ Model files are in JSON syntax, and follow the example below. Hundreds of model 
 }
 ```
 
-`tulip learn` outputs a JSON model file. `tulip simreads` can take in a model file with all or some of these parameters specified. Model parameters set on the command line override those set in the JSON model file. 
+`chips learn` outputs a JSON model file. `chips simreads` can take in a model file with all or some of these parameters specified. Model parameters set on the command line override those set in the JSON model file. 
 
 <a name="faq"></a>
 ## FAQ

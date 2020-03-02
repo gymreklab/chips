@@ -15,7 +15,7 @@ SEQUENCER=HiSeq
 #for nc in 1000 10000 100000 1000000
 for nc in 1000
 do
-    ./src/tulip simreads \
+    ./src/chips simreads \
 	-p ${PEAKS} \
 	-t ${TYPE} \
 	-f ${REFFA} \

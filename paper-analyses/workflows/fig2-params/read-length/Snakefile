@@ -1,0 +1,36 @@
+# Import most functionality from top level snakefile
+# Here we just define the parameters that change and generate the params files
+#
+# Simulated Peak files to use for evaluation
+#/storage/pandaman/project/ChIPs-experiments/data/TF-SP1-sim.bed
+#/storage/pandaman/project/ChIPs-experiments/data/HM-H3K27ac-sim.bed
+
+config["REF"] = "/storage/resources/dbase/human/hg19/hg19.fa"
+config["ENCODE"] = ""
+config["ENCDIR"] = ""
+config["REGION"] = "chr21:1-48129895"
+config["C"] = 4
+
+include: "../../Snakefile"
+
+READLEN = [36, 75, 100, 125, 150, 200]
+
+rule all:
+    input:
+        "{outprefix}.summary_stats_readlen.tab".format(outprefix=config["OUTPREFIX"])
+
+rule create_params_file:
+    output:
+        "params/" + config["OUTPREFIX"] + "-readlen{readlen,\d+}.params"
+    shell:
+        "echo --scale-outliers -c {config[C]} --numcopies 100 --numreads 100000 --readlen {wildcards.readlen} > {output}"
+
+rule summarize_all:
+    input:
+        expand("metrics/"+config["OUTPREFIX"]+"-readlen{readlen}.final.tab", readlen=READLEN)
+    output:
+        "{outprefix}.summary_stats_readlen.tab".format(outprefix=config["OUTPREFIX"])
+    run:
+       shell("head -n 1 {input[0]} | awk '{{print \"readlen\\t\" $0}}' >> {output}")
+       for rl in READLEN:
+           shell("tail -n 1 metrics/{config[OUTPREFIX]}-readlen%s.final.tab | awk '{{print \"%s\\t\" $0}}' >> {output}"%(rl, rl))

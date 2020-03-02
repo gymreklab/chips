@@ -30,11 +30,11 @@ RUN tar -xjf samtools-1.9.tar.bz2
 WORKDIR samtools-1.9
 RUN ./configure --without-curses && make && make install
 
-# Install Tulip
+# Install Chips
 WORKDIR /dependencies
-COPY tulip-1.10.1.tar.gz /dependencies/tulip-1.10.1.tar.gz
-RUN tar -xzvf tulip-1.10.1.tar.gz
-WORKDIR /dependencies/tulip-1.10.1
+COPY chips-1.10.1.tar.gz /dependencies/chips-1.10.1.tar.gz
+RUN tar -xzvf chips-1.10.1.tar.gz
+WORKDIR /dependencies/chips-1.10.1
 RUN ./configure && make && make install
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib"
 
