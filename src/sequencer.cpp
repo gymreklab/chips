@@ -52,10 +52,10 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
   std::vector<std::string> read_pair;
   std::vector<std::string> reads_1;
   std::vector<std::string> reads_2;
-  std::vector<std::string> chroms;
+  // std::vector<std::string> chroms;
   std::vector<std::string> ids;
-  std::vector<int> starts_1;
-  std::vector<int> starts_2;
+  // std::vector<int> starts_1;
+  // std::vector<int> starts_2;
 
   // Sample from fragments w/o replacement (by shuffling first)
   // If needed, go through the fragments multiple times
@@ -69,7 +69,6 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
   ss << "Sequencing total reads " << numreads << " for copy " << copy_index;
   //PrintMessageDieOnError(ss.str(), M_PROGRESS);
   while (true) {
-    // TODO
     std::shuffle(frag_indices.begin(), frag_indices.end(), rng);
     for (size_t fg=0; fg<frag_indices.size(); fg++) {
       frag_index = frag_indices[fg];
@@ -95,9 +94,9 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
       }else{
 	continue;
       }
-      chroms.push_back(input_fragments[frag_index].chrom);
-      starts_1.push_back(input_fragments[frag_index].start);
-      starts_2.push_back(input_fragments[frag_index].start+input_fragments[frag_index].length-readlen+1);
+      // chroms.push_back(input_fragments[frag_index].chrom);
+      // starts_1.push_back(input_fragments[frag_index].start);
+      // starts_2.push_back(input_fragments[frag_index].start+input_fragments[frag_index].length-readlen+1);
       reads_1.push_back(read_pair[0]);
       reads_2.push_back(read_pair[1]);
       
@@ -169,10 +168,16 @@ bool Sequencer::Fragment2Read(const std::string frag, std::string& read, std::mt
       }
     }
 
-    if (read.size() != readlen){
-      return false;
-    }else{
+    if (read.size() < readlen){
+      // fill up the reads with "N"s if the fragment length is
+      // shorter than the read length
+      for (int add_n=0; add_n<readlen-read.size(); add_n++) read += 'N';
       return true;
+    }else if (read.size() == readlen){
+      return true;
+    }else {
+      std::cerr << "Unexpected read size: " << read.size() << std::endl;
+      return false;
     }
   } catch (const char* msg){
     std::cerr << msg << " in Sequencer::Fragment2Read!"<< std::endl;
