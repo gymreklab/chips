@@ -171,7 +171,8 @@ bool Sequencer::Fragment2Read(const std::string frag, std::string& read, std::mt
     if (read.size() < readlen){
       // fill up the reads with "N"s if the fragment length is
       // shorter than the read length
-      for (int add_n=0; add_n<readlen-read.size(); add_n++) read += 'N';
+      int N_total = readlen-read.size();
+      for (int add_n=0; add_n<N_total; add_n++) read += 'N';
       return true;
     }else if (read.size() == readlen){
       return true;
