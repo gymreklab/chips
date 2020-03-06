@@ -103,9 +103,9 @@ void ChIPModel::ReadFromJSON(const std::string& model_file) {
 	frag_param_k == -1) {
       frag_param_k = mjson["frag"]["k"].get<double>();
     }
-    if (mjson["frag"].find("s") != mjson["frag"].end() &&
+    if (mjson["frag"].find("theta") != mjson["frag"].end() &&
 	frag_param_theta == -1) {
-      frag_param_theta = mjson["frag"]["s"].get<double>();
+      frag_param_theta = mjson["frag"]["theta"].get<double>();
     }
   }
 }
