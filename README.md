@@ -18,7 +18,7 @@ The latest ChIPs release is available on the [releases page](https://github.com/
 ### Install from Tarball
 Note: ChIPs uses a helper tool "pkg-config" in compilation, and requires a third party package [htslib](http://www.htslib.org/).
 
-You can use the following commands to install ChPs from the tarball file:
+You can use the following commands to install ChIPs from the tarball file:
 ```
 tar -xzvf chips-X.X.tar.gz
 cd chips-X.X
