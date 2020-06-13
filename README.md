@@ -39,8 +39,8 @@ Typing `chips --help` should show a help message if ChIPs is successfully instal
 
 If you get a pkg-config error, you may need to set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. If you do not have htslib installed in your machine, you need to install htslib first. You can download the package from https://github.com/samtools/htslib/releases/, and install htslib with the following commands:
 ```
-tar -xjvf htslib-1.8.tar.bz2
-cd htslib-1.8
+tar -xjvf htslib-X.X.tar.bz2
+cd htslib-X.X
 ./configure --disable-lzma --disable-bz2 --prefix=$YOUR_PATH
 make
 make install
