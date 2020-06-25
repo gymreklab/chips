@@ -17,7 +17,7 @@ sanity-checks/
 src/.deps/
 src/.libs/
 src/.*
-src/tulip
+src/chips
 *.o
 *.a
 src/*.a
