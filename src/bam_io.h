@@ -12,6 +12,7 @@
 #include <sstream>
 #include <vector>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "htslib/bgzf.h"
 #include "htslib/cram.h"
