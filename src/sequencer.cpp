@@ -28,6 +28,7 @@ Sequencer::Sequencer(const Options& options) {
   paired = options.paired;
   outprefix = options.outprefix;
   readlen = options.readlen;
+  pcr_rate = options.pcr_rate;
 
   sequencer_type = options.sequencer_type;
   if (sequencer_type == ""){
@@ -99,11 +100,23 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
       // starts_2.push_back(input_fragments[frag_index].start+input_fragments[frag_index].length-readlen+1);
       reads_1.push_back(read_pair[0]);
       reads_2.push_back(read_pair[1]);
-      
+     
       // Update
       total_reads_sequenced += 1;
+
+      // PCR TODO update 
+      while (true) {
+        if (total_reads_sequenced >= numreads) {
+	      break;
+        }
+        reads_1.push_back(read_pair[0]);
+        reads_2.push_back(read_pair[1]);
+        total_reads_sequenced += 1;
+        if ( ((float) rng()/(float) rng.max()) < pcr_rate) break;
+      } 
+
       if (total_reads_sequenced >= numreads) {
-	break;
+	    break;
       }
     }
     if (total_reads_sequenced >= numreads) {

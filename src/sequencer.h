@@ -22,6 +22,7 @@ class Sequencer {
   std::string outprefix;
   int readlen;
   std::string sequencer_type;
+  float pcr_rate;
   float sub_rate;
   float del_rate;
   float ins_rate;
