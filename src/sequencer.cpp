@@ -67,9 +67,6 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
     frag_indices.push_back(frag_index);
   }
 
-  // TODO REMOVE
-  std::cout << input_fragments.size() << std::endl;
-
   std::stringstream ss;
   ss << "Sequencing total reads " << numreads << " for copy " << copy_index;
   //PrintMessageDieOnError(ss.str(), M_PROGRESS);
