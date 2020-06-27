@@ -407,6 +407,8 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals,
       /* LibraryConstructor lc(options);
       lc.Perform(pulldown_fragments, &lib_fragments, rng); */
 
+      lib_fragments = pulldown_fragments;
+
       /*** Cleanup for next bin ***/
       pulldown_fragments.clear();
     }

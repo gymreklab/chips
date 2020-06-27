@@ -66,6 +66,7 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
   for (size_t frag_index=0; frag_index<input_fragments.size(); frag_index++) {
     frag_indices.push_back(frag_index);
   }
+
   std::stringstream ss;
   ss << "Sequencing total reads " << numreads << " for copy " << copy_index;
   //PrintMessageDieOnError(ss.str(), M_PROGRESS);
@@ -79,7 +80,6 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
 				  &frag_seq)) {
 	continue;
       }
-	
       // generate reads from both strands
       read_pair.clear();
       if (Fragment2Read(frag_seq, read_seq, rng) &&
@@ -100,15 +100,16 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
       // starts_2.push_back(input_fragments[frag_index].start+input_fragments[frag_index].length-readlen+1);
       reads_1.push_back(read_pair[0]);
       reads_2.push_back(read_pair[1]);
-     
+
       // Update
       total_reads_sequenced += 1;
 
-      // PCR TODO update 
+      // PCR 
       while (true) {
         if (total_reads_sequenced >= numreads) {
 	      break;
         }
+        ids.push_back(ids[ids.size()-1]);
         reads_1.push_back(read_pair[0]);
         reads_2.push_back(read_pair[1]);
         total_reads_sequenced += 1;
