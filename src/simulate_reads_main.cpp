@@ -404,10 +404,8 @@ void consume(TaskQueue <int> & q, Options options, PeakIntervals* pintervals,
       pulldown.Perform(&pulldown_fragments, pintervals, rng);
 
       /*** Step 3: Library construction NOTE PCR moved to sequencer ***/
-      /* LibraryConstructor lc(options);
-      lc.Perform(pulldown_fragments, &lib_fragments, rng); */
-
-      lib_fragments = pulldown_fragments;
+      LibraryConstructor lc(options);
+      lc.Perform(pulldown_fragments, &lib_fragments, rng);
 
       /*** Cleanup for next bin ***/
       pulldown_fragments.clear();
