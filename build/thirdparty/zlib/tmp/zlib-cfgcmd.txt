@@ -1,0 +1,1 @@
+cmd='/storage/mlamkin/projects/chips/build/thirdparty/zlib/src/zlib/configure;--prefix=/storage/mlamkin/projects/chips/build/thirdparty/zlib;--static'

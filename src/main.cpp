@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "src/common.h"
+#include "ChIPs/common.h"
 
 using namespace std;
 

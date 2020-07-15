@@ -1,0 +1,51 @@
+
+{
+	"sources" : 
+	[
+		
+		{
+			"file" : "/storage/mlamkin/projects/chips/build/CMakeFiles/zlib"
+		},
+		
+		{
+			"file" : "/storage/mlamkin/projects/chips/build/CMakeFiles/zlib.rule"
+		},
+		
+		{
+			"file" : "/storage/mlamkin/projects/chips/build/CMakeFiles/zlib-complete.rule"
+		},
+		
+		{
+			"file" : "/storage/mlamkin/projects/chips/build/thirdparty/zlib/src/zlib-stamp/zlib-install.rule"
+		},
+		
+		{
+			"file" : "/storage/mlamkin/projects/chips/build/thirdparty/zlib/src/zlib-stamp/zlib-mkdir.rule"
+		},
+		
+		{
+			"file" : "/storage/mlamkin/projects/chips/build/thirdparty/zlib/src/zlib-stamp/zlib-download.rule"
+		},
+		
+		{
+			"file" : "/storage/mlamkin/projects/chips/build/thirdparty/zlib/src/zlib-stamp/zlib-update.rule"
+		},
+		
+		{
+			"file" : "/storage/mlamkin/projects/chips/build/thirdparty/zlib/src/zlib-stamp/zlib-patch.rule"
+		},
+		
+		{
+			"file" : "/storage/mlamkin/projects/chips/build/thirdparty/zlib/src/zlib-stamp/zlib-configure.rule"
+		},
+		
+		{
+			"file" : "/storage/mlamkin/projects/chips/build/thirdparty/zlib/src/zlib-stamp/zlib-build.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : [ "zlib" ],
+		"name" : "zlib"
+	}
+}

@@ -1,0 +1,92 @@
+[
+{
+  "directory": "/storage/mlamkin/projects/chips/build",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/chips.dir/src/main.cpp.o -c /storage/mlamkin/projects/chips/src/main.cpp",
+  "file": "/storage/mlamkin/projects/chips/src/main.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/bam_io.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/bam_io.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/bam_io.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/bingenerator.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/bingenerator.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/bingenerator.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/common.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/common.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/common.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/fragment.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/fragment.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/fragment.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/learn_main.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/learn_main.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/learn_main.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/library_constructor.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/library_constructor.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/library_constructor.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/model.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/model.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/model.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/multithread.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/multithread.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/multithread.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/options.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/options.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/options.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/peak_intervals.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/peak_intervals.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/peak_intervals.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/peak_io_toolbox.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/peak_io_toolbox.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/peak_io_toolbox.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/peak_loader.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/peak_loader.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/peak_loader.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/pulldown.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/pulldown.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/pulldown.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/ref_genome.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/ref_genome.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/ref_genome.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/sequencer.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/sequencer.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/sequencer.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/simulate_reads_main.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/simulate_reads_main.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/simulate_reads_main.cpp"
+},
+{
+  "directory": "/storage/mlamkin/projects/chips/build/ChIPs",
+  "command": "/usr/bin/c++    -I/storage/mlamkin/projects/chips -I/storage/mlamkin/projects/chips/build/thirdparty/zlib/include -I/storage/mlamkin/projects/chips/build/thirdparty/htslib/include -I/storage/mlamkin/projects/chips/build    -std=gnu++11 -o CMakeFiles/ChIPs.dir/stringops.cpp.o -c /storage/mlamkin/projects/chips/ChIPs/stringops.cpp",
+  "file": "/storage/mlamkin/projects/chips/ChIPs/stringops.cpp"
+}
+]

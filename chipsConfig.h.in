@@ -1,0 +1,2 @@
+#define chips_VERSION_MAJOR @chips_VERSION_MAJOR@
+#define chips_VERSION_MINOR @chips_VERSION_MINOR@
