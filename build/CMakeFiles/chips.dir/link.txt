@@ -1,1 +1,0 @@
-/usr/bin/c++      CMakeFiles/chips.dir/src/main.cpp.o  -o chips ChIPs/libChIPs.a -lpthread thirdparty/htslib/lib/libhts.a thirdparty/zlib/lib/libz.a 
