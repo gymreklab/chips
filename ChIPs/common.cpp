@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include "common.h"
+#include "chipsConfig.h"
 
 using namespace std;
 
@@ -27,8 +28,8 @@ void PrintMessageDieOnError(const string& msg, MSGTYPE msgtype) {
     errx(1, "Invalid message type. This should never happen");
   }
   stringstream ss;
-  ss  << "[" << PROGRAM_NAME
-      << "-" << _GIT_VERSION << "] " << typestring << msg << endl;
+  ss << "[chips-" << chips_VERSION_MAJOR << "." << chips_VERSION_MINOR << "]"
+     << typestring << msg << endl;
   cerr << ss.str();
 
   if (msgtype == M_ERROR) {

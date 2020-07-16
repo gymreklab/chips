@@ -171,7 +171,8 @@ class BamAlignment {
   bool AddStringTag(const char tag[2], const std::string& value){
     if (HasTag(tag))
       return false;
-    return (bam_aux_append(b_, tag, 'Z', value.size()+1, (uint8_t*)value.c_str()) == 0);
+    bam_aux_append(b_, tag, 'Z', value.size()+1, (uint8_t*)value.c_str());
+    return true;
   }
 
   bool GetCharTag(const char tag[2], char& value) const {
