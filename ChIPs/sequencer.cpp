@@ -1,5 +1,5 @@
-#include "src/sequencer.h"
-#include "src/common.h"
+#include "sequencer.h"
+#include "common.h"
 #include <iostream>
 #include <sstream>
 #include <random>

@@ -1,9 +1,9 @@
 #ifndef SRC_SEQUENCER_H__
 #define SRC_SEQUENCER_H__
 
-#include "src/fragment.h"
-#include "src/options.h"
-#include "src/ref_genome.h"
+#include "fragment.h"
+#include "options.h"
+#include "ref_genome.h"
 #include <vector>
 #include <iostream>
 #include <fstream>

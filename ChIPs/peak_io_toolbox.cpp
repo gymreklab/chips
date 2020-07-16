@@ -1,7 +1,7 @@
 // Peak Loader Tool Box
 //
 
-#include "src/peak_io_toolbox.h"
+#include "peak_io_toolbox.h"
 
 PeakReader::PeakReader(const std::string& _peakfile){
   peakfile = _peakfile;

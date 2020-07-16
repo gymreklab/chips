@@ -6,7 +6,7 @@
  *
  * Last modified by An Zheng
  */
-#include "src/peak_loader.h"
+#include "peak_loader.h"
 
 const std::map<std::string, int> PeakLoader::peakfileTypeList = {{"homer", 0}, {"wce", 1}, {"bed", 2}};
 

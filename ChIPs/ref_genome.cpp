@@ -4,8 +4,8 @@
 #include <sstream>
 #include <algorithm>
 
-#include "src/common.h"
-#include "src/ref_genome.h"
+#include "common.h"
+#include "ref_genome.h"
 
 using namespace std;
 

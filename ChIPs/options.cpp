@@ -1,4 +1,4 @@
-#include "src/options.h"
+#include "options.h"
 
 using namespace std;
 

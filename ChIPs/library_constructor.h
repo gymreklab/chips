@@ -1,8 +1,8 @@
 #ifndef SRC_LIBRARY_CONSTRUCTOR_H__
 #define SRC_LIBRARY_CONSTRUCTOR_H__
 
-#include "src/fragment.h"
-#include "src/options.h"
+#include "fragment.h"
+#include "options.h"
 
 #include <vector>
 #include <random>

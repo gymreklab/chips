@@ -1,9 +1,9 @@
-#include "src/model.h"
+#include "model.h"
 
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <json.hpp>
+#include "json.hpp"
 
 using namespace std;
 using json = nlohmann::json;

@@ -1,6 +1,6 @@
-#include "src/bingenerator.h"
-#include "src/ref_genome.h"
-#include "src/common.h"
+#include "bingenerator.h"
+#include "ref_genome.h"
+#include "common.h"
 
 #include <sstream>
 #include <iostream>

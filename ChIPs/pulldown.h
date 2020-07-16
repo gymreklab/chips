@@ -1,10 +1,10 @@
 #ifndef SRC_PULLDOWN_H__
 #define SRC_PULLDOWN_H__
 
-#include "src/bingenerator.h"
-#include "src/fragment.h"
-#include "src/options.h"
-#include "src/peak_intervals.h"
+#include "bingenerator.h"
+#include "fragment.h"
+#include "options.h"
+#include "peak_intervals.h"
 
 #include <vector>
 

@@ -1,6 +1,7 @@
 #include <iostream>
 
-#include "src/common.h"
+#include "ChIPs/common.h"
+#include "chipsConfig.h"
 
 using namespace std;
 
@@ -23,7 +24,7 @@ int main(int argc, char* argv[]) {
 	   sub_cmd == "-help") {
     return chips_help();
   } else if (sub_cmd == "-version" || sub_cmd == "--version") {
-    cout << "chips " << _GIT_VERSION << endl;
+    cout << "chips-" << chips_VERSION_MAJOR << "." << chips_VERSION_MINOR << endl;
   } else {
     cerr << "error: unrecognized command: " << argv[1] << endl << endl;
     return 1;

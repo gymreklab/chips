@@ -8,18 +8,20 @@
 #include <random>
 #include <chrono>
 
-#include "src/bingenerator.h"
-#include "src/common.h"
-#include "src/fragment.h"
-#include "src/library_constructor.h"
-#include "src/model.h"
-#include "src/options.h"
-#include "src/pulldown.h"
-#include "src/sequencer.h"
-#include "src/stringops.h"
-#include "src/peak_intervals.h"
-#include "src/multithread.h"
-#include "src/multithread.cpp"
+#include "bingenerator.h"
+#include "common.h"
+#include "fragment.h"
+#include "library_constructor.h"
+#include "model.h"
+#include "options.h"
+#include "pulldown.h"
+#include "sequencer.h"
+#include "stringops.h"
+#include "peak_intervals.h"
+#include "multithread.h"
+#include "multithread.cpp"
+#include "chipsConfig.h"
+
 const bool DEBUG_SIM=true;
 
 // define our parameter checking macro
@@ -428,7 +430,7 @@ void merge_files(std::string ifilename, std::string ofilename){
 void simulate_reads_help(void) {
   Options options;
   cerr << "\nTool:    chips simreads" << endl;
-  cerr << "Version: " << _GIT_VERSION << "\n";    
+  cerr << "Version: " << chips_VERSION_MAJOR << "." << chips_VERSION_MINOR << "\n";
   cerr << "Summary: Simulate ChIP-seq reads for a set of peaks." << endl << endl;
   cerr << "Usage:   " << PROGRAM_NAME << " simreads -p peaks.bed -f ref.fa -o outprefix [OPTIONS] " << endl;
   cerr << "\n[Required arguments]: " << "\n";

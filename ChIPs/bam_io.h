@@ -21,7 +21,7 @@
 #define bam_ins_size(b)  (b)->core.isize;
 #include "htslib/sam.h"
 
-#include "src/common.h"
+#include "common.h"
 
 // htslib encodes each base using a 4 bit integer
 // This array converts each integer to its corresponding base
@@ -171,7 +171,8 @@ class BamAlignment {
   bool AddStringTag(const char tag[2], const std::string& value){
     if (HasTag(tag))
       return false;
-    return (bam_aux_append(b_, tag, 'Z', value.size()+1, (uint8_t*)value.c_str()) == 0);
+    bam_aux_append(b_, tag, 'Z', value.size()+1, (uint8_t*)value.c_str());
+    return true;
   }
 
   bool GetCharTag(const char tag[2], char& value) const {

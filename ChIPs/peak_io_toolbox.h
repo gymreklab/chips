@@ -15,8 +15,8 @@
 #include <sstream>
 #include <vector>
 #include <string>
-#include "src/fragment.h"
-#include "src/bam_io.h"
+#include "fragment.h"
+#include "bam_io.h"
 
 /* Peak File Reader */
 class PeakReader{

@@ -1,4 +1,4 @@
-#include "src/multithread.h"
+#include "multithread.h"
 
 template <typename T>
 T TaskQueue <T> ::pop(){

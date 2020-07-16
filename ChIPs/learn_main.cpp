@@ -10,12 +10,14 @@
 #include <algorithm>
 #include <chrono>
 
-#include "src/bam_io.h"
-#include "src/common.h"
-#include "src/model.h"
-#include "src/options.h"
-#include "src/peak_loader.h"
-#include "src/fragment.h"
+#include "bam_io.h"
+#include "common.h"
+#include "model.h"
+#include "options.h"
+#include "peak_loader.h"
+#include "fragment.h"
+#include "chipsConfig.h"
+
 using namespace std;
 
 // define our parameter checking macro
@@ -696,7 +698,7 @@ int learn_main(int argc, char* argv[]) {
 void learn_help(void) {
   Options options;
   cerr << "\nTool:    chips learn" << endl;
-  cerr << "Version: " << _GIT_VERSION << "\n";    
+  cerr << "Version: " << chips_VERSION_MAJOR << "." << chips_VERSION_MINOR << "\n";
   cerr << "Summary: Learn parameters from a ChIP dataset." << endl << endl;
   cerr << "Usage:   " << PROGRAM_NAME << " learn -b reads.bam -p peak.bed -o outprefix [OPTIONS] " << endl << endl;
   cerr << "[Required arguments]: " << "\n";

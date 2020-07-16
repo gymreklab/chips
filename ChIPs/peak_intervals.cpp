@@ -1,6 +1,6 @@
-#include "src/common.h"
-#include "src/peak_intervals.h"
-#include "src/ref_genome.h"
+#include "common.h"
+#include "peak_intervals.h"
+#include "ref_genome.h"
 
 PeakIntervals::PeakIntervals(const Options& options, const std::string peakfile, const std::string peakfileType,
 			     const std::string bamfile, const std::int32_t count_colidx) {

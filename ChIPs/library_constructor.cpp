@@ -1,4 +1,4 @@
-#include "src/library_constructor.h"
+#include "library_constructor.h"
 
 LibraryConstructor::LibraryConstructor(const Options& options) {
   pcr_rate = options.pcr_rate;

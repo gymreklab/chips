@@ -2,7 +2,7 @@
 #define SRC_MODEL_H__
 
 #include <string>
-#include "src/options.h"
+#include "options.h"
 
 class ChIPModel {
  public:

@@ -3,9 +3,9 @@
 
 #include <map>
 #include <vector>
-#include "src/fragment.h"
-#include "src/peak_loader.h"
-#include "src/options.h"
+#include "fragment.h"
+#include "peak_loader.h"
+#include "options.h"
 
 class PeakIntervals {
   /*

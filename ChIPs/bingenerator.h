@@ -1,7 +1,7 @@
 #ifndef SRC_BINGENERATOR_H__
 #define SRC_BINGENERATOR_H__
 
-#include "src/options.h"
+#include "options.h"
 #include <vector>
 #include <map>
 

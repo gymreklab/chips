@@ -17,8 +17,8 @@
 #include <string>
 #include <map>
 
-#include "src/peak_io_toolbox.h"
-#include "src/fragment.h"
+#include "peak_io_toolbox.h"
+#include "fragment.h"
 
 class PeakLoader{
   public:
