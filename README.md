@@ -14,59 +14,19 @@ For questions on installation or usage, please open an issue, submit a pull requ
 The latest ChIPs release is available on the [releases page](https://github.com/gymreklab/chips/releases).
 
 <a name="install"></a>
-## Installation
-### Install from Tarball
-Note: ChIPs uses a helper tool "pkg-config" in compilation, and requires a third party package [htslib](http://www.htslib.org/).
 
-You can use the following commands to install ChIPs from the tarball file:
-```
-tar -xzvf chips-X.X.tar.gz
-cd chips-X.X
-./configure
-make
-make install
-``` 
+To compile from git source, run:
 
-If you do not have root access, you can install ChIPs in a local directory with the commands:
-```
-./configure --prefix=$YOUR_PATH
-make
-make install
-```
-which installs `chips` to `$YOUR_PATH/bin/chips`.
-
-Typing `chips --help` should show a help message if ChIPs is successfully installed.
-
-If you get a pkg-config error, you may need to set the environment variable PKG_CONFIG_PATH to the directory containing `htslib.pc`. If you do not have htslib installed in your machine, you need to install htslib first. You can download the package from https://github.com/samtools/htslib/releases/, and install htslib with the following commands:
-```
-tar -xjvf htslib-X.X.tar.bz2
-cd htslib-X.X
-./configure --disable-lzma --disable-bz2 --prefix=$YOUR_PATH
-make
-make install
-```
-Once you succussfully install the htslib, you should set the environment variables `PKG_CONFIG_PATH` to the directory containing `htslib.pc` and `LD_LIBRARY_PATH` to the directory containing the `libhts.so*` files. e.g.:
-```
-export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:$YOUR_PATH/lib/pkgconfig
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$YOUR_PATH/lib
-```
-
-### Install from git source
-
-To compile from git source, first make sure htslib is installed. Then run:
 ```
 git clone https://github.com/gymreklab/chips
 cd chips/
-./reconf
-./configure
+mkdir build
+cd build/
+cmake ..
 make
-make install
 ```
 
-If installing from source on OSX, you will need to have autotools and related packages installed (ideally using Homebrew):
-```
-brew install autoconf automake autoconf-archive libtool pkg-config
-```
+This will generate a binary file `chips`, which you can then copy to a place on your `$PATH`.
 
 <a name="usage"></a>
 ## Basic usage
