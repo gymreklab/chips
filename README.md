@@ -15,7 +15,7 @@ The latest ChIPs release is available on the [releases page](https://github.com/
 
 <a name="install"></a>
 
-To compile from git source, run:
+To compile from the Github repository, run:
 
 ```
 git clone https://github.com/gymreklab/chips
@@ -26,7 +26,7 @@ cmake ..
 make
 ```
 
-To compile from source on [releases page](https://github.com/gymreklab/chips/releases/tag/v2.2), download the file chips-2.2-Source.tar.gz and run:
+To compile from source on the [releases page](https://github.com/gymreklab/chips/releases/tag/v2.2), download the file chips-2.2-Source.tar.gz and run:
 
 ```
 tar -xvf chips-2.2-Source.tar.gz
@@ -37,10 +37,10 @@ cmake ..
 make
 ```
 
-To compile from tarball, download the non-source code latest [release](https://github.com/gymreklab/chips/releases/tag/v2.2) and copy the binary located in `chips-2.2-Linux_x86_64/bin/chips` somewhere onto `$PATH`.
-
-
 This will generate a binary file `chips`, which you can then copy to a place on your `$PATH`.
+
+There is also a precompiled binary available on the [release page](https://github.com/gymreklab/chips/releases/tag/v2.2). Download and unzip chips-2.2-Linux_x86_64.tar.gz and copy the binary located in `chips-2.2-Linux_x86_64/bin/chips` somewhere onto your `$PATH`. 
+
 
 <a name="usage"></a>
 ## Basic usage
@@ -91,7 +91,7 @@ Optional parameters for BAM parsing:
 * `--thres <float>`: For estimating fragment length distribution from single end data, only consider peaks with scores above this threshold.
 
 Other optional parameters:
-* `--scale-outliers`: Set all peaks with scores $>$2x median score to have binding prob 1. Recommended with real data.
+* `--scale-outliers`: Set all peaks with scores >2x median score to have binding prob 1. Recommended with real data.
 * `--noscale`: Don't scale peak scores. Treat given scores as binding probabilities.
 * `--est <int>`: Estimated fragment length. Used as a rough guess to guide inference of fragment length distribution from single end data.
 * `-r <float>`: Ignore peaks with top r% of peak scores.
