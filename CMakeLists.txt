@@ -57,3 +57,16 @@ install(TARGETS chips DESTINATION bin)
 
 add_dependencies(htslib zlib)
 add_dependencies(ChIPs htslib)
+
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "") #required
+
+set(CPACK_PACKAGE_VERSION "${chips_VERSION_MAJOR}.${chips_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_MAJOR "${chips_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${chips_VERSION_MINOR}")
+
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
+
+set(CPACK_SOURCE_IGNORE_FILES "${CMAKE_SOURCE_DIR}/build/;${CMAKE_SOURCE_DIR}/.git/;${CMAKE_SOURCE_DIR}/power-analysis/;${CMAKE_SOURCE_DIR}/paper-analyses/;${CMAKE_SOURCE_DIR}/paper-methods/")
+
+include(CPack)
+
