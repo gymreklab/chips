@@ -26,6 +26,20 @@ cmake ..
 make
 ```
 
+To compile from source on [releases page][release]https://github.com/gymreklab/chips/releases/tag/v2.2, download the file chips-2.2-Source.tar.gz and run:
+
+```
+tar -xvf chips-2.2-Source.tar.gz
+cd chips-2.2-Source/
+mkdir build
+cd build/
+cmake ..
+make
+```
+
+To compile from tarball, download the non-source code latest [release]https://github.com/gymreklab/chips/releases/tag/v2.2 and copy the binary located in `chips-2.2-Linux_x86_64/bin/chips` somewhere onto `$PATH`.
+
+
 This will generate a binary file `chips`, which you can then copy to a place on your `$PATH`.
 
 <a name="usage"></a>
