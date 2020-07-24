@@ -27,10 +27,10 @@ rule get_window_peak_overlap:
         "windows/"+config["OUTPREFIX"]+"-5kb.nopeak"
      shell:
         """
-        intersectBed -a chr22_windows_1kb.bed -b {config[PEAKFILE]} -wa -u > {output[0]}
-        intersectBed -a chr22_windows_5kb.bed -b {config[PEAKFILE]} -wa -u > {output[1]}
-        intersectBed -a chr22_windows_1kb.bed -b {config[PEAKFILE]} -wa -v > {output[2]}
-        intersectBed -a chr22_windows_5kb.bed -b {config[PEAKFILE]} -wa -v > {output[3]}
+        intersectBed -a chr19_windows_1kb.bed -b {config[PEAKFILE]} -wa -u > {output[0]}
+        intersectBed -a chr19_windows_5kb.bed -b {config[PEAKFILE]} -wa -u > {output[1]}
+        intersectBed -a chr19_windows_1kb.bed -b {config[PEAKFILE]} -wa -v > {output[2]}
+        intersectBed -a chr19_windows_5kb.bed -b {config[PEAKFILE]} -wa -v > {output[3]}
         """
 
 rule get_window_counts:
