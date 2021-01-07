@@ -1,7 +1,5 @@
 # ChIPs
 
-**UNDER CONSTRUCTION**
-
 ChIPs is a tool for simulating ChIP-sequencing experiments.
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
