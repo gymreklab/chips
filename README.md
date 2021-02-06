@@ -110,10 +110,10 @@ Experiment parameters:
 
 Model parameters: (either user-specified or learned from `chips learn`:
 * `--model <str>`: JSON file with model parameters (e.g. from running learn. Setting parameters with other options overrides anything in the JSON file.
-* `--gamma-frag <float>,<float>`: Parameters for fragment length distribution (k, theta for Gamma distribution). Default: 15.67,15,49
-* `--spot <float>`: SPOT score (fraction of reads in peaks). Default: 0.18
-* `--frac <float>`: Fraction of the genome that is bound. Default: 0.03
-* `--pcr_rate <float>`: The geometric step size paramters for simulating PCR. Default: 1.0.
+* `--gamma-frag <float>,<float>`: Parameters for fragment length distribution (k, theta for Gamma distribution). Default: 15.67,15.49
+* `--spot <float>`: SPOT score (fraction of reads in peaks). Default: 0.17594
+* `--frac <float>`: Fraction of the genome that is bound. Default: 0.03713
+* `--pcr_rate <float>`: The geometric step size paramters for simulating PCR. Default: 0.85.
 * `--recomputeF`: Recompute `--frac` param based on input peaks. Recommended especially when using model parameters that were not learned on real data.
 
 Peak scoring:
