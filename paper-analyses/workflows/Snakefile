@@ -23,10 +23,15 @@ rule sim:
     benchmark:
         "metrics/{sample}.sim_metrics"
     run:
-        if config["LAYOUT"] == 'single':
-            shell("/storage/mlamkin/projects/chips/build/chips simreads -p {PEAKFILE} -t bed --model {MODELFILE} -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]} && touch {output[1]} && touch {output[2]}")
+        if config["METHOD"] == "chips":
+            if config["LAYOUT"] == 'single':
+                shell("chips simreads -p {PEAKFILE} -t bed --model {MODELFILE} -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]} && touch {output[1]} && touch {output[2]}")
+            else:
+                shell("chips simreads -p {PEAKFILE} -t bed --model {MODELFILE} -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]} --paired && touch {output[0]}")
+        elif config["METHOD"] == "chipulate":
+            shell("python3 /storage/yuq005/Tools/chipulate/chipulate.py -g {config[REF]} --chrom-size-file {config[REF]}.fai $(cat {input}) -o fastqs/{wildcards.sample}")
         else:
-            shell("/storage/mlamkin/projects/chips/build/chips simreads -p {PEAKFILE} -t bed --model {MODELFILE} -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]} --paired && touch {output[0]}")
+            shell("echo 'Not implemented yet' && exit 1")
 
 rule simwce:
     input:
@@ -37,9 +42,9 @@ rule simwce:
         "fastqs/{sample}_wce_2.fastq"
     run:
         if config["LAYOUT"] == 'single':
-            shell("/storage/mlamkin/projects/chips/build/chips simreads -t wce --model {MODELFILE} -f {config[REF]} -o fastqs/{wildcards.sample}_wce $(cat {input}) --region {config[REGION]} && touch {output[1]} {output[2]}")
+            shell("chips simreads -t wce --model {MODELFILE} -f {config[REF]} -o fastqs/{wildcards.sample}_wce $(cat {input}) --region {config[REGION]} && touch {output[1]} {output[2]}")
         else:
-            shell("/storage/mlamkin/projects/chips/build/chips simreads -t wce --model {MODELFILE} -f {config[REF]} -o fastqs/{wildcards.sample}_wce $(cat {input}) --region {config[REGION]} --paired && touch {output[0]}")
+            shell("chips simreads -t wce --model {MODELFILE} -f {config[REF]} -o fastqs/{wildcards.sample}_wce $(cat {input}) --region {config[REGION]} --paired && touch {output[0]}")
 
 rule bwa:
     input:

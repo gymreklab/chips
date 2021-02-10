@@ -6,31 +6,62 @@ include: "/storage/mgymrek/workspace/chips/paper-analyses/workflows/Snakefile"
 NUMCOPIES = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000]
 
 rule all:
-     input:
+    input:
         ["tdfs/{outprefix}-numcopies{numcopies}.tdf".format(outprefix=config["OUTPREFIX"], numcopies=nc) for nc in NUMCOPIES],
         ["windows/{outprefix}-1kb.peak.numcopies{numcopies}.counts".format(outprefix=config["OUTPREFIX"], numcopies=nc) for nc in NUMCOPIES],
         ["windows/{outprefix}-5kb.peak.numcopies{numcopies}.counts".format(outprefix=config["OUTPREFIX"], numcopies=nc) for nc in NUMCOPIES],
         ["windows/{outprefix}-1kb.nopeak.numcopies{numcopies}.counts".format(outprefix=config["OUTPREFIX"], numcopies=nc) for nc in NUMCOPIES],
         ["windows/{outprefix}-5kb.nopeak.numcopies{numcopies}.counts".format(outprefix=config["OUTPREFIX"], numcopies=nc) for nc in NUMCOPIES]
 
+rule create_model_file:
+    output:
+        config["OUTPREFIX"]+".json"
+    run:
+        if config["LAYOUT"] == 'single':
+            shell("chips learn -b {config[BAMFILE]} -p {config[PEAKFILE]} -t bed -c 7 -o {config[OUTPREFIX]} --scale-outliers --thres {config[THRESH]}")
+        else:
+            shell("chips learn --paired -b {config[BAMFILE]} -p {config[PEAKFILE]} -t bed -c 7 -o {config[OUTPREFIX]} --scale-outliers --thres {config[THRESH]}")
+
 rule create_params_file:
-     output:	
+    input:
+        config["OUTPREFIX"]+".json"
+    output:
         "params/"+config["OUTPREFIX"]+"-numcopies{numcopies}.params"
-     shell:
-        "echo --scale-outliers -c {config[C]} --numcopies {wildcards.numcopies} --numreads {config[NUMREADS]} --readlen {config[READLEN]} > {output}"
+    run:
+        if config["METHOD"] == "chips":
+            shell("echo --scale-outliers -c {config[C]} --numcopies {wildcards.numcopies} --numreads {config[NUMREADS]} --readlen {config[READLEN]} > {output}")
+        elif config["METHOD"] == "chipulate":
+            shell("python3 ./prob_to_energy.py {config[PEAKFILE]} $(cat {input} | grep pcr_rate | cut -f 2 -d':' | sed 's/,//') {config[CHROM]}  > {config[PEAKFILE]}.corrected")
+            shell("echo '-n {wildcards.numcopies} --read-length {config[READLEN]} --depth {config[DEPTH]} --mu-A 0 -i {config[PEAKFILE]}.corrected' $(./get_frag_params.py {input}) > {output}")
+        else:
+            shell("echo 'not implemented yet' && exit 1")
+
+rule make_windows:
+    output:
+         config["CHROM"]+"windows_1kb.bed",
+         config["CHROM"]+"windows_5kb.bed"
+    shell:
+         """
+         mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e "select chrom, size from hg19.chromInfo"  | grep {config[CHROM]} | head -n 1 > {config[CHROM]}.txt
+         bedtools makewindows -g {config[CHROM]}.txt -w 1000 > {output[0]}
+         bedtools makewindows -g {config[CHROM]}.txt -w 5000 > {output[1]}
+         """
 
 rule get_window_peak_overlap:
-     output:
+    input:
+        config["CHROM"]+"windows_1kb.bed",
+        config["CHROM"]+"windows_5kb.bed"
+    output:
         "windows/"+config["OUTPREFIX"]+"-1kb.peak",
         "windows/"+config["OUTPREFIX"]+"-5kb.peak",
         "windows/"+config["OUTPREFIX"]+"-1kb.nopeak",
         "windows/"+config["OUTPREFIX"]+"-5kb.nopeak"
-     shell:
+    shell:
         """
-        intersectBed -a chr19_windows_1kb.bed -b {config[PEAKFILE]} -wa -u > {output[0]}
-        intersectBed -a chr19_windows_5kb.bed -b {config[PEAKFILE]} -wa -u > {output[1]}
-        intersectBed -a chr19_windows_1kb.bed -b {config[PEAKFILE]} -wa -v > {output[2]}
-        intersectBed -a chr19_windows_5kb.bed -b {config[PEAKFILE]} -wa -v > {output[3]}
+        intersectBed -a {input[0]} -b {config[PEAKFILE]} -wa -u > {output[0]}
+        intersectBed -a {input[1]} -b {config[PEAKFILE]} -wa -u > {output[1]}
+        intersectBed -a {input[0]} -b {config[PEAKFILE]} -wa -v > {output[2]}
+        intersectBed -a {input[1]} -b {config[PEAKFILE]} -wa -v > {output[3]}
         """
 
 rule get_window_counts:
