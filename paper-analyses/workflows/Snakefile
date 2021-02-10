@@ -28,6 +28,8 @@ rule sim:
                 shell("chips simreads -p {PEAKFILE} -t bed --model {MODELFILE} -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]} && touch {output[1]} && touch {output[2]}")
             else:
                 shell("chips simreads -p {PEAKFILE} -t bed --model {MODELFILE} -f {config[REF]} -o fastqs/{wildcards.sample} $(cat {input}) --region {config[REGION]} --paired && touch {output[0]}")
+        elif config["METHOD"] == "chipulate":
+            shell("python3 /storage/yuq005/Tools/chipulate/chipulate.py -g {config[REF]} --chrom-size-file {config[REF]}.fai $(cat {input}) -o fastqs/{wildcards.sample}")
         else:
             shell("echo 'Not implemented yet' && exit 1")
 

@@ -25,10 +25,16 @@ rule create_model_file:
 rule create_params_file:
     input:
         config["OUTPREFIX"]+".json"
-    output:	
+    output:
         "params/"+config["OUTPREFIX"]+"-numcopies{numcopies}.params"
-    shell:
-        "echo --scale-outliers -c {config[C]} --numcopies {wildcards.numcopies} --numreads {config[NUMREADS]} --readlen {config[READLEN]} > {output}"
+    run:
+        if config["METHOD"] == "chips":
+            shell("echo --scale-outliers -c {config[C]} --numcopies {wildcards.numcopies} --numreads {config[NUMREADS]} --readlen {config[READLEN]} > {output}")
+        elif config["METHOD"] == "chipulate":
+            shell("python3 ./prob_to_energy.py {config[PEAKFILE]} $(cat {input} | grep pcr_rate | cut -f 2 -d':' | sed 's/,//') > {config[PEAKFILE]}.corrected")
+            shell("echo '-n {wildcards.numcopies} --read-length {config[READLEN]} --depth {config[DEPTH]} --mu-A 0 -i {config[PEAKFILE]}.corrected' $(./get-frag-params.py {input}) > {output}")
+        else:
+            shell("echo 'not implemented yet' && exit 1")
 
 rule make_windows:
     output:
