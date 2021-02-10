@@ -31,8 +31,8 @@ rule create_params_file:
         if config["METHOD"] == "chips":
             shell("echo --scale-outliers -c {config[C]} --numcopies {wildcards.numcopies} --numreads {config[NUMREADS]} --readlen {config[READLEN]} > {output}")
         elif config["METHOD"] == "chipulate":
-            shell("python3 ./prob_to_energy.py {config[PEAKFILE]} $(cat {input} | grep pcr_rate | cut -f 2 -d':' | sed 's/,//') > {config[PEAKFILE]}.corrected")
-            shell("echo '-n {wildcards.numcopies} --read-length {config[READLEN]} --depth {config[DEPTH]} --mu-A 0 -i {config[PEAKFILE]}.corrected' $(./get-frag-params.py {input}) > {output}")
+            shell("python3 ./prob_to_energy.py {config[PEAKFILE]} $(cat {input} | grep pcr_rate | cut -f 2 -d':' | sed 's/,//') {config[CHROM]}  > {config[PEAKFILE]}.corrected")
+            shell("echo '-n {wildcards.numcopies} --read-length {config[READLEN]} --depth {config[DEPTH]} --mu-A 0 -i {config[PEAKFILE]}.corrected' $(./get_frag_params.py {input}) > {output}")
         else:
             shell("echo 'not implemented yet' && exit 1")
 
