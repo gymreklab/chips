@@ -7,6 +7,7 @@
 #include "peak_intervals.h"
 
 #include <vector>
+#include <random>
 
 
 class Pulldown {
