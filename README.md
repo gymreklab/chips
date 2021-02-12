@@ -7,7 +7,7 @@ For questions on installation or usage, please open an issue, submit a pull requ
 [Download](#download) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats) | [FAQ](#faq)
 
 <a name="download"></a>
-## Download
+## 1. Download
 
 ### Through Anaconda
 The lastest ChIPs release is avaiable in the `bioconda` channel of Anaconda.
@@ -59,7 +59,7 @@ There is also a precompiled binary available on the [release page](https://githu
 
 
 <a name="usage"></a>
-## Basic usage
+## 2. Basic usage
 
 ChIPs is a single command line tool that contains several modules. To see available modules type:
 
@@ -91,7 +91,7 @@ chips simreads \
 ```
 
 <a name="detailed"></a>
-## Detailed usage
+## 3. Detailed usage
 
 ### chips learn
 
@@ -151,7 +151,7 @@ Other options:
 * `--del <float>`: Deletion error rate. Default: 0.
 
 <a name="formats"></a>
-## Formats
+## 4. Formats
 
 ### Peak files
 
@@ -182,7 +182,7 @@ Model files are in JSON syntax, and follow the example below.
 `chips learn` outputs a JSON model file. `chips simreads` can take in a model file with all or some of these parameters specified. Model parameters set on the command line override those set in the JSON model file. 
 
 <a name="faq"></a>
-## FAQ
+## 5. FAQ
 
 **Q**: What should I set the number of genome copies (`--numcopies`) parameter to for `simreads`?<br>
 **A**: This gives the number of simulation rounds to perform. This number is not directly comparable to the actual number of cells used in an experiment since we do not currently model pulldown inefficiency. We have found that for histone modifications performance starts to plateau after around 25 copies (`--numcopies 25`). For transcription factors we recommend setting `--numcopies 1000`. Note, run time increases linearly with the value set for this parameter.
