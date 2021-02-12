@@ -22,8 +22,7 @@ conda config --add channels bioconda
 conda config --add channels conda-forge
 ```
 
-Once bioconda is enabled, you can download ChIPs using \
-`conda install chips`.
+Once bioconda is enabled, you can download ChIPs using: `conda install chips`.
 
 
 ### From Github
