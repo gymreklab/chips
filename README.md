@@ -10,9 +10,9 @@ For questions on installation or usage, please open an issue, submit a pull requ
 ## Download
 
 ### Through Anaconda
-The lastest ChIPs release is avaiable on Anaconda in its bioconda channel.
+The lastest ChIPs release is avaiable in the `bioconda` channel of Anaconda.
 
-If you don't have Anaconda or Miniconda in your machine, you can follow the instructions here to install one of these tools:
+If you don't have Anaconda or Miniconda installed in your machine, you can follow the installation instructions provided in the link below:
 http://bioconda.github.io/user/install.html#install-packages
 
 After installing conda you will need to add the bioconda channel as well as the other channels bioconda depends on. 
