@@ -45,7 +45,7 @@ set(htslib_static ${CMAKE_BINARY_DIR}/thirdparty/htslib/lib/libhts.a)
 include_directories(${CMAKE_BINARY_DIR}/thirdparty/htslib/include)
 add_dependencies(htslib zlib)
 
-add_subdirectory(ChIPs)
+add_subdirectory(lib)
 
 # add the executable
 add_executable(chips src/main.cpp)

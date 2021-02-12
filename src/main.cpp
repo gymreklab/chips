@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "ChIPs/common.h"
+#include "lib/common.h"
 #include "chipsConfig.h"
 
 using namespace std;
