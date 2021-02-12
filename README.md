@@ -9,6 +9,22 @@ For questions on installation or usage, please open an issue, submit a pull requ
 <a name="download"></a>
 ## Download
 
+### Through Anaconda
+The lastest ChIPs release is avaiable on Anaconda in its bioconda channel.
+
+If you don't have Anaconda or Miniconda in your machine, you can follow the instructions here to install one of these tools:
+http://bioconda.github.io/user/install.html#install-packages
+
+After installing conda you will need to add the bioconda channel as well as the other channels bioconda depends on. 
+```
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+```
+
+Once bioconda is enabled, you can download ChIPs using `conda install chips`.
+
+
 ### From Github
 The latest ChIPs release is available on the [releases page](https://github.com/gymreklab/chips/releases).
 
@@ -25,7 +41,7 @@ cmake ..
 make
 ```
 
-### From source file
+### From source files
 To compile from source on the [releases page](https://github.com/gymreklab/chips/releases/tag/v2.2), download the file chips-2.2-Source.tar.gz and run:
 
 ```
