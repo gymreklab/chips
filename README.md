@@ -9,6 +9,7 @@ For questions on installation or usage, please open an issue, submit a pull requ
 <a name="download"></a>
 ## Download
 
+### From Github
 The latest ChIPs release is available on the [releases page](https://github.com/gymreklab/chips/releases).
 
 <a name="install"></a>
@@ -24,6 +25,7 @@ cmake ..
 make
 ```
 
+### From source file
 To compile from source on the [releases page](https://github.com/gymreklab/chips/releases/tag/v2.2), download the file chips-2.2-Source.tar.gz and run:
 
 ```
