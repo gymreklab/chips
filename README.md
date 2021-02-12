@@ -4,7 +4,7 @@ ChIPs is a tool for simulating ChIP-sequencing experiments.
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
 
-[Download](#download) | [Install](#install) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats) | [FAQ](#faq)
+[Download](#download) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats) | [FAQ](#faq)
 
 <a name="download"></a>
 ## Download
@@ -12,10 +12,10 @@ For questions on installation or usage, please open an issue, submit a pull requ
 ### Through Anaconda
 The lastest ChIPs release is avaiable in the `bioconda` channel of Anaconda.
 
-If you don't have Anaconda or Miniconda installed in your machine, you can follow the installation instructions provided in the link below:
+If you don't have Anaconda or Miniconda installed on your machine, you can follow the installation instructions provided in the link below:
 http://bioconda.github.io/user/install.html#install-packages
 
-After installing conda you will need to add the bioconda channel as well as the other channels bioconda depends on. 
+After installing conda, you will need to add the bioconda channel as well as the other channels bioconda depends on. 
 ```
 conda config --add channels defaults
 conda config --add channels bioconda
