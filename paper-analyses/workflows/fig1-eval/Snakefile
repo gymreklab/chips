@@ -40,7 +40,8 @@ rule create_params_file:
             shell("python3 ./prob_to_energy.py {config[PEAKFILE]} $(cat {input} | grep pcr_rate | cut -f 2 -d':' | sed 's/,//') {config[CHROM]}  > {config[PEAKFILE]}.corrected")
             shell("echo '-n {wildcards.numcopies} --read-length {config[READLEN]} --depth {config[DEPTH]} --mu-A 0 -i {config[PEAKFILE]}.corrected' $(./get_frag_params.py {input}) > {output}")
         elif config["METHOD"] == "ischip":
-            shell("echo --bscore {config[C]} --format FQ --cells {wildcards.numcopies} -r {config[READLEN]} --rd-lim {config[NUMREADS]} $(./get_ischip_model_params.py {input}) > {output}")
+            shell("./filter_outlier_peaks.sh {config[PEAKFILE]} | grep -w {config[CHROM]} > {config[PEAKFILE]}.filtered")
+            shell("echo --bscore 0 --format FQ --cells {wildcards.numcopies} -r {config[READLEN]} --rd-lim {config[NUMREADS]} $(./get_ischip_model_params.py {input}) > {output}") # --bscore config[C]
         else:
             shell("echo 'not implemented yet' && exit 1")
 

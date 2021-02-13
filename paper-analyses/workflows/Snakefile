@@ -31,7 +31,7 @@ rule sim:
         elif config["METHOD"] == "chipulate":
             shell("python3 /storage/yuq005/Tools/chipulate/chipulate.py -g {config[REF]} --chrom-size-file {config[REF]}.fai $(cat {input}) -o fastqs/{wildcards.sample} && mv fastqs/{wildcards.sample}.chip_reads.fastq fastqs/{wildcards.sample}.fastq && touch {output[1]} && touch {output[2]}")
         elif config["METHOD"] == "ischip":
-            shell("isChIP --chr %s -g {config[REFDIR]} -o fastqs/{wildcards.sample}.fastq $(cat {input}) {config[PEAKFILE]} ; mv fastqs/{wildcards.sample}.fastq.fq fastqs/{wildcards.sample}.fastq && touch {output[1]} && touch {output[2]}"%(config["CHROM"].replace("chr","")))
+            shell("isChIP --chr %s -g {config[REFDIR]} -o fastqs/{wildcards.sample}.fastq $(cat {input}) {config[PEAKFILE]}.filtered ; mv fastqs/{wildcards.sample}.fastq.fq fastqs/{wildcards.sample}.fastq && touch {output[1]} && touch {output[2]}"%(config["CHROM"].replace("chr","")))
         else:
             shell("echo 'Not implemented yet' && exit 1")
 
