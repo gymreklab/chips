@@ -15,3 +15,4 @@
 
 ./readme-chips.sh # run sims for chips
 ./readme-chipulate.sh # run sims for chipulate (only single-end)
+./readme-ischip.sh # run sims for ischip (only single-end)
