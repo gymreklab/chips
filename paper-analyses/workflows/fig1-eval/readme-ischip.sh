@@ -46,5 +46,4 @@ do
 	NUMREADS=$NUMREADS \
 	READLEN=$READLEN \
         METHOD=ischip
-    exit 1 # TODO remove
 done < datasets.csv
