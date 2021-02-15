@@ -22,14 +22,13 @@ do
 
     echo $PEAKFILE
 
-    # Run simulations
+    # Get read info
     NUMREADS=$(samtools view $BAMFILE $CHROM | wc -l)
     NUMREADS=$((NUMREADS*2))
     READLEN=$(samtools view $BAMFILE | head -n 1000 | awk '{print length($10)}' | datamash max 1)
-
-    # Chipulate params
     READLEN=$(samtools view $BAMFILE | head -n 1000 | awk '{print length($10)}' | datamash max 1)
 
+    # First without pcr
     snakemake $1 \
 	--config PEAKFILE=$PEAKFILE \
 	CHROM=$CHROM \
@@ -45,5 +44,23 @@ do
 	C=7 \
 	NUMREADS=$NUMREADS \
 	READLEN=$READLEN \
-        METHOD=ischip
+        METHOD=ischip PCR=0
+    # Now with PCR
+    PCR=10
+    snakemake $1 \
+	--config PEAKFILE=$PEAKFILE \
+	CHROM=$CHROM \
+	MODELFILE=$OUTPREFIX.json \
+	OUTPREFIX=$OUTPREFIX+"ischip-pcr${PCR}" \
+	BAMFILE=$BAMFILE \
+	THRESH=$THRES \
+	LAYOUT=$LAYOUT \
+	REF=/storage/resources/dbase/human/hg19/hg19.fa \
+        REFDIR=/storage/resources/dbase/human/hg19/chromFa \
+	REGION=$REGION \
+	ENCDIR="" \
+	C=7 \
+	NUMREADS=$NUMREADS \
+	READLEN=$READLEN \
+        METHOD=ischip PCR=${PCR}
 done < datasets.csv

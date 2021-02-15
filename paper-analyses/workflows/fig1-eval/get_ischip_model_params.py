@@ -7,16 +7,13 @@ import sys
 import numpy as np
 
 model = json.load(open(sys.argv[1], "r"))
+pcr = int(sys.argv[2])
+
 k = model["frag"]["k"]
 theta = model["frag"]["theta"]
 mean = k*theta
 var = k*theta**2
 sd = np.sqrt(var)
-
-#pcr = 0 # no pcr if the rate is 1
-#if model["pcr_rate"] < 1:
-#    pcr = 10 # ?
-pcr = 0
 
 spot = int(model["pulldown"]["s"]*100)
 frac = int(model["pulldown"]["f"]*100+1)
