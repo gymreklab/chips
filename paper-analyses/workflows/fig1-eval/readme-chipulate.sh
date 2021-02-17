@@ -31,9 +31,9 @@ do
     if [ "x$LAYOUT" = "xpaired" ]
     then
 	continue # only looking at single for chipulate right now
-    fi
+    fi    
 
-    echo snakemake $1 \
+    snakemake $1 \
 	--config PEAKFILE=$PEAKFILE \
 	CHROM=$CHROM \
 	MODELFILE=$OUTPREFIX.json \
@@ -48,4 +48,5 @@ do
 	NUMREADS=$NUMREADS \
 	READLEN=$READLEN \
         METHOD=chipulate DEPTH=$DEPTH
+    echo ""
 done < datasets.csv

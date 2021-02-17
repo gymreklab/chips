@@ -11,6 +11,8 @@ include: "/storage/mgymrek/workspace/chips/paper-analyses/workflows/Snakefile"
 #   NUMCOPIES = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000]
 
 NUMCOPIES = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000]
+if config["METHOD"]=="chipulate":
+   NUMCOPIES = [10, 50, 100, 500, 1000, 5000, 10000]
 
 rule all:
     input:
