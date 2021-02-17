@@ -3,8 +3,7 @@ import pandas as pd
 import sys
 
 fname = sys.argv[1]
-pcr_rate = float(sys.argv[2])
-chrom = sys.argv[3]
+chrom = sys.argv[2]
 
 
 def GetEnergy(score):
@@ -29,6 +28,6 @@ df["energy_A"] = df["score"].apply(GetEnergy)
 
 # Set reasonable values for p_ext and p_amp
 df['p_ext'] = 0.54 # based on their examples
-df['p_amp'] = 0.95 # pcr_rate The mean number of amplified fragments at a location is (1 + p)^n. should be between 0 and 1
+df['p_amp'] = 0.50 # pcr_rate The mean number of amplified fragments at a location is (1 + p)^n. should be between 0 and 1
 
 df[["chr","start","end","energy_A","p_ext","p_amp"]].to_csv(sys.stdout, index=False, sep="\t")
