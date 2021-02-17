@@ -33,7 +33,7 @@ do
 	continue # only looking at single for chipulate right now
     fi
 
-    snakemake $1 \
+    echo snakemake $1 \
 	--config PEAKFILE=$PEAKFILE \
 	CHROM=$CHROM \
 	MODELFILE=$OUTPREFIX.json \
