@@ -17,7 +17,7 @@ df = pd.read_csv(fname, sep='\t', header=None, names=['chr','start','end','score
 df = df[df["chr"]==chrom]
 
 # Remove duplicates - choose max energy per peak
-df = df.groupby(["chr","start","end"], as_index=False).agg{"score": np.max}
+df = df.groupby(["chr","start","end"], as_index=False).agg({"score": np.max})
 
 # First scale energy to be between 0 and 1
 total_reads = np.max(df["score"])
