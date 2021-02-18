@@ -5,9 +5,8 @@ import sys
 fname = sys.argv[1]
 chrom = sys.argv[2]
 
-
 def GetEnergy(score):
-    un_energy = 1.59
+    un_energy = 1.0
     chem_potential = 0
     energy = un_energy+chem_potential + np.log((1-score)/score)
     if energy < 0: return 0
@@ -21,10 +20,19 @@ df = df.groupby(["chr","start","end"], as_index=False).agg({"score": np.max})
 
 # First scale energy to be between 0 and 1
 total_reads = np.max(df["score"])
-df["score"] = df["score"]/total_reads
+thresh = 2*np.median(df["score"])
+if total_reads > thresh:
+    total_reads = thresh
+
+def ScaleScore(score, total_reads):
+    ss = score*1.0/total_reads
+    if ss > 1: return 1
+    else: return ss
+
+df["scaled_score"] = df["score"].apply(lambda x: ScaleScore(x, total_reads))
 
 # Now convert to energy
-df["energy_A"] = df["score"].apply(GetEnergy)
+df["energy_A"] = df["scaled_score"].apply(GetEnergy)
 
 # Set reasonable values for p_ext and p_amp
 df['p_ext'] = 0.54 # based on their examples

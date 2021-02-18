@@ -38,13 +38,13 @@ do
 	THRESH=$THRES \
 	LAYOUT=$LAYOUT \
 	REF=/storage/resources/dbase/human/hg19/hg19.fa \
-        REFDIR=/storage/resources/dbase/human/hg19/chromFa \
+       REFDIR=/storage/resources/dbase/human/hg19/chromFa \
 	REGION=$REGION \
 	ENCDIR="" \
 	C=7 \
 	NUMREADS=$NUMREADS \
 	READLEN=$READLEN \
-        METHOD=ischip PCR=0
+        METHOD=ischip PCR=0 HIGHBG=0
     # Now with PCR
     PCR=10
     snakemake $1 \
@@ -56,11 +56,30 @@ do
 	THRESH=$THRES \
 	LAYOUT=$LAYOUT \
 	REF=/storage/resources/dbase/human/hg19/hg19.fa \
+	REFDIR=/storage/resources/dbase/human/hg19/chromFa \
+	REGION=$REGION \
+	ENCDIR="" \
+	C=7 \
+	NUMREADS=$NUMREADS \
+	READLEN=$READLEN \
+	METHOD=ischip PCR=${PCR} HIGHBG=0
+    
+    # Now with high bg
+    snakemake $1 \
+	--config PEAKFILE=$PEAKFILE \
+	CHROM=$CHROM \
+	MODELFILE=$OUTPREFIX.json \
+	OUTPREFIX=$OUTPREFIX+"ischip-HighBG" \
+	BAMFILE=$BAMFILE \
+	THRESH=$THRES \
+	LAYOUT=$LAYOUT \
+	REF=/storage/resources/dbase/human/hg19/hg19.fa \
         REFDIR=/storage/resources/dbase/human/hg19/chromFa \
 	REGION=$REGION \
 	ENCDIR="" \
 	C=7 \
 	NUMREADS=$NUMREADS \
 	READLEN=$READLEN \
-        METHOD=ischip PCR=${PCR}
+        METHOD=ischip PCR=0 HIGHBG=1
+
 done < datasets.csv

@@ -11,5 +11,5 @@ theta = model["frag"]["theta"]
 mean = k*theta
 var = k*theta**2
 
-sys.stdout.write("--fragment-length %s --fragment-jitter %s"%(int(mean), int(var)))
+sys.stdout.write("--fragment-length %s "%(int(mean)))
 

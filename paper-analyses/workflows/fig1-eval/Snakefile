@@ -22,14 +22,14 @@ rule all:
         ["windows/{outprefix}-1kb.nopeak.numcopies{numcopies}.counts".format(outprefix=config["OUTPREFIX"], numcopies=nc) for nc in NUMCOPIES],
         ["windows/{outprefix}-5kb.nopeak.numcopies{numcopies}.counts".format(outprefix=config["OUTPREFIX"], numcopies=nc) for nc in NUMCOPIES]
 
-rule create_model_file:
-    output:
-        config["OUTPREFIX"]+".json"
-    run:
-        if config["LAYOUT"] == 'single':
-            shell("chips learn -b {config[BAMFILE]} -p {config[PEAKFILE]} -t bed -c 7 -o {config[OUTPREFIX]} --scale-outliers --thres {config[THRESH]}")
-        else:
-            shell("chips learn --paired -b {config[BAMFILE]} -p {config[PEAKFILE]} -t bed -c 7 -o {config[OUTPREFIX]} --scale-outliers --thres {config[THRESH]}")
+#rule create_model_file:
+#    output:
+#        config["OUTPREFIX"]+".json"
+#    run:
+#        if config["LAYOUT"] == 'single':
+#            shell("chips learn -b {config[BAMFILE]} -p {config[PEAKFILE]} -t bed -c 7 -o {config[OUTPREFIX]} --scale-outliers --thres {config[THRESH]}")
+#        else:
+#            shell("chips learn --paired -b {config[BAMFILE]} -p {config[PEAKFILE]} -t bed -c 7 -o {config[OUTPREFIX]} --scale-outliers --thres {config[THRESH]}")
 
 rule create_params_file:
     input:
@@ -44,7 +44,7 @@ rule create_params_file:
             shell("echo '-n {wildcards.numcopies} --read-length {config[READLEN]} --depth {config[DEPTH]} --mu-A 0 -i {config[PEAKFILE]}.corrected' $(./get_frag_params.py {input}) > {output}")
         elif config["METHOD"] == "ischip":
             shell("./filter_outlier_peaks.sh {config[PEAKFILE]} | grep -w {config[CHROM]} > {config[PEAKFILE]}.filtered")
-            shell("echo --bscore 0 --format FQ --cells {wildcards.numcopies} -r {config[READLEN]} --rd-lim {config[NUMREADS]} $(./get_ischip_model_params.py {input} {config[PCR]}) > {output}") # --bscore config[C]
+            shell("echo --bscore 0 --format FQ --cells {wildcards.numcopies} -r {config[READLEN]} --rd-lim {config[NUMREADS]} $(./get_ischip_model_params.py {input} {config[PCR]} {config[HIGHBG]}) > {output}") # --bscore config[C]
         else:
             shell("echo 'not implemented yet' && exit 1")
 
