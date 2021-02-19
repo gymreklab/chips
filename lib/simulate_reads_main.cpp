@@ -275,8 +275,7 @@ int simulate_reads_main(int argc, char* argv[]) {
 
     // recompute f
     if (options.recompute_f) {
-      RefGenome ref_genome(options.reffa);
-      float f = pintervals->total_bound_length/ref_genome.GetGenomeLength();
+      float f = pintervals->total_bound_length/pintervals->total_genome_length;
       if (f<0 || f>1) {
 	std::cerr << pintervals->total_bound_length << " " << pintervals->total_genome_length << std::endl;
 	PrintMessageDieOnError("Error. Estimated --frac not between 0 and 1. ", M_ERROR);

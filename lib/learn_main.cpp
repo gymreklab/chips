@@ -30,7 +30,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
 		 const std::string& peakfileType, const std::int32_t count_colidx,
 		 const float remove_pct, float* ab_ratio_ptr, 
 		 float *s_ptr, float* f_ptr, const float frag_param_a, const float frag_param_b,
-		 bool skip_frag, bool noscale, bool scale_outliers);
+		 bool skip_frag, bool noscale, bool scale_outliers, const std::string& region);
 bool compare_location(Fragment a, Fragment b);
 bool learn_pcr(const std::string& bamfile, float* geo_rate);
 bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag);
@@ -419,7 +419,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
 		 const std::string& peakfileType, const std::int32_t count_colidx, 
 		 const float remove_pct, float* ab_ratio_ptr, float *s_ptr, float* f_ptr,
 		 const float frag_param_a, const float frag_param_b,
-		 bool skip_frag, bool noscale, bool scale_outliers) {
+		 bool skip_frag, bool noscale, bool scale_outliers, const std::string& region) {
   /*
     Learn the ratio of alpha to beta from an input BAM file,
     and its correspounding peak file.
@@ -446,7 +446,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
   std::vector<Fragment> peaks;
   PeakLoader peakloader(peakfile, peakfileType, bamfile, count_colidx);
   const float frag_length = frag_param_a * frag_param_b * 2; // added buffer to fraglength since we just guess the mean
-  peakloader.Load(peaks, "", frag_length, noscale, scale_outliers);
+  peakloader.Load(peaks, region, frag_length, noscale, scale_outliers);
 
   // Remove top remove_pct% of peaks default is do not remove
   if (remove_pct > 0)
@@ -461,7 +461,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
   for(int peak_index = 0; peak_index < peaks.size(); peak_index++){
     plen += (peaks[peak_index].length * peaks[peak_index].score);
     //std::stringstream ss;
-    //ss << "score: "<< peaks[peak_index].score <<"\tpeak-length: "<<peaks[peak_index].length<<"\ttotal: "<< peakloader.total_genome_length;
+    //ss << peaks[peak_index].chrom << ":" << peaks[peak_index].start << " score: " << peaks[peak_index].score <<"\tpeak-length: "<<peaks[peak_index].length<<"\ttotal: "<< peakloader.total_genome_length;
     //PrintMessageDieOnError(ss.str(), M_DEBUG);
   }
 
@@ -601,6 +601,11 @@ int learn_main(int argc, char* argv[]) {
         options.remove_pct = std::atof(argv[i+1]);
         i++;
       }
+    } else if (PARAMETER_CHECK("--region", 8, parameterLength)) {
+      if ((i+1) < argc) {
+	options.region = argv[i+1];
+	i++;
+      }
     } else if (PARAMETER_CHECK("--scale-outliers", 16, parameterLength)) {
       options.scale_outliers = true;
     } else if (PARAMETER_CHECK("--noscale", 9, parameterLength)) {
@@ -669,7 +674,8 @@ int learn_main(int argc, char* argv[]) {
     float s = -1;
     float f = -1;
     if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
-		     &ab_ratio, &s, &f, frag_param_a, frag_param_b, options.skip_frag, options.noscale, options.scale_outliers)){
+		     &ab_ratio, &s, &f, frag_param_a, frag_param_b, options.skip_frag, options.noscale, options.scale_outliers,
+		     options.region)){
       PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
     }
     model.SetF(f);
@@ -714,6 +720,8 @@ void learn_help(void) {
        << "                             Default: " <<options.estimate_frag_length<< "\n";
   cerr << "         --noscale:          Don't scale peak scores by the max score.\n";                   
   cerr << "         --scale-outliers:   Set all peaks with scores >2*median score to have binding prob 1. Recommended with real data\n";
+  cerr << "         --region <str>:     Only consider peaks from this region chrom:start-end\n"
+       << "                             Default: genome-wide \n";
   cerr << "[BAM-file arguments]: " << "\n";
   cerr << "         --paired:           Loading paired-end reads\n"
        << "                             Default: false\n";
