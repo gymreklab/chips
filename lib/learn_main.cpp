@@ -33,7 +33,8 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
 		 bool skip_frag, bool noscale, bool scale_outliers, const std::string& region);
 bool compare_location(Fragment a, Fragment b);
 bool learn_pcr(const std::string& bamfile, float* geo_rate);
-bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag);
+bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag,
+		       const std::string& region);
 bool learn_frag_single(const std::string& bamfile, const std::string& peakfile, const std::string peakfileType,
     const std::int32_t count_colidx, const int intensity_threshold, const int estimate_frag_length,
     float* alpha, float* beta, bool skip_frag);
@@ -50,11 +51,12 @@ float calculate_eexpl(const float k, const float theta, const std::int32_t lower
 float calculate_edf(const float x, const std::int32_t lower_bound, const std::int32_t upper_bound,
     const std::vector<float> cdf, const std::vector<float> edf, const float mu);
 float calculate_gamma_pdf(const float x, const float k, const float theta);
-bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, const std::string& outfile, bool output_frags);
+//bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, const std::string& outfile, bool output_frags);
 
 
 bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag,
-		       const std::string& outfile, bool output_frags) {
+		       const std::string& outfile, bool output_frags,
+		       const std::string& region) {
   /*
     Learn fragment length distribution from an input BAM file
     Fragment lengths follow a gamma distribution.
@@ -64,6 +66,7 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
     - skip_frag (bool): Skip fragment parameter learning process
     - outfile (std::string): path to write list of fragment lengths (if output_frags=true)
     - output_frags (bool): Indicate whether to write fragment lengths to output file
+    - region (str): chr:start-end to use to pull fragments from
     Outputs:
     - alpha (float): parameter of gamma distribution
     - beta  (float): parameter of gamma distribution
@@ -83,19 +86,30 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
   std::int32_t tlen;
   BamAlignment aln;
 
-  // Randomly grab fragments
+  // Randomly grab fragments if region not set. Else look at region
   if (seq_names.size() > 0 && seq_lengths.size() > 0) {
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     srand(seed);
 
+    if (!region.empty()) {
+        std::int32_t region_start;
+        std::int32_t region_end;
+        std::string region_chrom;
+        RegionParser(region, region_chrom, region_start, region_end);
+	bamreader.SetRegion(region_chrom, region_start, region_end);
+    }
+
     int guard_count = 0; // prevent the dead loop
     while(numreads<maxreads && guard_count<(10*maxreads)) {
       guard_count++;
-      int chrom = rand() % seq_names.size();
-      int start = rand() % seq_lengths[chrom];
-      
-      //if ((seq_names[chrom].find("_") != std::string::npos) || (seq_names[chrom] == "chrM")){continue;}
-      bamreader.SetRegion(seq_names[chrom], start, seq_lengths[chrom]);
+
+      // Only reset region if region is empty
+      if (region.empty()) {
+	int chrom = rand() % seq_names.size();
+	int start = rand() % seq_lengths[chrom];
+	//if ((seq_names[chrom].find("_") != std::string::npos) || (seq_names[chrom] == "chrM")){continue;}
+	bamreader.SetRegion(seq_names[chrom], start, seq_lengths[chrom]);
+      }
 
       if (!bamreader.GetNextAlignment(aln)) {continue;}
       if (aln.IsDuplicate()) {continue;}
@@ -196,9 +210,12 @@ bool learn_frag_single(const std::string& bamfile,
   if (!peakloader.Load(peaks)) PrintMessageDieOnError("Error loading peaks from " + peakfile, M_ERROR);
   for (int peak_idx=peaks.size()-1;peak_idx>=0;peak_idx--){
     if (peaks[peak_idx].orig_score < intensity_threshold) peaks.erase(peaks.begin()+peak_idx);
-    if (peaks.size() == 0)
+    if (peaks.size() == 0) {
       PrintMessageDieOnError("There are no peaks satisfying the user-defined threshold: " + std::to_string(intensity_threshold), M_ERROR);
+    }
   }
+  PrintMessageDieOnError("Loaded " + std::to_string(peaks.size()) + " peaks for inferring fragment lengths", M_PROGRESS);
+
 
   /* Read reads from the BAM file */
   BamCramReader bamreader(bamfile);
@@ -229,6 +246,7 @@ bool learn_frag_single(const std::string& bamfile,
     }
     
     if ((starts_in_peak.size() == 0) || (ends_in_peak.size() == 0)) continue;
+
     float avg_start = std::accumulate(starts_in_peak.begin(), starts_in_peak.end(), 0.0)/ (float) starts_in_peak.size();
     float avg_end = std::accumulate(ends_in_peak.begin(), ends_in_peak.end(), 0.0)/ (float) ends_in_peak.size();
     float mid_pos = (avg_start + avg_end) / 2.0;
@@ -243,10 +261,13 @@ bool learn_frag_single(const std::string& bamfile,
   if (starts.size() == 0 || ends.size() == 0) {
     PrintMessageDieOnError("No starts found. something went wrong in fragment length estimation", M_ERROR);
   }
+  PrintMessageDieOnError("Found " + std::to_string(starts.size()) + " starts and " + std::to_string(ends.size()) + " ends", M_PROGRESS);
 
   /* mean value of fragment length*/
   float mean_frag_length = std::accumulate(ends.begin(), ends.end(), 0.0)/ (float) ends.size()
                         - std::accumulate(starts.begin(), starts.end(), 0.0)/ (float) starts.size();
+  PrintMessageDieOnError("Estimated mean frag length " + std::to_string(mean_frag_length), M_PROGRESS);
+
   /* calculate CDF of starts and ends */
   /* start */
   std::int32_t start_lower_bound = std::floor(*std::min_element(starts.begin(), starts.end()));
@@ -656,7 +677,7 @@ int learn_main(int argc, char* argv[]) {
     float frag_param_b = -1;
     if (options.paired){
       if (!learn_frag_paired(options.chipbam, &frag_param_a, &frag_param_b, options.skip_frag,
-			     options.outprefix+".frags.txt", options.output_frag_lens)) {
+			     options.outprefix+".frags.txt", options.output_frag_lens, options.region)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
     }else{

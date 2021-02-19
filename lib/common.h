@@ -17,4 +17,6 @@ enum MSGTYPE {
 void PrintMessageDieOnError(const std::string& msg,
                             MSGTYPE msgtype);
 
+void RegionParser(const std::string region, std::string& chromID, std::int32_t& start, std::int32_t& end);
+
 #endif  // SRC_COMMON_H__

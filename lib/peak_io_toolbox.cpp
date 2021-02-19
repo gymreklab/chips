@@ -1,6 +1,7 @@
 // Peak Loader Tool Box
 //
 
+#include "common.h"
 #include "peak_io_toolbox.h"
 
 PeakReader::PeakReader(const std::string& _peakfile){
@@ -317,30 +318,6 @@ bool PeakReader::compare_location(Fragment a, Fragment b){
   }else{
     return (a.score < b.score);
   }
-}
-
-void PeakReader::RegionParser(const std::string region,
-        std::string& chromID, std::int32_t& start, std::int32_t& end){
-  std::stringstream ss(region);
-
-  // parse chromID and the rest
-  std::string split;
-  std::vector<std::string> parts;
-  while(std::getline(ss, split, ':')) parts.push_back(split);
-  if (parts.size() != 2) PrintMessageDieOnError("Improper region input format should be chrom:start-end", M_ERROR);
-  chromID = parts[0];
-  std::string start_end = parts[1];
-
-  // reset
-  parts.clear();
-  ss.str(start_end);
-  ss.clear();
-
-  // parse start and end
-  while(getline(ss, split, '-')) parts.push_back(split);
-  if (parts.size() != 2) PrintMessageDieOnError("Improper region input format should be chrom:start-end", M_ERROR);
-  start = stoi(parts[0]);
-  end = stoi(parts[1]);
 }
 
 /* END OF FILE */
