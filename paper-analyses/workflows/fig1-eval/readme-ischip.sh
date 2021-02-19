@@ -38,7 +38,7 @@ do
 	THRESH=$THRES \
 	LAYOUT=$LAYOUT \
 	REF=/storage/resources/dbase/human/hg19/hg19.fa \
-       REFDIR=/storage/resources/dbase/human/hg19/chromFa \
+	REFDIR=/storage/resources/dbase/human/hg19/chromFa \
 	REGION=$REGION \
 	ENCDIR="" \
 	C=7 \

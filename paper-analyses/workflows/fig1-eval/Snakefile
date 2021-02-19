@@ -44,7 +44,7 @@ rule create_params_file:
             shell("echo '-n {wildcards.numcopies} --read-length {config[READLEN]} --depth {config[DEPTH]} --mu-A 0 -i {config[PEAKFILE]}.corrected' $(./get_frag_params.py {input}) > {output}")
         elif config["METHOD"] == "ischip":
             shell("./filter_outlier_peaks.sh {config[PEAKFILE]} | grep -w {config[CHROM]} > {config[PEAKFILE]}.filtered")
-            shell("echo --bscore 0 --format FQ --cells {wildcards.numcopies} -r {config[READLEN]} --rd-lim {config[NUMREADS]} $(./get_ischip_model_params.py {input} {config[PCR]} {config[HIGHBG]}) > {output}") # --bscore config[C]
+            shell("echo --bscore 0 --format FQ --cells {wildcards.numcopies} -r {config[READLEN]} --rd-lim {config[NUMREADS]} $(./get_ischip_model_params.py {input} {config[PCR]} {config[HIGHBG]}) > {output}") # # --bscore 0 #--bscore config[C]
         else:
             shell("echo 'not implemented yet' && exit 1")
 
