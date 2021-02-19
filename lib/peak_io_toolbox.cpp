@@ -298,6 +298,10 @@ void PeakReader::Rescale(std::vector<Fragment>& peaks, bool rm_outliers) {
     }
   }
   for(int peak_index=0; peak_index<peaks.size(); peak_index++) {
+    //if (peaks[peak_index].orig_score == 48 || peaks[peak_index].score==threshold) {
+      //      std::cerr << "max score " << max_score << " threshold " << max_score << std::endl; // TODO remove
+      //std::cerr << peaks[peak_index].chrom << ":" << peaks[peak_index].start << " score: " << peaks[peak_index].score << " " << peaks[peak_index].orig_score <<  " " << threshold <<  " " << peaks[peak_index].score/threshold << std::endl;
+      //}
     if (peaks[peak_index].score >= threshold) {
       peaks[peak_index].score = 1;
     } else {

@@ -460,8 +460,8 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
   float plen = 0;
   for(int peak_index = 0; peak_index < peaks.size(); peak_index++){
     plen += (peaks[peak_index].length * peaks[peak_index].score);
-    //std::stringstream ss;
-    //ss << peaks[peak_index].chrom << ":" << peaks[peak_index].start << " score: " << peaks[peak_index].score <<"\tpeak-length: "<<peaks[peak_index].length<<"\ttotal: "<< peakloader.total_genome_length;
+    std::stringstream ss;
+    ss << peaks[peak_index].chrom << ":" << peaks[peak_index].start << " score: " << peaks[peak_index].score << " " << peaks[peak_index].orig_score <<"\tpeak-length: "<<peaks[peak_index].length<<"\ttotal: "<< peakloader.total_genome_length;
     //PrintMessageDieOnError(ss.str(), M_DEBUG);
   }
 
