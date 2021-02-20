@@ -43,7 +43,10 @@ Options::Options() {
   binsize = 100000;
 
   // Additional learn parameters
+  downsample = 1.0;
   skip_frag = false;
+  skip_pd = false;
+  skip_pcr = false;
   output_frag_lens = false;
 
   // sequencer

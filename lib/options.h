@@ -56,7 +56,10 @@ class Options {
   int estimate_frag_length;
 
   // Learn options
+  float downsample;
   bool skip_frag;
+  bool skip_pd;
+  bool skip_pcr;
   bool output_frag_lens;
   virtual ~Options();
 

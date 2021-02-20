@@ -8,6 +8,7 @@
 #include <numeric>
 #include <time.h>
 #include <algorithm>
+#include <random>
 #include <chrono>
 
 #include "bam_io.h"
@@ -38,7 +39,8 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
 bool learn_frag_single(const std::string& bamfile, const std::string& peakfile, const std::string peakfileType,
 		       const std::int32_t count_colidx, const float intensity_threshold, const float intensity_threshold_scale,
 		       const int estimate_frag_length,
-		       float* alpha, float* beta, bool skip_frag, const std::string& region, const int extend);
+		       float* alpha, float* beta, bool skip_frag, const std::string& region, const int extend,
+		       const float downsample);
 void search(float& low, float& high, const float mu, const float gs,
     const std::int32_t start_lower_bound, const std::int32_t start_upper_bound, const std::vector<float> start_cdf, const std::vector<float> start_edf,
     const std::int32_t end_lower_bound, const std::int32_t end_upper_bound, const std::vector<float> end_cdf, const std::vector<float> end_edf);
@@ -189,7 +191,7 @@ bool learn_frag_single(const std::string& bamfile,
 		       const float intensity_threshold, const float intensity_threshold_scale,
 		       const int estimate_frag_length,
 		       float* alpha, float* beta, bool skip_frag,
-		       const std::string& region, const int extend) {
+		       const std::string& region, const int extend, const float downsample) {
   /*
     Predict fragment length distribution from an input BAM file (single-end reads)
     Fragment lengths follow a gamma distribution.
@@ -232,6 +234,10 @@ bool learn_frag_single(const std::string& bamfile,
     std::vector<float> starts_in_peak;
     std::vector<float> ends_in_peak;
     while (bamreader.GetNextAlignment(aln)){
+      if (downsample <= 1.0) {
+	std::mt19937 rng;
+	if ( ((float) rng()/(float) rng.max()) > downsample) {continue;}
+      }
       if (aln.IsDuplicate()) {continue;}
       if ((!aln.IsMapped()) || aln.IsFailedQC() || aln.IsSecondary() || aln.IsSupplementary()){continue;}
       float aln_start = aln.Position();
@@ -647,6 +653,15 @@ int learn_main(int argc, char* argv[]) {
       options.noscale = true;
     } else if (PARAMETER_CHECK("--skip-frag", 11, parameterLength)){
       options.skip_frag = true;
+    } else if (PARAMETER_CHECK("--skip-pd", 9, parameterLength)) {
+      options.skip_pd = true;
+    } else if (PARAMETER_CHECK("--skip-pcr", 10, parameterLength)) {
+      options.skip_pcr = true;
+    } else if (PARAMETER_CHECK("--ds", 4, parameterLength)) { 
+      if ((i+1) < argc) {
+	options.downsample = std::atof(argv[i+1]);
+	i++;
+      }
     } else if (PARAMETER_CHECK("--thres", 7, parameterLength)) {
       if ((i+1) < argc){
         options.intensity_threshold = std::atof(argv[i+1]);
@@ -707,7 +722,7 @@ int learn_main(int argc, char* argv[]) {
     }else{
       if (!learn_frag_single(options.chipbam, options.peaksbed, options.peakfiletype,
 			     options.countindex, options.intensity_threshold, options.intensity_threshold_scale, options.estimate_frag_length,
-			     &frag_param_a, &frag_param_b, options.skip_frag, options.region, options.extend)) {
+			     &frag_param_a, &frag_param_b, options.skip_frag, options.region, options.extend, options.downsample)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
     }
@@ -718,10 +733,12 @@ int learn_main(int argc, char* argv[]) {
     float ab_ratio;
     float s = -1;
     float f = -1;
-    if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
-		     &ab_ratio, &s, &f, frag_param_a, frag_param_b, options.skip_frag, options.noscale, options.scale_outliers,
-		     options.region)){
-      PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
+    if (!options.skip_pd) {
+      if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
+		       &ab_ratio, &s, &f, frag_param_a, frag_param_b, options.skip_frag, options.noscale, options.scale_outliers,
+		       options.region)){
+	PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
+      }
     }
     model.SetF(f);
     model.SetS(s);
@@ -729,8 +746,10 @@ int learn_main(int argc, char* argv[]) {
     /*** Learn PCR geometric distribution parameter **/
     PrintMessageDieOnError("Learning PCR parameters", M_PROGRESS);
     float geo_rate = -1;
-    if (!learn_pcr(options.chipbam, &geo_rate, options.region)){
-      PrintMessageDieOnError("Error learning PCR rate", M_ERROR);
+    if (!options.skip_pcr) {
+      if (!learn_pcr(options.chipbam, &geo_rate, options.region)){
+	PrintMessageDieOnError("Error learning PCR rate", M_ERROR);
+      }
     }
     model.SetPCR(geo_rate);
 
