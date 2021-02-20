@@ -35,7 +35,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
 bool compare_location(Fragment a, Fragment b);
 bool learn_pcr(const std::string& bamfile, float* geo_rate, const std::string& region);
 bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag,
-		       const std::string& region);
+		       const std::string& region, const float downsample);
 bool learn_frag_single(const std::string& bamfile, const std::string& peakfile, const std::string peakfileType,
 		       const std::int32_t count_colidx, const float intensity_threshold, const float intensity_threshold_scale,
 		       const int estimate_frag_length,
@@ -59,7 +59,7 @@ float calculate_gamma_pdf(const float x, const float k, const float theta);
 
 bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag,
 		       const std::string& outfile, bool output_frags,
-		       const std::string& region) {
+		       const std::string& region, const float downsample) {
   /*
     Learn fragment length distribution from an input BAM file
     Fragment lengths follow a gamma distribution.
@@ -115,6 +115,10 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
       }
 
       if (!bamreader.GetNextAlignment(aln)) {continue;}
+      if (downsample <= 1.0) {
+	std::mt19937 rng;
+	if ( ((float) rng()/(float) rng.max()) > downsample) {continue;}
+      }
       if (aln.IsDuplicate()) {continue;}
       if ( (!aln.IsMapped()) || (!aln.IsMateMapped()) || (!aln.IsPaired()) || (!aln.IsProperPair())
             || aln.IsFailedQC() || aln.IsSecondary() || aln.IsSupplementary()){continue;}
@@ -125,6 +129,7 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
 
     if (fraglengths.size() == 0)
       PrintMessageDieOnError("No paired-end reads found in the input BAM file", M_ERROR);
+    PrintMessageDieOnError("Using " + std::to_string(fraglengths.size()) + " to estimate fragment lengths", M_PROGRESS);
 
     // find median to use to filter
     nth_element(fraglengths.begin(), fraglengths.begin() + fraglengths.size()/2, fraglengths.end());
@@ -716,7 +721,7 @@ int learn_main(int argc, char* argv[]) {
     float frag_param_b = -1;
     if (options.paired){
       if (!learn_frag_paired(options.chipbam, &frag_param_a, &frag_param_b, options.skip_frag,
-			     options.outprefix+".frags.txt", options.output_frag_lens, options.region)) {
+			     options.outprefix+".frags.txt", options.output_frag_lens, options.region, options.downsample)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
     }else{
