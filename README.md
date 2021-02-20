@@ -4,7 +4,7 @@ ChIPs is a tool for simulating ChIP-sequencing experiments.
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
 
-[Download](#download) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats) | [FAQ](#faq)
+[Download](#download) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats) | [Usage example](#usage) | [FAQ](#faq)
 
 <a name="download"></a>
 ## 1. Download
@@ -181,8 +181,40 @@ Model files are in JSON syntax, and follow the example below.
 
 `chips learn` outputs a JSON model file. `chips simreads` can take in a model file with all or some of these parameters specified. Model parameters set on the command line override those set in the JSON model file. 
 
+<a name="usage"></a>
+## 5. Usage Example
+In this toy example, we use this `sample.bed` as input for read simulation.
+```
+chr21    10001100   10001400    10  
+chr21    10002500   10002800    20  
+chr21    10004100   10004900    60  
+chr21    10005900   10006800    100
+```
+First, we can use `chips simreads` to simulate reads.
+```
+chips simreads -p sample.bed -t bed -c 4 -f {PATH-TO-HG19}/hg19.fa -o sample --numcopies 1000 --numreads 10000 --readlen 36 --paired --gamma-frag 15,15 --spot 0.8 --frac 0.15 --pcr_rate 0.8 --region chr21:10000000-10010000
+```
+
+Next, we use `bowtie`, `samtools`, `picard`, and `igvtools` to map simulated reads to the reference genome and generate a sorted BAM file. You can use IGV to visualize the BAM file.
+```
+bowtie2 -x {PATH-TO-HG19}/hg19 -1 sample_1.fastq -2 sample_2.fastq > tmp.sam 
+samtools view -bS tmp.sam > tmp.bam
+samtools sort tmp.bam -o tmp.sorted.bam
+samtools index tmp.sorted.bam
+samtools view tmp.sorted.bam chr21:10000000-10010000 -b -o tmp.trimmed.bam
+samtools index tmp.trimmed.bam
+java -jar {PATH-TO-picard}/picard.jar MarkDuplicates -I tmp.trimmed.bam -O tmp.flagged.bam -M tmp.metrics
+samtools index tmp.flagged.bam
+igvtools count -z 5 -w 25 -e 0 tmp.flagged.bam tmp.tdf /storage/resources/dbase/human/hg19/hg19.fa
+```
+
+Last, we use `chips learn` to estimate the parameters in ChIP-seq simulation. The esitmations can be found in `sample.json`.
+```
+chips learn -b tmp.flagged.bam -p sample.bed -t bed -c 4 -o sample --region chr21:10000000-10010000 --paired
+```
+
 <a name="faq"></a>
-## 5. FAQ
+## 6. FAQ
 
 **Q**: What should I set the number of genome copies (`--numcopies`) parameter to for `simreads`?<br>
 **A**: This gives the number of simulation rounds to perform. This number is not directly comparable to the actual number of cells used in an experiment since we do not currently model pulldown inefficiency. We have found that for histone modifications performance starts to plateau after around 25 copies (`--numcopies 25`). For transcription factors we recommend setting `--numcopies 1000`. Note, run time increases linearly with the value set for this parameter.
