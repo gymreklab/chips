@@ -50,7 +50,9 @@ class Options {
   std::string region;
   int binsize;
 
-  int intensity_threshold;
+  float intensity_threshold;
+  float intensity_threshold_scale;
+  int extend;
   int estimate_frag_length;
 
   // Learn options

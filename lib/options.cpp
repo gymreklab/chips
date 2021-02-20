@@ -57,6 +57,8 @@ Options::Options() {
 
   // learn only: intensity threshold
   intensity_threshold = 100;
+  intensity_threshold_scale = 0.0;
+  extend = 0;
   estimate_frag_length = 200;
 
   // Other options

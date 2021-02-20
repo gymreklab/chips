@@ -36,8 +36,9 @@ bool learn_pcr(const std::string& bamfile, float* geo_rate, const std::string& r
 bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag,
 		       const std::string& region);
 bool learn_frag_single(const std::string& bamfile, const std::string& peakfile, const std::string peakfileType,
-		       const std::int32_t count_colidx, const int intensity_threshold, const int estimate_frag_length,
-		       float* alpha, float* beta, bool skip_frag, const std::string& region);
+		       const std::int32_t count_colidx, const float intensity_threshold, const float intensity_threshold_scale,
+		       const int estimate_frag_length,
+		       float* alpha, float* beta, bool skip_frag, const std::string& region, const int extend);
 void search(float& low, float& high, const float mu, const float gs,
     const std::int32_t start_lower_bound, const std::int32_t start_upper_bound, const std::vector<float> start_cdf, const std::vector<float> start_edf,
     const std::int32_t end_lower_bound, const std::int32_t end_upper_bound, const std::vector<float> end_cdf, const std::vector<float> end_edf);
@@ -184,10 +185,11 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
 
 bool learn_frag_single(const std::string& bamfile,
 		       const std::string& peakfile, const std::string peakfileType,
-		       const std::int32_t count_colidx, const int intensity_threshold,
+		       const std::int32_t count_colidx,
+		       const float intensity_threshold, const float intensity_threshold_scale,
 		       const int estimate_frag_length,
 		       float* alpha, float* beta, bool skip_frag,
-		       const std::string& region) {
+		       const std::string& region, const int extend) {
   /*
     Predict fragment length distribution from an input BAM file (single-end reads)
     Fragment lengths follow a gamma distribution.
@@ -210,7 +212,9 @@ bool learn_frag_single(const std::string& bamfile,
   std::vector<Fragment> peaks;
   if (!peakloader.Load(peaks, region)) PrintMessageDieOnError("Error loading peaks from " + peakfile, M_ERROR);
   for (int peak_idx=peaks.size()-1;peak_idx>=0;peak_idx--){
-    if (peaks[peak_idx].orig_score < intensity_threshold) peaks.erase(peaks.begin()+peak_idx);
+    if ((peaks[peak_idx].orig_score < intensity_threshold) || (peaks[peak_idx].score < intensity_threshold_scale)) {
+      peaks.erase(peaks.begin()+peak_idx);
+    }
     if (peaks.size() == 0) {
       PrintMessageDieOnError("There are no peaks satisfying the user-defined threshold: " + std::to_string(intensity_threshold), M_ERROR);
     }
@@ -223,7 +227,7 @@ bool learn_frag_single(const std::string& bamfile,
   std::vector<float> starts;
   std::vector<float> ends;
   for (int peak_index=0; peak_index<peaks.size(); peak_index++){
-    bamreader.SetRegion(peaks[peak_index].chrom, peaks[peak_index].start, peaks[peak_index].start+peaks[peak_index].length);
+    bamreader.SetRegion(peaks[peak_index].chrom, peaks[peak_index].start-extend, peaks[peak_index].start+peaks[peak_index].length+extend);
     BamAlignment aln;
     std::vector<float> starts_in_peak;
     std::vector<float> ends_in_peak;
@@ -645,8 +649,18 @@ int learn_main(int argc, char* argv[]) {
       options.skip_frag = true;
     } else if (PARAMETER_CHECK("--thres", 7, parameterLength)) {
       if ((i+1) < argc){
-        options.intensity_threshold = std::atoi(argv[i+1]);
+        options.intensity_threshold = std::atof(argv[i+1]);
         i++;
+      }
+    } else if (PARAMETER_CHECK("--thres-scale", 13, parameterLength)) {
+      if ((i+1) < argc) {
+	options.intensity_threshold_scale = std::atof(argv[i+1]);
+	i++;
+      }
+    } else if (PARAMETER_CHECK("--extend", 8, parameterLength)) {
+      if ((i+1) < argc) {
+	options.extend = std::atoi(argv[i+1]);
+	i++;
       }
     } else if (PARAMETER_CHECK("--paired", 8, parameterLength)) {
       options.paired = true;
@@ -692,8 +706,8 @@ int learn_main(int argc, char* argv[]) {
       }
     }else{
       if (!learn_frag_single(options.chipbam, options.peaksbed, options.peakfiletype,
-			     options.countindex, options.intensity_threshold, options.estimate_frag_length,
-			     &frag_param_a, &frag_param_b, options.skip_frag, options.region)) {
+			     options.countindex, options.intensity_threshold, options.intensity_threshold_scale, options.estimate_frag_length,
+			     &frag_param_a, &frag_param_b, options.skip_frag, options.region, options.extend)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
     }
@@ -747,8 +761,6 @@ void learn_help(void) {
   cerr << "[Optional arguments]: " << "\n";
   cerr << "         -r <float>:         Ratio of high score peaks to ignore\n"
        << "                             Default: " <<options.remove_pct<< "\n";
-  cerr << "         --est <int>:        Estimated fragment length\n"
-       << "                             Default: " <<options.estimate_frag_length<< "\n";
   cerr << "         --noscale:          Don't scale peak scores by the max score.\n";                   
   cerr << "         --scale-outliers:   Set all peaks with scores >2*median score to have binding prob 1. Recommended with real data\n";
   cerr << "         --region <str>:     Only consider peaks from this region chrom:start-end\n"
@@ -756,8 +768,18 @@ void learn_help(void) {
   cerr << "[BAM-file arguments]: " << "\n";
   cerr << "         --paired:           Loading paired-end reads\n"
        << "                             Default: false\n";
-  cerr << "         --thres <float>:    Threshold for peak scores in single-end read length estimation\n"
+  cerr << "[Fragment length estimation arguments]: " << "\n";
+  cerr << " (only relevant for single-end data) " << "\n";
+  cerr << "         --est <int>:        Estimated fragment length\n"
+       << "                             Default: " <<options.estimate_frag_length<< "\n";
+  cerr << "         --thres <float>:    Absolute threshold for peak scores. Only consider peaks with at least this score\n"
        << "                             Default: " <<options.intensity_threshold<< "\n";
+  cerr << "         --thres-scale <float>: Scale threshold for peak scores. Only consider peaks with at least this score\n";
+  cerr << "                                after scaling scores to be between 0-1\n";
+  cerr << "                                Default: " <<options.intensity_threshold_scale << "\n";
+  cerr << "         --extend <int>:     Extend peak regions by this amount when estimating fragment lengths.\n";
+  cerr << "                             This can result in more robust estimates especially for data with narrow peaks.\n";
+  cerr << "                             Default: " << options.extend << "\n";
   cerr << "\n";
   cerr  << "[ General help ]:" << endl;
   cerr  << "    --help        "  << "Print this help menu.\n";
