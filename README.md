@@ -26,7 +26,7 @@ Once bioconda is enabled, you can download ChIPs using: `conda install chips`
 
 
 ### From Github
-The latest ChIPs release is available on the [releases page](https://github.com/gymreklab/chips/releases).
+The latest ChIPs release is available on the [releases page](https://github.com/gymreklab/chips/releases)
 
 <a name="install"></a>
 
@@ -197,7 +197,7 @@ First, we can use `chips simreads` to simulate reads.
 chips simreads -p sample.bed -t bed -c 4 -f {PATH-TO-HG19}/hg19.fa -o sample --numcopies 1000 --numreads 10000 --readlen 36 --paired --gamma-frag 15,15 --spot 0.8 --frac 0.15 --pcr_rate 0.8 --region chr21:10000000-10010000
 ```
 
-Next, we use `bowtie`, `samtools`, `picard`, and `igvtools` to map simulated reads to the reference genome and generate a sorted BAM file. You can use IGV to visualize the BAM file: (https://tinyurl.com/ybmvczpt).
+Next, we use `bowtie`, `samtools`, `picard`, and `igvtools` to map simulated reads to the reference genome and generate a sorted BAM file. You can use IGV to visualize the BAM file (screen shot: https://drive.google.com/file/d/1DReo-hIWwT2oC533g67EWb-FDUaJ23Sb/view?usp=sharing).
 ```
 bowtie2 -x {PATH-TO-HG19}/hg19 -1 sample_1.fastq -2 sample_2.fastq > tmp.sam 
 samtools view -bS tmp.sam > tmp.bam
