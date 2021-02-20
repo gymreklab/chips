@@ -4,7 +4,7 @@ ChIPs is a tool for simulating ChIP-sequencing experiments.
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
 
-[Download](#download) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats) | [Usage example](#usage) | [FAQ](#faq)
+[Download](#download) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats) | [Usage example](#example) | [FAQ](#faq)
 
 <a name="download"></a>
 ## 1. Download
@@ -181,7 +181,7 @@ Model files are in JSON syntax, and follow the example below.
 
 `chips learn` outputs a JSON model file. `chips simreads` can take in a model file with all or some of these parameters specified. Model parameters set on the command line override those set in the JSON model file. 
 
-<a name="usage"></a>
+<a name="example"></a>
 
 ## 5. Usage Example
 In this toy example, we use this `sample.bed` as input for read simulation.
