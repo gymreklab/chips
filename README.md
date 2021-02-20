@@ -184,8 +184,9 @@ Model files are in JSON syntax, and follow the example below.
 <a name="example"></a>
 
 ## 5. Usage Example
-In this toy example, we use this `sample.bed` as input for read simulation.
+In this toy example, we use the following `sample.bed` as input for read simulation.
 ```
+sample.bed:
 chr21    10001100   10001400    10  
 chr21    10002500   10002800    20  
 chr21    10004100   10004900    60  
