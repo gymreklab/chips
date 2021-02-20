@@ -103,6 +103,7 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
     }
 
     int guard_count = 0; // prevent the dead loop
+    std::mt19937 rng;
     while(numreads<maxreads && guard_count<(10*maxreads)) {
       guard_count++;
 
@@ -116,7 +117,6 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
 
       if (!bamreader.GetNextAlignment(aln)) {continue;}
       if (downsample <= 1.0) {
-	std::mt19937 rng;
 	if ( ((float) rng()/(float) rng.max()) > downsample) {continue;}
       }
       if (aln.IsDuplicate()) {continue;}
@@ -233,6 +233,7 @@ bool learn_frag_single(const std::string& bamfile,
   BamCramReader bamreader(bamfile);
   std::vector<float> starts;
   std::vector<float> ends;
+  std::mt19937 rng;
   for (int peak_index=0; peak_index<peaks.size(); peak_index++){
     bamreader.SetRegion(peaks[peak_index].chrom, peaks[peak_index].start-extend, peaks[peak_index].start+peaks[peak_index].length+extend);
     BamAlignment aln;
@@ -240,7 +241,6 @@ bool learn_frag_single(const std::string& bamfile,
     std::vector<float> ends_in_peak;
     while (bamreader.GetNextAlignment(aln)){
       if (downsample <= 1.0) {
-	std::mt19937 rng;
 	if ( ((float) rng()/(float) rng.max()) > downsample) {continue;}
       }
       if (aln.IsDuplicate()) {continue;}
@@ -708,6 +708,10 @@ int learn_main(int argc, char* argv[]) {
   }
   if (options.peakfiletype.empty()) {
     cerr << "****** ERROR: Must specify peakfiletype with -t ******" << endl;
+    showHelp = true;
+  }
+  if (options.chipbam.empty()) {
+    cerr << "****** ERROR: Must specify a bam file with -b ******" << endl;
     showHelp = true;
   }
 
