@@ -197,7 +197,7 @@ First, we can use `chips simreads` to simulate reads.
 chips simreads -p sample.bed -t bed -c 4 -f {PATH-TO-HG19}/hg19.fa -o sample --numcopies 1000 --numreads 10000 --readlen 36 --paired --gamma-frag 15,15 --spot 0.8 --frac 0.15 --pcr_rate 0.8 --region chr21:10000000-10010000
 ```
 
-Next, we use `bowtie`, `samtools`, `picard`, and `igvtools` to map simulated reads to the reference genome and generate a sorted BAM file. You can use IGV to visualize the BAM file.
+Next, we use `bowtie`, `samtools`, `picard`, and `igvtools` to map simulated reads to the reference genome and generate a sorted BAM file. You can use IGV to visualize the BAM file: (https://tinyurl.com/ybmvczpt).
 ```
 bowtie2 -x {PATH-TO-HG19}/hg19 -1 sample_1.fastq -2 sample_2.fastq > tmp.sam 
 samtools view -bS tmp.sam > tmp.bam
@@ -210,9 +210,23 @@ samtools index tmp.flagged.bam
 igvtools count -z 5 -w 25 -e 0 tmp.flagged.bam tmp.tdf /storage/resources/dbase/human/hg19/hg19.fa
 ```
 
-Last, we use `chips learn` to estimate the parameters in ChIP-seq simulation. The esitmations can be found in `sample.json`.
+Last, we use `chips learn` to estimate the parameters in ChIP-seq simulation.
 ```
 chips learn -b tmp.flagged.bam -p sample.bed -t bed -c 4 -o sample --region chr21:10000000-10010000 --paired
+```
+The esitmations can be found in `sample.json`.
+```
+{
+    "frag": {
+        "k": 15.783836364746094,
+        "theta": 14.306901931762695
+    },  
+    "pcr_rate": 0.7234475612640381,
+    "pulldown": {
+        "f": 0.15454448759555817,
+        "s": 0.8646870851516724
+    }   
+}
 ```
 
 <a name="faq"></a>
