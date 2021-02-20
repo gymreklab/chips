@@ -107,7 +107,7 @@ Optional parameters for BAM parsing:
 * `--thres <float>`: For estimating fragment length distribution from single end data, only consider peaks with scores above this threshold.
 
 Other optional parameters:
-* `--scale-outliers`: Set all peaks with scores >2x median score to have binding prob 1. Recommended with real data.
+* `--scale-outliers`: Set all peaks with scores >3x median score to have binding prob 1. Recommended with real data.
 * `--noscale`: Don't scale peak scores. Treat given scores in the input bed file as binding probabilities.
 * `--est <int>`: Estimated fragment length. Used as a rough guess to guide inference of fragment length distribution from single end data.
 * `-r <float>`: Ignore peaks with top r% of peak scores.
@@ -137,7 +137,7 @@ Model parameters: (either user-specified or learned from `chips learn`:
 Peak scoring:
 * `-b <reads.bam>`: Use a provided BAM file to obtain scores for each peak (optional). If a BAM is not given, scores in the peak files are used.
 * `-c <int>`: The index of the BED or homer peak file column used to score each peak (index starting from 1). Required if not using `-b`.
-* `--scale-outliers`: Set all peaks with scores >2x median score to have binding prob 1. Recommended with real data.
+* `--scale-outliers`: Set all peaks with scores >3x median score to have binding prob 1. Recommended with real data.
 * `--noscale`: Don't scale peak scores. Treat given scores as binding probabilities.
 
 Other options:
