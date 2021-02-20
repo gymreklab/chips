@@ -182,6 +182,7 @@ Model files are in JSON syntax, and follow the example below.
 `chips learn` outputs a JSON model file. `chips simreads` can take in a model file with all or some of these parameters specified. Model parameters set on the command line override those set in the JSON model file. 
 
 <a name="usage"></a>
+
 ## 5. Usage Example
 In this toy example, we use this `sample.bed` as input for read simulation.
 ```
