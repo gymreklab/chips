@@ -249,13 +249,13 @@ bool learn_frag_single(const std::string& bamfile,
       float aln_end = aln.GetEndPosition();
 
       if(aln.IsReverseStrand()){
-        if ( ((aln_end-estimate_frag_length) >= peaks[peak_index].start)
-                &&(aln_end <= peaks[peak_index].start+peaks[peak_index].length)){
+        if ( ((aln_end-estimate_frag_length) >= (peaks[peak_index].start-extend))
+                &&(aln_end <= (peaks[peak_index].start+peaks[peak_index].length+extend)) ){
           ends_in_peak.push_back(aln_end);
         }
       }else{
-        if ((aln_start >= peaks[peak_index].start) 
-                &&( (aln_start+estimate_frag_length) <= peaks[peak_index].start+peaks[peak_index].length)){
+        if ((aln_start >= (peaks[peak_index].start-extend))
+                &&( (aln_start+estimate_frag_length) <= (peaks[peak_index].start+peaks[peak_index].length+extend))){
           starts_in_peak.push_back(aln_start);
         }
       }
