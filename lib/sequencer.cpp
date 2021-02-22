@@ -53,10 +53,7 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
   std::vector<std::string> read_pair;
   std::vector<std::string> reads_1;
   std::vector<std::string> reads_2;
-  // std::vector<std::string> chroms;
   std::vector<std::string> ids;
-  // std::vector<int> starts_1;
-  // std::vector<int> starts_2;
 
   // Sample from fragments w/o replacement (by shuffling first)
   // If needed, go through the fragments multiple times
@@ -68,8 +65,9 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
   }
 
   std::stringstream ss;
-  ss << "Sequencing total reads " << numreads << " for copy " << copy_index;
-  //PrintMessageDieOnError(ss.str(), M_PROGRESS);
+  ss << "Sequencing " << numreads << " total reads from " << input_fragments.size() << " fragments for copy " << copy_index;
+  int dupnum = 0;
+  //  PrintMessageDieOnError(ss.str(), M_PROGRESS);
   while (true) {
     std::shuffle(frag_indices.begin(), frag_indices.end(), rng);
     for (size_t fg=0; fg<frag_indices.size(); fg++) {
@@ -80,6 +78,8 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
 				  &frag_seq)) {
 	continue;
       }
+
+      dupnum = 0;
       // generate reads from both strands
       read_pair.clear();
       if (Fragment2Read(frag_seq, read_seq, rng) &&
@@ -89,29 +89,27 @@ void Sequencer::Sequence(const std::vector<Fragment>& input_fragments,
 	std::stringstream ss;
 	ss << input_fragments[frag_index].chrom << ":"
 	   << input_fragments[frag_index].start << ":"
-	   << input_fragments[frag_index].length;
-	ids.push_back(ss.str());
+	   << input_fragments[frag_index].length << ":";
 	std::shuffle(read_pair.begin(), read_pair.end(), rng);
-      }else{
+	// Add the first read
+	reads_1.push_back(read_pair[0]);
+	reads_2.push_back(read_pair[1]);
+	ids.push_back(ss.str()+std::to_string(dupnum));
+	total_reads_sequenced += 1;
+	dupnum += 1;
+      } else {
 	continue;
       }
-      // chroms.push_back(input_fragments[frag_index].chrom);
-      // starts_1.push_back(input_fragments[frag_index].start);
-      // starts_2.push_back(input_fragments[frag_index].start+input_fragments[frag_index].length-readlen+1);
-      reads_1.push_back(read_pair[0]);
-      reads_2.push_back(read_pair[1]);
-
-      // Update
-      total_reads_sequenced += 1;
 
       // PCR 
       while (true) {
         if (total_reads_sequenced >= numreads) break;
         if ( ((float) rng()/(float) rng.max()) < pcr_rate) break;
-        ids.push_back(ids[ids.size()-1]);
+        ids.push_back(ids[ids.size()-1]+std::to_string(dupnum));
         reads_1.push_back(read_pair[0]);
         reads_2.push_back(read_pair[1]);
         total_reads_sequenced += 1;
+	dupnum += 1;
       } 
 
       if (total_reads_sequenced >= numreads) {
