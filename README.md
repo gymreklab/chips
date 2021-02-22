@@ -79,6 +79,7 @@ chips learn \
   -b <reads.bam> \
   -p <peaks> \
   -t <homer|bed>
+  -c <int> \
   -o <outprefix>
 ```
 
@@ -102,15 +103,21 @@ Required parameters:
 * `-b <file.bam>`: BAM file containing aligned reads. Should be sorted and indexed. To accurately estimate PCR duplicate rate, duplicates must be flagged e.g. using Picard. Both paired-end or single-end data are supported.
 * `-c <int>`: The index of the BED or homer peak file column used to score each peak (index starting from 1)
 
-Optional parameters for BAM parsing:
-* `--paired`: Data is paired
-* `--thres <float>`: For estimating fragment length distribution from single end data, only consider peaks with scores above this threshold.
+Optional parameters:
+* `-r <float>`: Ignore peaks with top r% of peak scores. Default: 0.
+* `--noscale`: Don't scale peak scores by the max score. Treat given scores in the input bed file as binding probabilities. Default: false.
+* `--scale-outliers`: Set all peaks with scores >3x median score to have binding prob 1. Recommended with real data. Default: flase.
+* `--region <str>`: Only consider peaks from this region chrom:start-end. Default: genome-wide.
 
-Other optional parameters:
-* `--scale-outliers`: Set all peaks with scores >3x median score to have binding prob 1. Recommended with real data.
-* `--noscale`: Don't scale peak scores. Treat given scores in the input bed file as binding probabilities.
-* `--est <int>`: Estimated fragment length. Used as a rough guess to guide inference of fragment length distribution from single end data.
-* `-r <float>`: Ignore peaks with top r% of peak scores.
+BAM-file arguments:
+* `--paired`: Data is paired. Default: false.
+
+Fragment length estimation arguments (for single-end data only):
+* `--est <int>`: Estimated fragment length. Used as a rough guess to guide inference of fragment length distribution from single end data. Default: 300.
+* `--extend <int>`: Extend peak regions by this amount when estimating fragment lengths. This can result in more robust estimates especially for data with narrow peaks. Default: 300.
+* `--thres <float>`: For estimating fragment length distribution from single end data, only consider peaks with scores above this threshold. ChIPs applies `--thres` or `--thres-scale` whichever is stricter. Default: 100.
+* `--thres-scale <float>`: Scale threshold for peak scores. Only consider peaks with at least this score after scaling scores to be between 0-1. ChIPs applies `--thres` or `--thres-scale` whichever is stricter. Default: 0.
+
 
 ### chips simreads
 
@@ -131,14 +138,14 @@ Model parameters: (either user-specified or learned from `chips learn`:
 * `--gamma-frag <float>,<float>`: Parameters for fragment length distribution (k, theta for Gamma distribution). Default: 15.67,15.49
 * `--spot <float>`: SPOT score (fraction of reads in peaks). Default: 0.17594
 * `--frac <float>`: Fraction of the genome that is bound. Default: 0.03713
-* `--pcr_rate <float>`: The geometric step size paramters for simulating PCR. Default: 0.85.
+* `--pcr_rate <float>`: The geometric step size paramters for simulating PCR. Default: 1.
 * `--recomputeF`: Recompute `--frac` param based on input peaks. Recommended especially when using model parameters that were not learned on real data.
 
 Peak scoring:
 * `-b <reads.bam>`: Use a provided BAM file to obtain scores for each peak (optional). If a BAM is not given, scores in the peak files are used.
 * `-c <int>`: The index of the BED or homer peak file column used to score each peak (index starting from 1). Required if not using `-b`.
-* `--scale-outliers`: Set all peaks with scores >3x median score to have binding prob 1. Recommended with real data.
-* `--noscale`: Don't scale peak scores. Treat given scores as binding probabilities.
+* `--scale-outliers`: Set all peaks with scores >3x median score to have binding prob 1. Recommended with real data. Default: false.
+* `--noscale`: Don't scale peak scores. Treat given scores as binding probabilities. Default: false.
 
 Other options:
 * `--seed <unsigned>`: The random seed used for initiating randomization opertions. By default or 0, use wall-clock time.
