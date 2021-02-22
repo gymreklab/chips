@@ -789,8 +789,10 @@ void learn_help(void) {
   cerr << "[Optional arguments]: " << "\n";
   cerr << "         -r <float>:         Ratio of high score peaks to ignore\n"
        << "                             Default: " <<options.remove_pct<< "\n";
-  cerr << "         --noscale:          Don't scale peak scores by the max score.\n";                   
-  cerr << "         --scale-outliers:   Set all peaks with scores >2*median score to have binding prob 1. Recommended with real data\n";
+  cerr << "         --noscale:          Don't scale peak scores by the max score.\n" 
+       << "                             Default: false\n";
+  cerr << "         --scale-outliers:   Set all peaks with scores >2*median score to have binding prob 1. Recommended with real data.\n"
+       << "                             Default: false\n";
   cerr << "         --region <str>:     Only consider peaks from this region chrom:start-end\n"
        << "                             Default: genome-wide \n";
   cerr << "[BAM-file arguments]: " << "\n";
@@ -800,11 +802,13 @@ void learn_help(void) {
   cerr << " (only relevant for single-end data) " << "\n";
   cerr << "         --est <int>:        Estimated fragment length\n"
        << "                             Default: " <<options.estimate_frag_length<< "\n";
-  cerr << "         --thres <float>:    Absolute threshold for peak scores. Only consider peaks with at least this score\n"
+  cerr << "         --thres <float>:    Absolute threshold for peak scores. Only consider peaks with at least this score.\n"
+       << "                             ChIPs applies `--thres` or `--thres-scale` whichever is stricter.\n"
        << "                             Default: " <<options.intensity_threshold<< "\n";
-  cerr << "         --thres-scale <float>: Scale threshold for peak scores. Only consider peaks with at least this score\n";
-  cerr << "                                after scaling scores to be between 0-1\n";
-  cerr << "                                Default: " <<options.intensity_threshold_scale << "\n";
+  cerr << "         --thres-scale <float>: Scale threshold for peak scores. Only consider peaks with at least this score.\n";
+  cerr << "                                after scaling scores to be between 0-1.\n"
+       << "                                ChIPs applies `--thres` or `--thres-scale` whichever is stricter.\n"
+       << "                                Default: " <<options.intensity_threshold_scale << "\n";
   cerr << "         --extend <int>:     Extend peak regions by this amount when estimating fragment lengths.\n";
   cerr << "                             This can result in more robust estimates especially for data with narrow peaks.\n";
   cerr << "                             Default: " << options.extend << "\n";
