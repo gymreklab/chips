@@ -55,14 +55,11 @@ Options::Options() {
   ins_rate = 0;
   del_rate = 0;
 
-  // pcr
-  pcr_rate = 0.85;
-
   // learn only: intensity threshold
   intensity_threshold = 100;
   intensity_threshold_scale = 0.0;
-  extend = 0;
-  estimate_frag_length = 200;
+  extend = 300;
+  estimate_frag_length = 300;
 
   // Other options
   verbose = false;
