@@ -30,10 +30,10 @@ class PeakReader{
 			std::uint32_t* ptr_total_genome_length, float* ptr_total_tagcount,
 			float* ptr_tagcount_in_peaks,const std::string region, const float frag_length,
 			const bool noscale, const bool scale_outliers);
+
   private:
     std::string peakfile;
     static bool compare_location(Fragment a, Fragment b);
-    static void RegionParser(const std::string region, std::string& chromID, std::int32_t& start, std::int32_t& end);
     void Rescale(std::vector<Fragment>& peaks, bool rm_outliers);
 };
 

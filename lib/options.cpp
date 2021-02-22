@@ -43,7 +43,10 @@ Options::Options() {
   binsize = 100000;
 
   // Additional learn parameters
+  downsample = 1.0;
   skip_frag = false;
+  skip_pd = false;
+  skip_pcr = false;
   output_frag_lens = false;
 
   // sequencer
@@ -57,6 +60,8 @@ Options::Options() {
 
   // learn only: intensity threshold
   intensity_threshold = 100;
+  intensity_threshold_scale = 0.0;
+  extend = 0;
   estimate_frag_length = 200;
 
   // Other options

@@ -8,6 +8,7 @@
 #include <numeric>
 #include <time.h>
 #include <algorithm>
+#include <random>
 #include <chrono>
 
 #include "bam_io.h"
@@ -30,13 +31,16 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
 		 const std::string& peakfileType, const std::int32_t count_colidx,
 		 const float remove_pct, float* ab_ratio_ptr, 
 		 float *s_ptr, float* f_ptr, const float frag_param_a, const float frag_param_b,
-		 bool skip_frag, bool noscale, bool scale_outliers);
+		 bool skip_frag, bool noscale, bool scale_outliers, const std::string& region);
 bool compare_location(Fragment a, Fragment b);
-bool learn_pcr(const std::string& bamfile, float* geo_rate);
-bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag);
+bool learn_pcr(const std::string& bamfile, float* geo_rate, const std::string& region);
+bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag,
+		       const std::string& region, const float downsample);
 bool learn_frag_single(const std::string& bamfile, const std::string& peakfile, const std::string peakfileType,
-    const std::int32_t count_colidx, const int intensity_threshold, const int estimate_frag_length,
-    float* alpha, float* beta, bool skip_frag);
+		       const std::int32_t count_colidx, const float intensity_threshold, const float intensity_threshold_scale,
+		       const int estimate_frag_length,
+		       float* alpha, float* beta, bool skip_frag, const std::string& region, const int extend,
+		       const float downsample);
 void search(float& low, float& high, const float mu, const float gs,
     const std::int32_t start_lower_bound, const std::int32_t start_upper_bound, const std::vector<float> start_cdf, const std::vector<float> start_edf,
     const std::int32_t end_lower_bound, const std::int32_t end_upper_bound, const std::vector<float> end_cdf, const std::vector<float> end_edf);
@@ -50,11 +54,12 @@ float calculate_eexpl(const float k, const float theta, const std::int32_t lower
 float calculate_edf(const float x, const std::int32_t lower_bound, const std::int32_t upper_bound,
     const std::vector<float> cdf, const std::vector<float> edf, const float mu);
 float calculate_gamma_pdf(const float x, const float k, const float theta);
-bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, const std::string& outfile, bool output_frags);
+//bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, const std::string& outfile, bool output_frags);
 
 
 bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bool skip_frag,
-		       const std::string& outfile, bool output_frags) {
+		       const std::string& outfile, bool output_frags,
+		       const std::string& region, const float downsample) {
   /*
     Learn fragment length distribution from an input BAM file
     Fragment lengths follow a gamma distribution.
@@ -64,6 +69,7 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
     - skip_frag (bool): Skip fragment parameter learning process
     - outfile (std::string): path to write list of fragment lengths (if output_frags=true)
     - output_frags (bool): Indicate whether to write fragment lengths to output file
+    - region (str): chr:start-end to use to pull fragments from
     Outputs:
     - alpha (float): parameter of gamma distribution
     - beta  (float): parameter of gamma distribution
@@ -83,21 +89,36 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
   std::int32_t tlen;
   BamAlignment aln;
 
-  // Randomly grab fragments
+  // Randomly grab fragments if region not set. Else look at region
   if (seq_names.size() > 0 && seq_lengths.size() > 0) {
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     srand(seed);
 
+    if (!region.empty()) {
+        std::int32_t region_start;
+        std::int32_t region_end;
+        std::string region_chrom;
+        RegionParser(region, region_chrom, region_start, region_end);
+	bamreader.SetRegion(region_chrom, region_start, region_end);
+    }
+
     int guard_count = 0; // prevent the dead loop
+    std::mt19937 rng;
     while(numreads<maxreads && guard_count<(10*maxreads)) {
       guard_count++;
-      int chrom = rand() % seq_names.size();
-      int start = rand() % seq_lengths[chrom];
-      
-      //if ((seq_names[chrom].find("_") != std::string::npos) || (seq_names[chrom] == "chrM")){continue;}
-      bamreader.SetRegion(seq_names[chrom], start, seq_lengths[chrom]);
+
+      // Only reset region if region is empty
+      if (region.empty()) {
+	int chrom = rand() % seq_names.size();
+	int start = rand() % seq_lengths[chrom];
+	//if ((seq_names[chrom].find("_") != std::string::npos) || (seq_names[chrom] == "chrM")){continue;}
+	bamreader.SetRegion(seq_names[chrom], start, seq_lengths[chrom]);
+      }
 
       if (!bamreader.GetNextAlignment(aln)) {continue;}
+      if (downsample <= 1.0) {
+	if ( ((float) rng()/(float) rng.max()) > downsample) {continue;}
+      }
       if (aln.IsDuplicate()) {continue;}
       if ( (!aln.IsMapped()) || (!aln.IsMateMapped()) || (!aln.IsPaired()) || (!aln.IsProperPair())
             || aln.IsFailedQC() || aln.IsSecondary() || aln.IsSupplementary()){continue;}
@@ -108,6 +129,7 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
 
     if (fraglengths.size() == 0)
       PrintMessageDieOnError("No paired-end reads found in the input BAM file", M_ERROR);
+    PrintMessageDieOnError("Using " + std::to_string(fraglengths.size()) + " to estimate fragment lengths", M_PROGRESS);
 
     // find median to use to filter
     nth_element(fraglengths.begin(), fraglengths.begin() + fraglengths.size()/2, fraglengths.end());
@@ -169,10 +191,12 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
 
 
 bool learn_frag_single(const std::string& bamfile,
-                        const std::string& peakfile, const std::string peakfileType,
-                        const std::int32_t count_colidx, const int intensity_threshold,
-                        const int estimate_frag_length,
-                        float* alpha, float* beta, bool skip_frag) {
+		       const std::string& peakfile, const std::string peakfileType,
+		       const std::int32_t count_colidx,
+		       const float intensity_threshold, const float intensity_threshold_scale,
+		       const int estimate_frag_length,
+		       float* alpha, float* beta, bool skip_frag,
+		       const std::string& region, const int extend, const float downsample) {
   /*
     Predict fragment length distribution from an input BAM file (single-end reads)
     Fragment lengths follow a gamma distribution.
@@ -193,23 +217,32 @@ bool learn_frag_single(const std::string& bamfile,
   PeakLoader peakloader(peakfile, peakfileType, "", count_colidx);
 
   std::vector<Fragment> peaks;
-  if (!peakloader.Load(peaks)) PrintMessageDieOnError("Error loading peaks from " + peakfile, M_ERROR);
+  if (!peakloader.Load(peaks, region)) PrintMessageDieOnError("Error loading peaks from " + peakfile, M_ERROR);
   for (int peak_idx=peaks.size()-1;peak_idx>=0;peak_idx--){
-    if (peaks[peak_idx].orig_score < intensity_threshold) peaks.erase(peaks.begin()+peak_idx);
-    if (peaks.size() == 0)
+    if ((peaks[peak_idx].orig_score < intensity_threshold) || (peaks[peak_idx].score < intensity_threshold_scale)) {
+      peaks.erase(peaks.begin()+peak_idx);
+    }
+    if (peaks.size() == 0) {
       PrintMessageDieOnError("There are no peaks satisfying the user-defined threshold: " + std::to_string(intensity_threshold), M_ERROR);
+    }
   }
+  PrintMessageDieOnError("Loaded " + std::to_string(peaks.size()) + " peaks for inferring fragment lengths", M_PROGRESS);
+
 
   /* Read reads from the BAM file */
   BamCramReader bamreader(bamfile);
   std::vector<float> starts;
   std::vector<float> ends;
+  std::mt19937 rng;
   for (int peak_index=0; peak_index<peaks.size(); peak_index++){
-    bamreader.SetRegion(peaks[peak_index].chrom, peaks[peak_index].start, peaks[peak_index].start+peaks[peak_index].length);
+    bamreader.SetRegion(peaks[peak_index].chrom, peaks[peak_index].start-extend, peaks[peak_index].start+peaks[peak_index].length+extend);
     BamAlignment aln;
     std::vector<float> starts_in_peak;
     std::vector<float> ends_in_peak;
     while (bamreader.GetNextAlignment(aln)){
+      if (downsample <= 1.0) {
+	if ( ((float) rng()/(float) rng.max()) > downsample) {continue;}
+      }
       if (aln.IsDuplicate()) {continue;}
       if ((!aln.IsMapped()) || aln.IsFailedQC() || aln.IsSecondary() || aln.IsSupplementary()){continue;}
       float aln_start = aln.Position();
@@ -229,6 +262,7 @@ bool learn_frag_single(const std::string& bamfile,
     }
     
     if ((starts_in_peak.size() == 0) || (ends_in_peak.size() == 0)) continue;
+
     float avg_start = std::accumulate(starts_in_peak.begin(), starts_in_peak.end(), 0.0)/ (float) starts_in_peak.size();
     float avg_end = std::accumulate(ends_in_peak.begin(), ends_in_peak.end(), 0.0)/ (float) ends_in_peak.size();
     float mid_pos = (avg_start + avg_end) / 2.0;
@@ -243,10 +277,13 @@ bool learn_frag_single(const std::string& bamfile,
   if (starts.size() == 0 || ends.size() == 0) {
     PrintMessageDieOnError("No starts found. something went wrong in fragment length estimation", M_ERROR);
   }
+  PrintMessageDieOnError("Found " + std::to_string(starts.size()) + " starts and " + std::to_string(ends.size()) + " ends", M_PROGRESS);
 
   /* mean value of fragment length*/
   float mean_frag_length = std::accumulate(ends.begin(), ends.end(), 0.0)/ (float) ends.size()
                         - std::accumulate(starts.begin(), starts.end(), 0.0)/ (float) starts.size();
+  PrintMessageDieOnError("Estimated mean frag length " + std::to_string(mean_frag_length), M_PROGRESS);
+
   /* calculate CDF of starts and ends */
   /* start */
   std::int32_t start_lower_bound = std::floor(*std::min_element(starts.begin(), starts.end()));
@@ -419,7 +456,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
 		 const std::string& peakfileType, const std::int32_t count_colidx, 
 		 const float remove_pct, float* ab_ratio_ptr, float *s_ptr, float* f_ptr,
 		 const float frag_param_a, const float frag_param_b,
-		 bool skip_frag, bool noscale, bool scale_outliers) {
+		 bool skip_frag, bool noscale, bool scale_outliers, const std::string& region) {
   /*
     Learn the ratio of alpha to beta from an input BAM file,
     and its correspounding peak file.
@@ -446,7 +483,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
   std::vector<Fragment> peaks;
   PeakLoader peakloader(peakfile, peakfileType, bamfile, count_colidx);
   const float frag_length = frag_param_a * frag_param_b * 2; // added buffer to fraglength since we just guess the mean
-  peakloader.Load(peaks, "", frag_length, noscale, scale_outliers);
+  peakloader.Load(peaks, region, frag_length, noscale, scale_outliers);
 
   // Remove top remove_pct% of peaks default is do not remove
   if (remove_pct > 0)
@@ -460,8 +497,8 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
   float plen = 0;
   for(int peak_index = 0; peak_index < peaks.size(); peak_index++){
     plen += (peaks[peak_index].length * peaks[peak_index].score);
-    //std::stringstream ss;
-    //ss << "score: "<< peaks[peak_index].score <<"\tpeak-length: "<<peaks[peak_index].length<<"\ttotal: "<< peakloader.total_genome_length;
+    std::stringstream ss;
+    ss << peaks[peak_index].chrom << ":" << peaks[peak_index].start << " score: " << peaks[peak_index].score << " " << peaks[peak_index].orig_score <<"\tpeak-length: "<<peaks[peak_index].length<<"\ttotal: "<< peakloader.total_genome_length;
     //PrintMessageDieOnError(ss.str(), M_DEBUG);
   }
 
@@ -484,7 +521,7 @@ bool learn_ratio(const std::string& bamfile, const std::string& peakfile,
   return true;
 }
 
-bool learn_pcr(const std::string& bamfile, float* geo_rate){
+bool learn_pcr(const std::string& bamfile, float* geo_rate, const std::string& region){
   BamCramReader bamreader(bamfile);
   const BamHeader* bamheader = bamreader.bam_header();
   std::vector<std::string> seq_names = bamheader->seq_names();
@@ -493,14 +530,23 @@ bool learn_pcr(const std::string& bamfile, float* geo_rate){
   std::map<int, int> n_pcr_copies = {{1, 0}};
   std::map<std::string, int> duplicated_reads;
   int count_unmapped = 0;
+
+  std::int32_t region_start = -1;
+  std::int32_t region_end = -1;
+  std::string region_chrom = "";
+  if (!region.empty()) {
+    RegionParser(region, region_chrom, region_start, region_end);
+  }
+
+  BamAlignment aln;
   for (int seq_index=0; seq_index<seq_names.size(); seq_index++){
+    if (!region.empty() && (seq_names[seq_index]!=region_chrom)) { continue;}
     //if ((seq_names[seq_index].find("_") == std::string::npos) && (seq_names[seq_index] != "chrM")){
-      bamreader.SetRegion(seq_names[seq_index], 0, seq_lengths[seq_index]);
-      BamAlignment aln;
+    bamreader.SetRegion(seq_names[seq_index], 0, seq_lengths[seq_index]);
       while (bamreader.GetNextAlignment(aln)){
        if ( (!aln.IsMapped()) || aln.IsSecondary()){count_unmapped+=1; continue;}
        if (aln.IsDuplicate()){
-        std::string read_location = seq_names[seq_index] + ":" + std::to_string(aln.Position());
+	 std::string read_location = seq_names[seq_index] + ":" + std::to_string(aln.Position());
         if (duplicated_reads.find(read_location) != duplicated_reads.end()){
           duplicated_reads[read_location] += 1;
         }else{
@@ -510,8 +556,8 @@ bool learn_pcr(const std::string& bamfile, float* geo_rate){
         n_pcr_copies[1] += 1;
        }
       }
-    //}
   }
+      //}
 
   //for (std::map<Fragment, int, bool(*)(Fragment, Fragment)>::iterator it=duplicated_reads.begin();
   for (std::map<std::string, int>::iterator it=duplicated_reads.begin();
@@ -601,16 +647,40 @@ int learn_main(int argc, char* argv[]) {
         options.remove_pct = std::atof(argv[i+1]);
         i++;
       }
+    } else if (PARAMETER_CHECK("--region", 8, parameterLength)) {
+      if ((i+1) < argc) {
+	options.region = argv[i+1];
+	i++;
+      }
     } else if (PARAMETER_CHECK("--scale-outliers", 16, parameterLength)) {
       options.scale_outliers = true;
     } else if (PARAMETER_CHECK("--noscale", 9, parameterLength)) {
       options.noscale = true;
     } else if (PARAMETER_CHECK("--skip-frag", 11, parameterLength)){
       options.skip_frag = true;
+    } else if (PARAMETER_CHECK("--skip-pd", 9, parameterLength)) {
+      options.skip_pd = true;
+    } else if (PARAMETER_CHECK("--skip-pcr", 10, parameterLength)) {
+      options.skip_pcr = true;
+    } else if (PARAMETER_CHECK("--ds", 4, parameterLength)) { 
+      if ((i+1) < argc) {
+	options.downsample = std::atof(argv[i+1]);
+	i++;
+      }
     } else if (PARAMETER_CHECK("--thres", 7, parameterLength)) {
       if ((i+1) < argc){
-        options.intensity_threshold = std::atoi(argv[i+1]);
+        options.intensity_threshold = std::atof(argv[i+1]);
         i++;
+      }
+    } else if (PARAMETER_CHECK("--thres-scale", 13, parameterLength)) {
+      if ((i+1) < argc) {
+	options.intensity_threshold_scale = std::atof(argv[i+1]);
+	i++;
+      }
+    } else if (PARAMETER_CHECK("--extend", 8, parameterLength)) {
+      if ((i+1) < argc) {
+	options.extend = std::atoi(argv[i+1]);
+	i++;
       }
     } else if (PARAMETER_CHECK("--paired", 8, parameterLength)) {
       options.paired = true;
@@ -640,6 +710,10 @@ int learn_main(int argc, char* argv[]) {
     cerr << "****** ERROR: Must specify peakfiletype with -t ******" << endl;
     showHelp = true;
   }
+  if (options.chipbam.empty()) {
+    cerr << "****** ERROR: Must specify a bam file with -b ******" << endl;
+    showHelp = true;
+  }
 
   if (!showHelp) {
     /***************** Main implementation ***************/
@@ -651,13 +725,13 @@ int learn_main(int argc, char* argv[]) {
     float frag_param_b = -1;
     if (options.paired){
       if (!learn_frag_paired(options.chipbam, &frag_param_a, &frag_param_b, options.skip_frag,
-			     options.outprefix+".frags.txt", options.output_frag_lens)) {
+			     options.outprefix+".frags.txt", options.output_frag_lens, options.region, options.downsample)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
     }else{
       if (!learn_frag_single(options.chipbam, options.peaksbed, options.peakfiletype,
-                  options.countindex, options.intensity_threshold, options.estimate_frag_length,
-                  &frag_param_a, &frag_param_b, options.skip_frag)) {
+			     options.countindex, options.intensity_threshold, options.intensity_threshold_scale, options.estimate_frag_length,
+			     &frag_param_a, &frag_param_b, options.skip_frag, options.region, options.extend, options.downsample)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
     }
@@ -668,9 +742,12 @@ int learn_main(int argc, char* argv[]) {
     float ab_ratio;
     float s = -1;
     float f = -1;
-    if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
-		     &ab_ratio, &s, &f, frag_param_a, frag_param_b, options.skip_frag, options.noscale, options.scale_outliers)){
-      PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
+    if (!options.skip_pd) {
+      if (!learn_ratio(options.chipbam, options.peaksbed, options.peakfiletype, options.countindex, options.remove_pct,
+		       &ab_ratio, &s, &f, frag_param_a, frag_param_b, options.skip_frag, options.noscale, options.scale_outliers,
+		       options.region)){
+	PrintMessageDieOnError("Error learning pulldown ratio", M_ERROR);
+      }
     }
     model.SetF(f);
     model.SetS(s);
@@ -678,8 +755,10 @@ int learn_main(int argc, char* argv[]) {
     /*** Learn PCR geometric distribution parameter **/
     PrintMessageDieOnError("Learning PCR parameters", M_PROGRESS);
     float geo_rate = -1;
-    if (!learn_pcr(options.chipbam, &geo_rate)){
-      PrintMessageDieOnError("Error learning PCR rate", M_ERROR);
+    if (!options.skip_pcr) {
+      if (!learn_pcr(options.chipbam, &geo_rate, options.region)){
+	PrintMessageDieOnError("Error learning PCR rate", M_ERROR);
+      }
     }
     model.SetPCR(geo_rate);
 
@@ -710,15 +789,25 @@ void learn_help(void) {
   cerr << "[Optional arguments]: " << "\n";
   cerr << "         -r <float>:         Ratio of high score peaks to ignore\n"
        << "                             Default: " <<options.remove_pct<< "\n";
-  cerr << "         --est <int>:        Estimated fragment length\n"
-       << "                             Default: " <<options.estimate_frag_length<< "\n";
   cerr << "         --noscale:          Don't scale peak scores by the max score.\n";                   
   cerr << "         --scale-outliers:   Set all peaks with scores >2*median score to have binding prob 1. Recommended with real data\n";
+  cerr << "         --region <str>:     Only consider peaks from this region chrom:start-end\n"
+       << "                             Default: genome-wide \n";
   cerr << "[BAM-file arguments]: " << "\n";
   cerr << "         --paired:           Loading paired-end reads\n"
        << "                             Default: false\n";
-  cerr << "         --thres <float>:    Threshold for peak scores in single-end read length estimation\n"
+  cerr << "[Fragment length estimation arguments]: " << "\n";
+  cerr << " (only relevant for single-end data) " << "\n";
+  cerr << "         --est <int>:        Estimated fragment length\n"
+       << "                             Default: " <<options.estimate_frag_length<< "\n";
+  cerr << "         --thres <float>:    Absolute threshold for peak scores. Only consider peaks with at least this score\n"
        << "                             Default: " <<options.intensity_threshold<< "\n";
+  cerr << "         --thres-scale <float>: Scale threshold for peak scores. Only consider peaks with at least this score\n";
+  cerr << "                                after scaling scores to be between 0-1\n";
+  cerr << "                                Default: " <<options.intensity_threshold_scale << "\n";
+  cerr << "         --extend <int>:     Extend peak regions by this amount when estimating fragment lengths.\n";
+  cerr << "                             This can result in more robust estimates especially for data with narrow peaks.\n";
+  cerr << "                             Default: " << options.extend << "\n";
   cerr << "\n";
   cerr  << "[ General help ]:" << endl;
   cerr  << "    --help        "  << "Print this help menu.\n";
