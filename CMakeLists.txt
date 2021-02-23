@@ -8,7 +8,7 @@ include(ExternalProject)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 # set the project name
-project(chips VERSION 2.3)
+project(chips VERSION 2.4)
 configure_file(chipsConfig.h.in chipsConfig.h)
 
 # specify the C++ standard

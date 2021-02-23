@@ -39,8 +39,7 @@ bool learn_frag_paired(const std::string& bamfile, float* alpha, float* beta, bo
 bool learn_frag_single(const std::string& bamfile, const std::string& peakfile, const std::string peakfileType,
 		       const std::int32_t count_colidx, const float intensity_threshold, const float intensity_threshold_scale,
 		       const int estimate_frag_length,
-		       float* alpha, float* beta, bool skip_frag, const std::string& region, const int extend,
-		       const float downsample);
+		       float* alpha, float* beta, bool skip_frag, const std::string& region, const float downsample);
 void search(float& low, float& high, const float mu, const float gs,
     const std::int32_t start_lower_bound, const std::int32_t start_upper_bound, const std::vector<float> start_cdf, const std::vector<float> start_edf,
     const std::int32_t end_lower_bound, const std::int32_t end_upper_bound, const std::vector<float> end_cdf, const std::vector<float> end_edf);
@@ -196,7 +195,7 @@ bool learn_frag_single(const std::string& bamfile,
 		       const float intensity_threshold, const float intensity_threshold_scale,
 		       const int estimate_frag_length,
 		       float* alpha, float* beta, bool skip_frag,
-		       const std::string& region, const int extend, const float downsample) {
+		       const std::string& region, const float downsample) {
   /*
     Predict fragment length distribution from an input BAM file (single-end reads)
     Fragment lengths follow a gamma distribution.
@@ -235,7 +234,8 @@ bool learn_frag_single(const std::string& bamfile,
   std::vector<float> ends;
   std::mt19937 rng;
   for (int peak_index=0; peak_index<peaks.size(); peak_index++){
-    bamreader.SetRegion(peaks[peak_index].chrom, peaks[peak_index].start-extend, peaks[peak_index].start+peaks[peak_index].length+extend);
+    bamreader.SetRegion(peaks[peak_index].chrom, peaks[peak_index].start-estimate_frag_length,
+            peaks[peak_index].start+peaks[peak_index].length+estimate_frag_length);
     BamAlignment aln;
     std::vector<float> starts_in_peak;
     std::vector<float> ends_in_peak;
@@ -249,13 +249,13 @@ bool learn_frag_single(const std::string& bamfile,
       float aln_end = aln.GetEndPosition();
 
       if(aln.IsReverseStrand()){
-        if ( ((aln_end-estimate_frag_length) >= (peaks[peak_index].start-extend))
-                &&(aln_end <= (peaks[peak_index].start+peaks[peak_index].length+extend)) ){
+        if ( (aln_end >= peaks[peak_index].start)
+                &&(aln_end <= (peaks[peak_index].start+peaks[peak_index].length+estimate_frag_length)) ){
           ends_in_peak.push_back(aln_end);
         }
       }else{
-        if ((aln_start >= (peaks[peak_index].start-extend))
-                &&( (aln_start+estimate_frag_length) <= (peaks[peak_index].start+peaks[peak_index].length+extend))){
+        if ((aln_start >= (peaks[peak_index].start-estimate_frag_length))
+                &&( aln_start <= (peaks[peak_index].start+peaks[peak_index].length)) ){
           starts_in_peak.push_back(aln_start);
         }
       }
@@ -608,7 +608,7 @@ int learn_main(int argc, char* argv[]) {
     int parameterLength = (int)strlen(argv[i]);
 
     if ((PARAMETER_CHECK("-h", 2, parameterLength)) ||
-       (PARAMETER_CHECK("--help", 5, parameterLength))) {
+       (PARAMETER_CHECK("--help", 6, parameterLength))) {
       showHelp = true;
     }
   }
@@ -677,11 +677,6 @@ int learn_main(int argc, char* argv[]) {
 	options.intensity_threshold_scale = std::atof(argv[i+1]);
 	i++;
       }
-    } else if (PARAMETER_CHECK("--extend", 8, parameterLength)) {
-      if ((i+1) < argc) {
-	options.extend = std::atoi(argv[i+1]);
-	i++;
-      }
     } else if (PARAMETER_CHECK("--paired", 8, parameterLength)) {
       options.paired = true;
     } else if (PARAMETER_CHECK("--output-frag-lens", 18, parameterLength)) {
@@ -731,7 +726,7 @@ int learn_main(int argc, char* argv[]) {
     }else{
       if (!learn_frag_single(options.chipbam, options.peaksbed, options.peakfiletype,
 			     options.countindex, options.intensity_threshold, options.intensity_threshold_scale, options.estimate_frag_length,
-			     &frag_param_a, &frag_param_b, options.skip_frag, options.region, options.extend, options.downsample)) {
+			     &frag_param_a, &frag_param_b, options.skip_frag, options.region, options.downsample)) {
         PrintMessageDieOnError("Error learning fragment length distribution", M_ERROR);
       }
     }
@@ -800,7 +795,8 @@ void learn_help(void) {
        << "                             Default: false\n";
   cerr << "[Fragment length estimation arguments]: " << "\n";
   cerr << " (only relevant for single-end data) " << "\n";
-  cerr << "         --est <int>:        Estimated fragment length\n"
+  cerr << "         --est <int>:        The estimated fragment length. Please set this number as the loose upper-bound of your estimated fragment length.\n"
+       << "                             This can result in more robust estimates especially for data with narrow peaks.\n"
        << "                             Default: " <<options.estimate_frag_length<< "\n";
   cerr << "         --thres <float>:    Absolute threshold for peak scores. Only consider peaks with at least this score.\n"
        << "                             ChIPs applies `--thres` or `--thres-scale` whichever is stricter.\n"
@@ -809,9 +805,6 @@ void learn_help(void) {
   cerr << "                                after scaling scores to be between 0-1.\n"
        << "                                ChIPs applies `--thres` or `--thres-scale` whichever is stricter.\n"
        << "                                Default: " <<options.intensity_threshold_scale << "\n";
-  cerr << "         --extend <int>:     Extend peak regions by this amount when estimating fragment lengths.\n";
-  cerr << "                             This can result in more robust estimates especially for data with narrow peaks.\n";
-  cerr << "                             Default: " << options.extend << "\n";
   cerr << "\n";
   cerr  << "[ General help ]:" << endl;
   cerr  << "    --help        "  << "Print this help menu.\n";
