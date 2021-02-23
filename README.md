@@ -45,8 +45,8 @@ make
 To compile from source on the [releases page](https://github.com/gymreklab/chips/releases/tag/v2.2), download the file chips-2.2-Source.tar.gz and run:
 
 ```
-tar -xvf chips-2.2-Source.tar.gz
-cd chips-2.2-Source/
+tar -xvf chips-2.4-Source.tar.gz
+cd chips-2.4-Source/
 mkdir build
 cd build/
 cmake ..
@@ -113,8 +113,7 @@ BAM-file arguments:
 * `--paired`: Data is paired. Default: false.
 
 Fragment length estimation arguments (for single-end data only):
-* `--est <int>`: Estimated fragment length. Used as a rough guess to guide inference of fragment length distribution from single end data. Default: 300.
-* `--extend <int>`: Extend peak regions by this amount when estimating fragment lengths. This can result in more robust estimates especially for data with narrow peaks. Default: 300.
+* `--est <int>`: Estimated fragment length. Used as a rough guess to guide inference of fragment length distribution from single end data. Please set this number as the loose upper-bound of your best estimation. This can result in more robust estimates especially for data with narrow peaks. Default: 300.
 * `--thres <float>`: For estimating fragment length distribution from single end data, only consider peaks with scores above this threshold. ChIPs applies `--thres` or `--thres-scale` whichever is stricter. Default: 100.
 * `--thres-scale <float>`: Scale threshold for peak scores. Only consider peaks with at least this score after scaling scores to be between 0-1. ChIPs applies `--thres` or `--thres-scale` whichever is stricter. Default: 0.
 
