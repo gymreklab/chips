@@ -2,7 +2,7 @@
 
 ChIPs is a tool for simulating ChIP-sequencing experiments.
 
-For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu).
+For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu) & Melissa Gymrek (mgymrek@ucsd.edu).
 
 [Download](#download) | [Basic Usage](#usage) | [Detailed usage](#detailed) | [File formats](#formats) | [Usage example](#example) | [FAQ](#faq)
 
