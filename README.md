@@ -2,9 +2,9 @@
 
 ChIPs is a tool for simulating ChIP-sequencing experiments. This tool has been published as a software on BMC Bioinformatics.
 
-Open Access Paper: https://doi.org/10.1186/s12859-021-04097-5
+**Open Access Paper:** *https://doi.org/10.1186/s12859-021-04097-5*
 
-Citation: Zheng, A., Lamkin, M., Qiu, Y. et al. A flexible ChIP-sequencing simulation toolkit. BMC Bioinformatics 22, 201 (2021).
+**Citation:** *Zheng, A., Lamkin, M., Qiu, Y. et al. A flexible ChIP-sequencing simulation toolkit. BMC Bioinformatics 22, 201 (2021).*
 
 For questions on installation or usage, please open an issue, submit a pull request, or contact An Zheng (anz023@eng.ucsd.edu) & Melissa Gymrek (mgymrek@ucsd.edu).
 
