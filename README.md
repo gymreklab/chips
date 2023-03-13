@@ -13,25 +13,6 @@ For questions on installation or usage, please open an issue, submit a pull requ
 <a name="download"></a>
 ## 1. Download
 
-### Through Anaconda
-<a href="https://anaconda.org/bioconda/chips"> <img src="https://anaconda.org/bioconda/chips/badges/version.svg" /> </a>
-<a href="https://anaconda.org/bioconda/chips"> <img src="https://anaconda.org/bioconda/chips/badges/platforms.svg" /> </a>
-<a href="https://conda.anaconda.org/bioconda"> <img src="https://anaconda.org/bioconda/chips/badges/installer/conda.svg" /> </a> \
-ChIPs can be downloaded through Anaconda.
-
-If you don't have Anaconda or Miniconda installed on your machine, you can follow the installation instructions provided in the link below:\
-http://bioconda.github.io/user/install.html#install-packages
-
-After installing conda, you will need to add the bioconda channel as well as the other channels bioconda depends on. 
-```
-conda config --add channels defaults
-conda config --add channels bioconda
-conda config --add channels conda-forge
-```
-
-Once bioconda is enabled, you can download ChIPs using: `conda install chips`
-
-
 ### From Github
 The latest ChIPs release is available on the [releases page](https://github.com/gymreklab/chips/releases)
 
